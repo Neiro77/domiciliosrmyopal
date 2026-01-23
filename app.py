@@ -24,8 +24,9 @@ from werkzeug.security import generate_password_hash, check_password_hash # Para
 # Define tu configuración aquí o impórtala de config.py
 class Config:
     WTF_CSRF_ENABLED = True # Habilita la protección CSRF
-    SECRET_KEY = 'una-cadena-dificil-de-adivinar_!@#$%^&*()_+' 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://neondb_owner:npg_eaFydS6Tt2xv@ep-blue-hat-acgjjxt5-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require'
+    SECRET_KEY = 'una-cadena-dificil-de-adivinar_!@#$%^&*()_+'
+    # Intenta leer DATABASE_URL de Render; si no existe, usa la de Neon por defecto
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql://neondb_owner:npg_eaFydS6Tt2xv@ep-blue-hat-acgjjxt5-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.googlemail.com' 
     MAIL_PORT = 587
@@ -82,54 +83,61 @@ def create_app():
     # Función para inicializar datos esenciales
     with app.app_context():
         # db.create_all() # Descomentar si no usas Flask-Migrate y quieres que SQLAlchemy cree las tablas al iniciar
-
-        # Insertar servicios si no existen
-        if db.session.scalar(db.select(Service).filter_by(name='comidas')) is None:
-            db.session.add(Service(name='comidas', description='Servicio de entrega de alimentos'))
-            db.session.commit()
-            print("DEBUG: Servicio 'comidas' añadido.")
         
-        if db.session.scalar(db.select(Service).filter_by(name='paquetes')) is None:
-            db.session.add(Service(name='paquetes', description='Envío y recogida de paquetes'))
-            db.session.commit()
-            print("DEBUG: Servicio 'paquetes' añadido.")
-        
-        if db.session.scalar(db.select(Service).filter_by(name='compras')) is None:
-            db.session.add(Service(name='compras', description='Servicio para realizar compras'))
-            db.session.commit()
-            print("DEBUG: Servicio 'compras' añadido.")
+        try:
 
-        # Insertar métodos de pago si no existen
-        if db.session.scalar(db.select(PaymentMethod).filter_by(name='efectivo')) is None:
-            db.session.add(PaymentMethod(name='efectivo', description='Pago en efectivo al motorizado', is_active=True))
-            db.session.commit()
-            print("DEBUG: Método de pago 'efectivo' añadido.")
-
-        if db.session.scalar(db.select(PaymentMethod).filter_by(name='tarjeta de Crédito')) is None:
-            db.session.add(PaymentMethod(name='tarjeta de Crédito', description='Pago con tarjeta de crédito', is_active=True))
-            db.session.commit()
-            print("DEBUG: Método de pago 'tarjeta de Crédito' añadido.")
-        
-        # Opcional: Asegúrate de tener al menos un negocio, cliente o motorizado activo para pruebas
-        # Estas comprobaciones son para fines de depuración, no esenciales para el arranque
-        if db.session.scalar(db.select(User).filter_by(role='admin', is_active=True)) is None:
-            print("ADVERTENCIA: No hay un usuario administrador activo en la base de datos.")
-            # Puedes insertar uno aquí si es necesario para el desarrollo
-            # from werkzeug.security import generate_password_hash
-            # admin_user = User(email='admin@example.com', password_hash=generate_password_hash('adminpass'), role='admin', is_active=True, nombre='Admin', apellido='User', telefono='1234567890')
-            # db.session.add(admin_user)
-            # db.session.commit()
-            # print("DEBUG: Usuario administrador de ejemplo insertado (admin@example.com / adminpass).")
+            # Insertar servicios si no existen
+            if db.session.scalar(db.select(Service).filter_by(name='comidas')) is None:
+                db.session.add(Service(name='comidas', description='Servicio de entrega de alimentos'))
+                db.session.commit()
+                print("DEBUG: Servicio 'comidas' añadido.")
             
-        if db.session.scalar(db.select(User).filter_by(role='business', is_active=True)) is None:
-             print("ADVERTENCIA: No hay un usuario de negocio activo. Las pruebas de pedido pueden fallar sin uno.")
+            if db.session.scalar(db.select(Service).filter_by(name='paquetes')) is None:
+                db.session.add(Service(name='paquetes', description='Envío y recogida de paquetes'))
+                db.session.commit()
+                print("DEBUG: Servicio 'paquetes' añadido.")
+            
+            if db.session.scalar(db.select(Service).filter_by(name='compras')) is None:
+                db.session.add(Service(name='compras', description='Servicio para realizar compras'))
+                db.session.commit()
+                print("DEBUG: Servicio 'compras' añadido.")
 
-        if db.session.scalar(db.select(User).filter_by(role='driver', is_active=True)) is None:
-             print("ADVERTENCIA: No hay un usuario motorizado activo. Las pruebas de asignación pueden fallar sin uno.")
+            # Insertar métodos de pago si no existen
+            if db.session.scalar(db.select(PaymentMethod).filter_by(name='efectivo')) is None:
+                db.session.add(PaymentMethod(name='efectivo', description='Pago en efectivo al motorizado', is_active=True))
+                db.session.commit()
+                print("DEBUG: Método de pago 'efectivo' añadido.")
+
+            if db.session.scalar(db.select(PaymentMethod).filter_by(name='tarjeta de Crédito')) is None:
+                db.session.add(PaymentMethod(name='tarjeta de Crédito', description='Pago con tarjeta de crédito', is_active=True))
+                db.session.commit()
+                print("DEBUG: Método de pago 'tarjeta de Crédito' añadido.")
+            
+            # Opcional: Asegúrate de tener al menos un negocio, cliente o motorizado activo para pruebas
+            # Estas comprobaciones son para fines de depuración, no esenciales para el arranque
+            if db.session.scalar(db.select(User).filter_by(role='admin', is_active=True)) is None:
+                print("ADVERTENCIA: No hay un usuario administrador activo en la base de datos.")
+                # Puedes insertar uno aquí si es necesario para el desarrollo
+                # from werkzeug.security import generate_password_hash
+                # admin_user = User(email='admin@example.com', password_hash=generate_password_hash('adminpass'), role='admin', is_active=True, nombre='Admin', apellido='User', telefono='1234567890')
+                # db.session.add(admin_user)
+                # db.session.commit()
+                # print("DEBUG: Usuario administrador de ejemplo insertado (admin@example.com / adminpass).")
+                
+            if db.session.scalar(db.select(User).filter_by(role='business', is_active=True)) is None:
+                 print("ADVERTENCIA: No hay un usuario de negocio activo. Las pruebas de pedido pueden fallar sin uno.")
+
+            if db.session.scalar(db.select(User).filter_by(role='driver', is_active=True)) is None:
+                 print("ADVERTENCIA: No hay un usuario motorizado activo. Las pruebas de asignación pueden fallar sin uno.")
+                 
+            if db.session.scalar(db.select(User).filter_by(role='customer', is_active=True)) is None:
+                 print("ADVERTENCIA: No hay un usuario cliente activo. Las pruebas de carrito pueden fallar sin uno.")
              
-        if db.session.scalar(db.select(User).filter_by(role='customer', is_active=True)) is None:
-             print("ADVERTENCIA: No hay un usuario cliente activo. Las pruebas de carrito pueden fallar sin uno.")
-
+        except Exception as e:
+            # Si las tablas no existen (error de UndefinedTable), atrapamos el error
+            # Esto permite que la app cargue y 'flask db upgrade' pueda crear las tablas
+            print(f"AVISO: No se pudieron inicializar datos semilla. Es normal si es el primer despliegue: {e}")
+            db.session.rollback() # Limpiamos la sesión si hubo error
 
     return app
     
