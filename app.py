@@ -25,7 +25,7 @@ from werkzeug.security import generate_password_hash, check_password_hash # Para
 class Config:
     WTF_CSRF_ENABLED = True # Habilita la protección CSRF
     SECRET_KEY = 'una-cadena-dificil-de-adivinar_!@#$%^&*()_+' 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:P4o13C70%23.20_%2F25%24@localhost:5432/rm_domicilios_casanare_db'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://neondb_owner:npg_eaFydS6Tt2xv@ep-blue-hat-acgjjxt5-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.googlemail.com' 
     MAIL_PORT = 587

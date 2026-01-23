@@ -34,7 +34,7 @@ class Config:
     # MAIL_DEFAULT_SENDER = os.environ.get('MAIL_USERNAME') or 'tucorreo@gmail.com' # O un correo específico
     # --- ¡CAMBIO AQUÍ! ---
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-                              'postgresql://postgres:P4o13C70%23.20_%2F25%24@localhost:5432/rm_domicilios_casanare_db'
+                              'postgresql://neondb_owner:npg_eaFydS6Tt2xv@ep-blue-hat-acgjjxt5-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require'
     # --- FIN DEL CAMBIO ---
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
