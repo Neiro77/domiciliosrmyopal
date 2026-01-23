@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Direcciones{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-8 text-center">Mis Direcciones</h1>
+
+    <div class="bg-white rounded-lg shadow-xl p-6 mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Añadir Nueva Dirección</h2>
+        <form method="POST" action="{{ url_for('customer.manage_addresses') }}">
+            {{ form.csrf_token }}
+            <div class="mb-4">
+                <label for="{{ form.address.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.address.label }}</label>
+                {{ form.address(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Calle 123 #45-67, Apartamento 301") }}
+                {% if form.address.errors %}
+                    <ul class="text-red-600 text-sm mt-1">{% for error in form.address.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.alias.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.alias.label }}</label>
+                {{ form.alias(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Casa, Trabajo, Apartamento de mi hermana") }}
+                {% if form.alias.errors %}
+                    <ul class="text-red-600 text-sm mt-1">{% for error in form.alias.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+            {# Campos ocultos para latitud/longitud si los vas a usar en el futuro #}
+            {{ form.latitud(class="hidden") }}
+            {{ form.longitud(class="hidden") }}
+            {{ form.is_principal(class="hidden", value="False") }} {# Por defecto, no principal al añadir #}
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold text-lg shadow-md">
+                {{ form.submit.label }}
+            </button>
+        </form>
+		<p class="text-sm text-gray-500 mt-2">
+                        ¿Necesitas continuar con tu pedido?
+                        <a href="{{ url_for('customer.checkout') }}" class="text-blue-600 hover:underline">
+                            Ir al domicilio
+                        </a>
+        </p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Mis Direcciones Guardadas</h2>
+        {% if addresses %}
+            <div class="space-y-4">
+                {% for address in addresses %}
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg shadow-sm">
+                    <div>
+                        <p class="font-semibold text-gray-800 text-lg">{{ address.alias or 'Sin Alias' }}</p>
+                        <p class="text-gray-700">{{ address.address }}</p>
+                        {% if address.is_principal %}
+                            <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800 mt-1">
+                                <i class="fas fa-home mr-1"></i> Principal
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="flex space-x-2">
+                        {% if not address.is_principal %}
+                        <form method="POST" action="{{ url_for('customer.set_principal_address', address_id=address.id) }}">
+                            <button type="submit" class="bg-blue-100 text-blue-600 p-2 rounded-full hover:bg-blue-200 transition" title="Establecer como principal">
+                                <i class="fas fa-thumbtack"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('customer.delete_address', address_id=address.id) }}" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta dirección?');">
+                            <button type="submit" class="bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200 transition" title="Eliminar dirección">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-gray-600 text-lg py-4">No tienes direcciones guardadas. ¡Añade una!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

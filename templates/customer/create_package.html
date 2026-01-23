@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Enviar Paquete{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-2xl" x-data="packageForm">
+
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-8 text-center">Enviar un Paquete</h1>
+
+    <div class="bg-white rounded-lg shadow-xl p-8 mb-8">
+        <p class="text-gray-700 text-lg mb-6 text-center">
+            Ingresa todos los detalles posibles para ser precisos en tu envío.
+        </p>
+        
+        <form method="POST" action="{{ url_for('customer.create_package') }}" @submit.prevent="validateAndSubmit($event)"> 
+		{{ form.csrf_token }}
+
+            {{ form.csrf_token }}
+
+            {% if form.errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">¡Error!</strong>
+                    <span class="block sm:inline">Por favor, corrige los siguientes errores:</span>
+                    <ul class="mt-2 list-disc list-inside">
+                    {% for field, errors in form.errors.items() %}
+                        {% if field != 'csrf_token' %}
+                            <li><strong>{{ form[field].label.text }}:</strong> {{ errors | join(', ') }}</li>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="mb-5">
+                <label for="{{ form.tipo_paquete.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.tipo_paquete.label }}</label>
+                {{ form.tipo_paquete(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800") }}
+                {% if form.tipo_paquete.errors %}
+                    <ul class="text-red-600 text-sm mt-1">{% for error in form.tipo_paquete.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+			<div class="mb-5">
+                <label for="{{ form.tamano_paquete.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.tamano_paquete.label }}</label>
+                {{ form.tamano_paquete(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800") }}
+                {% if form.tamano_paquete.errors %}
+                    <ul class="text-red-600 text-sm mt-1">{% for error in form.tamano_paquete.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+			
+            <div class="mb-5">
+                <label for="{{ form.descripcion.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.descripcion.label }}</label>
+                {{ form.descripcion(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 h-24 resize-y", placeholder="Ej: Documentos importantes, ropa, un juguete pequeño") }}
+                {% if form.descripcion.errors %}
+                    <ul class="text-red-600 text-sm mt-1">{% for error in form.descripcion.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                <div>
+                    <label for="{{ form.peso_kg.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.peso_kg.label }}</label>
+                    {{ form.peso_kg(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: 0.5") }}
+                    {% if form.peso_kg.errors %}
+                        <ul class="text-red-600 text-sm mt-1">{% for error in form.peso_kg.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.dimensiones_cm.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.dimensiones_cm.label }}</label>
+                    {{ form.dimensiones_cm(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: 10x20x5") }}
+                    {% if form.dimensiones_cm.errors %}
+                        <ul class="text-red-600 text-sm mt-1">{% for error in form.dimensiones_cm.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label for="{{ form.valor_declarado.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.valor_declarado.label }}</label>
+                {{ form.valor_declarado(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: 50000.00") }}
+                {% if form.valor_declarado.errors %}
+                    <ul class="text-red-600 text-sm mt-1">{% for error in form.valor_declarado.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="mb-5">
+                <label for="{{ form.instrucciones_especiales.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.instrucciones_especiales.label }}</label>
+                {{ form.instrucciones_especiales(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 h-24 resize-y", placeholder="Ej: Entregar al portero, llamar antes de llegar") }}
+                {% if form.instrucciones_especiales.errors %}
+                    <ul class="text-red-600 text-sm mt-1">{% for error in form.instrucciones_especiales.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            {# Precio Calculado: Se llenará con JavaScript/Alpine.js #}
+            
+			<input type="hidden" name="precio_calculado" :value="packagePrice.toFixed(2)">
+
+            <div class="mt-8">
+				
+				<button type="submit" 
+						class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold text-lg shadow-md">
+					<i class="fas fa-cart-plus mr-2"></i> Añadir al Carrito
+				</button>
+			</div>
+        </form>
+    </div>
+
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('customer.dashboard') }}" class="text-blue-600 hover:underline font-semibold">
+            <i class="fas fa-arrow-left mr-2"></i> Volver al Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('packageForm', () => ({
+        packageType: '',
+        packageDescription: '',
+        weightKg: 0,
+        dimensionsCm: '',
+        declaredValue: 0,
+        specialInstructions: '',
+        packagePrice: 0.00,
+
+        init() {
+            // Restaurar valores si hay error en formulario
+            this.packageType = '{{ form.tipo_paquete.data or "" }}';
+            this.packageDescription = '{{ form.descripcion.data or "" }}';
+            this.weightKg = parseFloat('{{ form.peso_kg.data or 0 }}');
+            this.dimensionsCm = '{{ form.dimensiones_cm.data or "" }}';
+            this.declaredValue = parseFloat('{{ form.valor_declarado.data or 0 }}');
+            this.specialInstructions = '{{ form.instrucciones_especiales.data or "" }}';
+            this.packagePrice = parseFloat('{{ form.precio_calculado.data or 0 }}');
+
+            this.calculatePrice();
+
+            this.$watch('packageType', () => this.calculatePrice());
+            this.$watch('weightKg', () => this.calculatePrice());
+            this.$watch('declaredValue', () => this.calculatePrice());
+        },
+
+        calculatePrice() {
+            let basePrice = 5000;
+            let weightCost = (this.weightKg || 0) * 1000;
+            let valueCost = (this.declaredValue || 0) * 0.01;
+
+            switch (this.packageType) {
+                case 'documento':
+                    basePrice += 1000;
+                    break;
+                case 'caja_pequena':
+                    basePrice += 2000;
+                    break;
+                case 'caja_mediana':
+                    basePrice += 4000;
+                    break;
+                case 'caja_grande':
+                    basePrice += 8000;
+                    break;
+                case 'otro':
+                    basePrice += 5000;
+                    break;
+            }
+
+            const randomFactor = Math.random() * 500;
+            this.packagePrice = Math.max(basePrice + weightCost + valueCost + randomFactor, 5000);
+        },
+
+        validateAndSubmit(event) {
+            if (!this.packagePrice || this.packagePrice <= 0 || isNaN(this.packagePrice)) {
+                alert("El precio calculado no es válido. Intenta de nuevo.");
+                return;
+            }
+
+            const hiddenInput = event.target.querySelector('input[name="precio_calculado"]');
+            if (hiddenInput) hiddenInput.value = this.packagePrice.toFixed(2);
+
+            event.target.submit();
+        }
+    }));
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedido Exitoso{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-extrabold text-green-600 mb-8 text-center">¡Tu pedido fue exitoso!</h1>
+
+    <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Resumen del Pedido</h2>
+
+        <div class="mb-4">
+            <p class="text-gray-700 mb-2"><strong>ID de Pedido:</strong> {{ order.id }}</p>
+            <p class="text-gray-700 mb-2"><strong>Fecha:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</p>
+            <p class="text-gray-700 mb-2"><strong>Estado:</strong> {{ order.status }}</p>
+            <p class="text-gray-700 mb-2"><strong>Total:</strong> ${{ '%.2f' | format(order.total_amount) }}</p>
+        </div>
+
+        <div class="border-t border-gray-200 pt-4">
+            {% if items %}
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Productos:</h3>
+                <ul class="list-disc list-inside text-gray-700 mb-4">
+                    {% for item in items %}
+                        <li>
+                            {{ item.quantity }} x {{ item.product.name }} - ${{ '%.2f' | format(item.price * item.quantity) }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if paquetes %}
+                <h3 class="text-xl font-semibold text-blue-700 mb-2">Envíos de Paquetes:</h3>
+                <ul class="space-y-4">
+                    {% for p in paquetes %}
+                        <li class="p-4 border border-blue-200 rounded-md bg-blue-50">
+                            <p><strong>Tipo:</strong> {{ p.tipo_paquete }}</p>
+                            <p><strong>Tamaño:</strong> {{ p.tamano_paquete or 'No especificado' }}</p>
+                            <p><strong>Dirección de Recogida:</strong> {{ p.direccion_recogida }}</p>
+                            <p><strong>Dirección de Entrega:</strong> {{ p.direccion_entrega }}</p>
+                            <p><strong>Descripción:</strong> {{ p.descripcion or 'N/A' }}</p>
+                            <p><strong>Peso (kg):</strong> {{ p.peso_kg or 'N/A' }}</p>
+                            <p><strong>Dimensiones:</strong> {{ p.dimensiones_cm or 'N/A' }}</p>
+                            <p><strong>Valor Declarado:</strong> ${{ '%.2f' | format(p.valor_declarado or 0) }}</p>
+                            <p><strong>Instrucciones Especiales:</strong> {{ p.instrucciones_especiales or 'Ninguna' }}</p>
+                            <p class="font-semibold text-blue-700"><strong>Precio:</strong> ${{ '%.2f' | format(p.precio_calculado or 0) }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mt-6">
+        <a href="{{ url_for('customer.my_orders') }}" class="text-blue-600 hover:underline font-semibold">
+            <i class="fas fa-arrow-left mr-2"></i> Ver estado de mi domicilio
+        </a>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        Alpine.store('cart')?.clearCart();
+    });
+</script>
+
+</div>
+<script>
+    document.addEventListener('alpine:init', () => {
+        if (Alpine.store('cart')) {
+            Alpine.store('cart').clearCart();
+        }
+    });
+</script>
+
+{% endblock %}

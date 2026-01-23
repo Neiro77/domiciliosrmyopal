@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Pedidos{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-8 text-center">Mis Pedidos</h1>
+
+    {% if customer.deuda_cancelacion and customer.deuda_cancelacion > 0 %}
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md mb-8" role="alert">
+        <p class="font-bold">Saldo Pendiente</p>
+        <p>Tienes una deuda de <strong>${{ "%.2f"|format(customer.deuda_cancelacion) }}</strong> por cancelaciones tardías. Por favor, contacta a soporte para saldarla.</p>
+    </div>
+    {% endif %}
+
+    <div class="mb-6">
+        </div>
+
+    <div class="space-y-6">
+        {% if orders %}
+            {% for order in orders %}
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Pedido #{{ order.id }}</h2>
+                        <p class="text-sm text-gray-500">Realizado el: {{ order.order_date }}</p>
+						
+						<li class="list-group-item"><b>Negocio:</b> {{ order.business.name if order.business else 'N/A (Pedido de Paquete/Mandado)' }}</li>
+						<li class="list-group-item"><b>Recoger en:</b> {{ order.pickup_address or 'N/A' }}</li>
+                        <li class="list-group-item"><b>Dirección de Entrega:</b> {{ order.delivery_address }}</li>
+						
+                        
+						<p class="text-lg font-semibold text-blue-600 mt-1">Costo del Domicilio (COP): ${{ "%.2f"|format(order.costo_domicilio) }}</p>
+						
+                    </div>
+					
+					
+                    <ul class="list-group list-group-flush mb-4">
+                        {% for item in order.items %}
+                            {# CASO 1: Es un producto de comida #}
+                            {% if item.tipo_item == 'producto_comida' and item.product %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        {{ item.quantity }} x {{ item.product.name }}
+                                    </span>
+                                    <span class="badge rounded-pill">${{ "%.2f"|format(item.price_at_order * item.quantity) }}</span>
+                                </li>
+
+                            {# --- >>> NUEVO BLOQUE PARA PAQUETES <<< --- #}
+                            {# CASO 2: Es un envío de paquete #}
+                            {% elif item.tipo_item == 'paquete_envio' and item.paquete_envio %}
+                                <li class="list-group-item">
+                                    <p class="mb-1"><strong>Tipo de Paquete:</strong> {{ item.paquete_envio.tipo_paquete | capitalize }}</p>
+                                    <p class="mb-1"><strong>Descripción:</strong> {{ item.paquete_envio.descripcion or 'No especificada' }}</p>
+                                    <p class="mb-1"><strong>Peso:</strong> {{ item.paquete_envio.peso_kg or 'N/A' }} kg</p>
+                                    <p class="mb-1"><strong>Dimensiones:</strong> {{ item.paquete_envio.dimensiones_cm or 'N/A' }}</p>
+                                    <p class="mb-1"><strong>Valor Declarado:</strong> ${{ "%.2f"|format(item.paquete_envio.valor_declarado or 0) }}</p>
+                                    <p class="mb-0"><strong>Instrucciones:</strong> {{ item.paquete_envio.instrucciones_especiales or 'Ninguna' }}</p>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="list-group-item">No se encontraron ítems para este pedido.</li>
+                        {% endfor %}
+						<p class="text-lg font-semibold text-blue-600 mt-1">Costo producto: ${{ "%.2f"|format(order.total_amount) }}</p>
+                    </ul>
+					<span>
+					<p class="text-lg font-semibold text-blue-600 mt-1">Total a pagar: ${{ "%.2f"|format(order.total_amount + order.costo_domicilio) }} </p>
+					{{ order.payment_method.description }}
+					</span>
+                    <span class="text-sm font-semibold px-3 py-1 rounded-full
+                        {% if order.status == 'Entregado' %} bg-green-200 text-green-800
+                        {% elif order.status == 'Pendiente' %} bg-yellow-200 text-yellow-800
+                        {% elif order.status == 'Cancelado' %} bg-red-200 text-red-800
+                        {% else %} bg-blue-200 text-blue-800 {% endif %}">
+                        {{ order.status }}
+                    </span>
+					
+                </div>
+
+                {% if order.status != 'Entregado' and order.status != 'Cancelado' %}
+				<div class="mt-4 pt-4 border-t border-gray-200 cancellation-container"
+					 data-order-date="{{ order.order_date.isoformat() }}Z">
+					
+					<div class="flex items-center justify-between flex-wrap gap-4">
+						<div class="timer-message text-lg font-semibold text-gray-700">Calculando tiempo...</div>
+						
+						<form method="POST" action="{{ url_for('customer.cancel_order', order_id=order.id) }}" class="cancel-form">
+							{{ form.hidden_tag() }}
+							<button type="submit" class="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-700 transition-colors">
+								Cancelar Pedido
+							</button>
+						</form>
+					</div>
+				</div>
+				{% endif %}
+
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-12">
+                <p class="text-xl text-gray-500">Aún no has realizado ningún pedido.</p>
+                <a href="{{ url_for('customer.list_businesses') }}" class="mt-4 inline-block bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700">¡Haz tu primer pedido!</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="mt-8">
+        </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const containers = document.querySelectorAll('.cancellation-container');
+
+    containers.forEach(container => {
+        const orderDate = new Date(container.dataset.orderDate);
+        const deadline = new Date(orderDate.getTime() + 5 * 60 * 1000);
+        const messageElement = container.querySelector('.timer-message');
+
+        const updateTimer = () => {
+            const now = new Date();
+            const remainingTime = deadline - now;
+
+            if (remainingTime > 0) {
+                const minutes = Math.floor((remainingTime / 1000 / 60) % 60);
+                const seconds = Math.floor((remainingTime / 1000) % 60);
+                const formattedMinutes = String(minutes).padStart(2, '0');
+                const formattedSeconds = String(seconds).padStart(2, '0');
+                
+                messageElement.innerHTML = `Puedes cancelar sin costo por <span class="text-green-600">${formattedMinutes}:${formattedSeconds}</span>`;
+            } else {
+                messageElement.innerHTML = `<span class="text-yellow-600">Cancelar ahora aplicará una penalización.</span>`;
+                clearInterval(intervalId);
+            }
+        };
+
+        const intervalId = setInterval(updateTimer, 1000);
+        updateTimer(); // Llama una vez al inicio para no esperar 1 segundo
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Busca todos los contenedores de cronómetros
+    const timerContainers = document.querySelectorAll('.cancellation-timer');
+
+    timerContainers.forEach(container => {
+        // Obtiene la fecha de creación del pedido del atributo data-*
+        const orderDate = new Date(container.dataset.orderDate);
+        // Calcula la fecha límite (5 minutos después de la creación)
+        const deadline = new Date(orderDate.getTime() + 5 * 60 * 1000);
+        
+        const orderId = container.id.split('-')[2];
+        const timerElement = document.getElementById('timer-' + orderId);
+        const formElement = document.getElementById('cancel-form-' + orderId);
+        const expiredMessageElement = document.getElementById('expired-message-' + orderId);
+
+        // Función que se ejecuta cada segundo
+        const intervalId = setInterval(() => {
+            const now = new Date();
+            const remainingTime = deadline - now;
+
+            if (remainingTime > 0) {
+                // Si aún queda tiempo, calcula minutos y segundos
+                const minutes = Math.floor((remainingTime / 1000 / 60) % 60);
+                const seconds = Math.floor((remainingTime / 1000) % 60);
+                
+                // Formatea para que siempre tengan dos dígitos (ej: 04:08)
+                const formattedMinutes = String(minutes).padStart(2, '0');
+                const formattedSeconds = String(seconds).padStart(2, '0');
+                
+                timerElement.innerHTML = `Tiempo para cancelar sin costo: <span class="text-green-600">${formattedMinutes}:${formattedSeconds}</span>`;
+            } else {
+                // Si el tiempo se acabó
+                clearInterval(intervalId); // Detiene el cronómetro
+                container.style.display = 'none'; // Oculta el cronómetro y el botón
+                expiredMessageElement.style.display = 'block'; // Muestra el mensaje de tiempo expirado
+            }
+        }, 1000);
+    });
+});
+</script>
+{% endblock %}

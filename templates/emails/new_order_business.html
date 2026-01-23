@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>¡Nuevo Pedido Recibido! - RM Domicilios</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background-color: #3B82F6; padding: 20px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { padding: 30px; color: #333333; line-height: 1.6; }
+        .content h2 { color: #3B82F6; font-size: 24px; margin-top: 0; }
+        .order-details { background-color: #f9f9f9; border: 1px solid #e0e0e0; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .order-details p { margin: 5px 0; }
+        .order-items table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .order-items th, .order-items td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .order-items th { background-color: #eee; }
+        .button { display: inline-block; background-color: #10B981; color: #ffffff; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 25px; }
+        .footer { background-color: #eee; padding: 20px; text-align: center; color: #777777; font-size: 12px; border-top: 1px solid #e0e0e0; }
+        .highlight { color: #3B82F6; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>RM Domicilios</h1>
+            <p>¡Nuevo Pedido Recibido!</p>
+        </div>
+        <div class="content">
+            <h2>Hola, {{ business_name }}</h2>
+            <p>Has recibido un nuevo pedido a través de RM Domicilios. ¡Es hora de empezar a prepararlo!</p>
+
+            <div class="order-details">
+                <p><strong>ID del Pedido:</strong> <span class="highlight">#{{ order.id }}</span></p>
+                <p><strong>Cliente:</strong> {{ order.customer_name }}</p>
+                <p><strong>Dirección de Entrega:</strong> {{ order.delivery_address }}</p>
+                <p><strong>Valor Total:</strong> <span class="highlight">${{ '{:,.0f}'.format(order.total_amount) }}</span></p>
+                <p><strong>Método de Pago:</strong> {{ order.payment_method }}</p>
+                <p><strong>Notas del Cliente:</strong> <span class="highlight">{{ order.customer_notes if order.customer_notes else 'Ninguna' }}</span></p>
+            </div>
+
+            <h3>Detalles del Pedido:</h3>
+            <div class="order-items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ '{:,.0f}'.format(item.price) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Por favor, accede a tu panel para gestionar el pedido y actualizar su estado:</p>
+            <a href="{{ dashboard_url }}" class="button">Ir a mi Dashboard de Pedidos</a>
+        </div>
+        <div class="footer">
+            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+            <p>&copy; {{ current_year }} RM Domicilios. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

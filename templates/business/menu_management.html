@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Menú - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Gestión de Menú y Productos</h1>
+
+    <div x-data="{ open: false }" class="bg-white p-6 rounded-lg shadow-lg mb-8 animate-fade-in-up delay-200">
+        <button @click="open = !open" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition shadow-md flex items-center justify-center">
+            <i class="fas fa-plus-circle mr-3"></i> {{ 'Cerrar Formulario' if open else 'Añadir Nuevo Producto' }}
+        </button>
+        <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90" class="mt-6 border-t border-gray-200 pt-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Detalles del Producto</h2>
+            <form action="{{ url_for('business.menu_management') }}" method="POST">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="mb-4">
+                        <label for="item_name" class="block text-gray-700 text-sm font-semibold mb-2">Nombre del Producto</label>
+                        <input type="text" id="item_name" name="item_name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" placeholder="Ej: Pizza Napolitana" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="item_price" class="block text-gray-700 text-sm font-semibold mb-2">Precio ($)</label>
+                        <input type="number" id="item_price" name="item_price" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" placeholder="Ej: 35000" min="0" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="item_description" class="block text-gray-700 text-sm font-semibold mb-2">Descripción</label>
+                    <textarea id="item_description" name="item_description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" placeholder="Describe tu producto..." required></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="mb-4">
+                        <label for="item_category" class="block text-gray-700 text-sm font-semibold mb-2">Categoría</label>
+                        <input type="text" id="item_category" name="item_category" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" placeholder="Ej: Pizzas Clásicas" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="item_image" class="block text-gray-700 text-sm font-semibold mb-2">Imagen del Producto</label>
+                        <input type="file" id="item_image" name="item_image" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                </div>
+                <div class="flex items-center mb-6">
+                    <input type="checkbox" id="item_available" name="item_available" class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2" checked>
+                    <label for="item_available" class="text-gray-700 font-semibold">Producto Disponible (se puede ordenar)</label>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-green-700 transition shadow-md">
+                    <i class="fas fa-save mr-2"></i> Guardar Producto
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-300">
+        <h2 class="text-2xl font-bold text-gray-800 mb-5">Tus Productos</h2>
+        {% if menu_items %}
+            <div class="space-y-6">
+                {% for item in menu_items %}
+                <div class="flex flex-col md:flex-row items-center border border-gray-200 rounded-lg p-5 hover:shadow-md transition duration-300">
+                    <div class="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                        <img src="{{ url_for('static', filename='img/' + item.image) if item.image else url_for('static', filename='img/placeholder_product.png') }}" alt="{{ item.name }}" class="w-24 h-24 object-cover rounded-lg">
+                    </div>
+                    <div class="flex-grow text-center md:text-left mb-4 md:mb-0">
+                        <h3 class="text-xl font-semibold text-gray-900">{{ item.name }}</h3>
+                        <p class="text-gray-600 text-sm">{{ item.description | truncate(80, true, '...') }}</p>
+                        <p class="text-blue-600 font-medium text-sm mt-1">{{ item.category }}</p>
+                        <p class="text-green-600 text-lg font-bold mt-2">${{ '{:,.0f}'.format(item.price) }}</p>
+                    </div>
+                    <div class="flex-shrink-0 flex flex-col items-center md:items-end space-y-3">
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold 
+                            {{ 'bg-green-100 text-green-800' if item.available else 'bg-red-100 text-red-800' }}">
+                            {{ 'Disponible' if item.available else 'No Disponible' }}
+                        </span>
+                        <div class="flex space-x-2">
+                            <form action="{{ url_for('business.toggle_item_availability', item_id=item.id) }}" method="POST">
+                                <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold 
+                                    {{ 'bg-yellow-500 text-white hover:bg-yellow-600' if item.available else 'bg-green-500 text-white hover:bg-green-600' }} transition">
+                                    <i class="fas {{ 'fa-toggle-off' if item.available else 'fa-toggle-on' }} mr-2"></i> {{ 'Desactivar' if item.available else 'Activar' }}
+                                </button>
+                            </form>
+                            <button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition">
+                                <i class="fas fa-edit mr-2"></i> Editar
+                            </button>
+                            <button class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition">
+                                <i class="fas fa-trash mr-2"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-10">
+                <i class="fas fa-folder-open text-gray-400 text-5xl mb-4"></i>
+                <p class="text-gray-600 text-lg">Aún no tienes productos en tu menú. ¡Añade el primero!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

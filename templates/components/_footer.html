@@ -1,0 +1,39 @@
+<footer class="bg-gray-800 text-gray-300 py-8 mt-12">
+    <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
+        <div>
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="RM Domicilios Logo" class="h-10 mx-auto md:mx-0 mb-4">
+            <p class="text-sm">Tu plataforma todo en uno para domicilios en Yopal. Conecta con tus servicios favoritos.</p>
+        </div>
+
+        <div>
+            <h4 class="font-semibold text-white mb-3">Enlaces Rápidos</h4>
+            <ul>
+                <li class="mb-2"><a href="{{ url_for('public.index') }}" class="hover:text-white transition">Inicio</a></li>
+                <li class="mb-2"><a href="#" class="hover:text-white transition">Explorar Servicios</a></li> {# Aquí irá la vista de servicios #}
+                <li class="mb-2"><a href="#" class="hover:text-white transition">Cómo Funciona</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 class="font-semibold text-white mb-3">Información</h4>
+            <ul>
+                <li class="mb-2"><a href="#" class="hover:text-white transition">Acerca de Nosotros</a></li>
+                <li class="mb-2"><a href="#" class="hover:text-white transition">Contacto</a></li>
+                <li class="mb-2"><a href="#" class="hover:text-white transition">Política de Privacidad</a></li>
+                <li class="mb-2"><a href="#" class="hover:text-white transition">Términos y Condiciones</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 class="font-semibold text-white mb-3">Síguenos</h4>
+            <div class="flex justify-center md:justify-start space-x-4">
+                <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-500">
+        &copy; {{ moment().format('YYYY') }} RM Domicilios Yopal. Todos los derechos reservados.
+    </div>
+</footer>

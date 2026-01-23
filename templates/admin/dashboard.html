@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard de Administrador{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Ganancias de Hoy (Comisiones)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ "%.2f"|format(ganancias_hoy) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+<div class="container mx-auto px-4 py-8">
+	<p class="text-lg text-gray-600 text-center mb-10">Gestiona y supervisa la plataforma Domicilios RM.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        {# Tarjeta de Usuarios Totales #}
+        <div class="bg-white rounded-lg shadow-xl p-6 flex items-center space-x-4 transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+            <div class="flex-shrink-0 bg-blue-100 text-blue-600 p-4 rounded-full">
+                <i class="fas fa-users text-3xl"></i>
+            </div>
+            <div>
+                <p class="text-xl font-semibold text-gray-700">Total de Usuarios</p>
+                <p class="text-4xl font-bold text-gray-900">{{ total_users }}</p>
+            </div>
+        </div>
+
+        {# Tarjeta de Conductores Pendientes #}
+        <div class="bg-white rounded-lg shadow-xl p-6 flex items-center space-x-4 transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+            <div class="flex-shrink-0 bg-yellow-100 text-yellow-600 p-4 rounded-full">
+                <i class="fas fa-motorcycle text-3xl"></i>
+            </div>
+            <div>
+                <p class="text-xl font-semibold text-gray-700">Conductores Pendientes</p>
+                <p class="text-4xl font-bold text-gray-900">{{ pending_drivers }}</p>
+            </div>
+        </div>
+
+        {# Tarjeta de Negocios Pendientes #}
+        <div class="bg-white rounded-lg shadow-xl p-6 flex items-center space-x-4 transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+            <div class="flex-shrink-0 bg-purple-100 text-purple-600 p-4 rounded-full">
+                <i class="fas fa-store-alt text-3xl"></i>
+            </div>
+            <div>
+                <p class="text-xl font-semibold text-gray-700">Negocios Pendientes</p>
+                <p class="text-4xl font-bold text-gray-900">{{ pending_businesses }}</p>
+            </div>
+        </div>
+        
+        {# Puedes añadir más tarjetas para otras métricas aquí, ej: Pedidos Activos, Ingresos, etc. #}
+        {# Ejemplo:
+        <div class="bg-white rounded-lg shadow-xl p-6 flex items-center space-x-4 transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+            <div class="flex-shrink-0 bg-green-100 text-green-600 p-4 rounded-full">
+                <i class="fas fa-receipt text-3xl"></i>
+            </div>
+            <div>
+                <p class="text-xl font-semibold text-gray-700">Pedidos Activos</p>
+                <p class="text-4xl font-bold text-gray-900">XX</p>
+            </div>
+        </div>
+        #}
+    </div>
+
+    <div class="bg-white rounded-lg shadow-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2 text-center">Gestión Rápida</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="{{ url_for('admin.user_management') }}" 
+               class="flex items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg shadow-md 
+                      transition duration-200 ease-in-out transform hover:scale-105">
+                <i class="fas fa-user-cog text-xl mr-3"></i>
+                <span class="font-semibold text-lg">Administrar Usuarios</span>
+            </a>
+            <a href="{{ url_for('admin.business_management') }}" {# ASUMIR ESTA RUTA #}
+               class="flex items-center justify-center p-4 bg-purple-50 hover:bg-purple-100 text-purple-800 rounded-lg shadow-md 
+                      transition duration-200 ease-in-out transform hover:scale-105">
+                <i class="fas fa-store text-xl mr-3"></i>
+                <span class="font-semibold text-lg">Administrar Negocios</span>
+            </a>
+            <a href="{{ url_for('admin.driver_management') }}" {# ASUMIR ESTA RUTA #}
+               class="flex items-center justify-center p-4 bg-yellow-50 hover:bg-yellow-100 text-yellow-800 rounded-lg shadow-md 
+                      transition duration-200 ease-in-out transform hover:scale-105">
+                <i class="fas fa-shipping-fast text-xl mr-3"></i>
+                <span class="font-semibold text-lg">Administrar Motorizados</span>
+            </a>
+            <a href="{{ url_for('admin.order_management') }}" {# ASUMIR ESTA RUTA #}
+               class="flex items-center justify-center p-4 bg-green-50 hover:bg-green-100 text-green-800 rounded-lg shadow-md 
+                      transition duration-200 ease-in-out transform hover:scale-105">
+                <i class="fas fa-receipt text-xl mr-3"></i>
+                <span class="font-semibold text-lg">Administrar Pedidos</span>
+            </a>
+            {# Puedes añadir más enlaces rápidos aquí, ej. para categorías, métodos de pago, etc. #}
+        </div>
+    </div>
+</div>
+{% endblock %}

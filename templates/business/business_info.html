@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Información del Negocio - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Información del Negocio</h1>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8 animate-fade-in-up delay-200">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-store mr-3 text-blue-600"></i> Datos Generales
+        </h2>
+        <form action="{{ url_for('business.business_info') }}" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="mb-4">
+                    <label for="business_name" class="block text-gray-700 text-sm font-semibold mb-2">Nombre del Negocio</label>
+                    <input type="text" id="business_name" name="business_name" value="{{ business.name }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" required>
+                </div>
+                <div class="mb-4">
+                    <label for="business_phone" class="block text-gray-700 text-sm font-semibold mb-2">Teléfono</label>
+                    <input type="tel" id="business_phone" name="business_phone" value="{{ business.phone }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" required>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="business_address" class="block text-gray-700 text-sm font-semibold mb-2">Dirección</label>
+                <input type="text" id="business_address" name="business_address" value="{{ business.address }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" required>
+            </div>
+            <div class="mb-4">
+                <label for="business_email" class="block text-gray-700 text-sm font-semibold mb-2">Correo Electrónico</label>
+                <input type="email" id="business_email" name="business_email" value="{{ business.email }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-600" readonly>
+            </div>
+            <div class="mb-6">
+                <label for="business_description" class="block text-gray-700 text-sm font-semibold mb-2">Descripción del Negocio</label>
+                <textarea id="business_description" name="business_description" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">{{ business.description }}</textarea>
+            </div>
+            <div class="mb-6">
+                <label for="business_logo" class="block text-gray-700 text-sm font-semibold mb-2">Logo del Negocio</label>
+                <div class="flex items-center space-x-4">
+                    <img src="{{ url_for('static', filename='img/' + business.logo) if business.logo else url_for('static', filename='img/placeholder_business.png') }}" alt="Logo del Negocio" class="w-24 h-24 object-contain rounded-lg border-2 border-blue-200 p-1">
+                    <input type="file" id="business_logo" name="business_logo" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">
+                <i class="fas fa-save mr-2"></i> Guardar Cambios
+            </button>
+        </form>
+    </div>
+
+    <div x-data="{ open_hours: {{ business.opening_hours | tojson }} }" class="bg-white p-6 rounded-lg shadow-lg mb-8 animate-fade-in-up delay-300">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-clock mr-3 text-blue-600"></i> Horarios de Apertura
+        </h2>
+        <form action="{{ url_for('business.business_info') }}" method="POST">
+            <div class="space-y-4">
+                {% for day_data in business.opening_hours %}
+                <div class="flex items-center">
+                    <label class="block text-gray-700 font-semibold w-24">{{ day_data.day }}</label>
+                    <input type="text" name="opening_hours_{{ day_data.day }}" value="{{ day_data.hours }}" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" placeholder="Ej: 09:00 - 22:00">
+                </div>
+                {% endfor %}
+            </div>
+            <p class="text-gray-500 text-sm mt-4">Ingresa 'Cerrado' si el negocio no abre un día específico.</p>
+            <button type="submit" class="mt-6 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">
+                <i class="fas fa-save mr-2"></i> Guardar Horarios
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-400">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-truck mr-3 text-blue-600"></i> Configuración de Entrega y Pagos
+        </h2>
+        <form action="{{ url_for('business.business_info') }}" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="mb-4">
+                    <label for="min_order_value" class="block text-gray-700 text-sm font-semibold mb-2">Valor Mínimo de Pedido ($)</label>
+                    <input type="number" id="min_order_value" name="min_order_value" value="{{ business.min_order_value }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" min="0">
+                </div>
+                <div class="mb-4">
+                    <label for="delivery_fee" class="block text-gray-700 text-sm font-semibold mb-2">Costo de Envío Fijo ($)</label>
+                    <input type="number" id="delivery_fee" name="delivery_fee" value="{{ business.delivery_fee }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800" min="0">
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-semibold mb-2">Métodos de Pago Aceptados</label>
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="payment_cash" name="payment_method" value="Efectivo" class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2" {% if 'Efectivo' in business.payment_methods %}checked{% endif %}>
+                        <label for="payment_cash" class="text-gray-700">Efectivo</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="payment_online" name="payment_method" value="Tarjeta (online)" class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2" {% if 'Tarjeta (online)' in business.payment_methods %}checked{% endif %}>
+                        <label for="payment_online" class="text-gray-700">Tarjeta (online)</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="payment_dataphone" name="payment_method" value="Datafono" class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2" {% if 'Datafono' in business.payment_methods %}checked{% endif %}>
+                        <label for="payment_dataphone" class="text-gray-700">Datafono</label>
+                    </div>
+                    {# Añadir más métodos de pago si es necesario #}
+                </div>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">
+                <i class="fas fa-save mr-2"></i> Guardar Configuración
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

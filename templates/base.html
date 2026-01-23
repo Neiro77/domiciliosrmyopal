@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Domicilios RM{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    {% block head %}{% endblock %}
+	{# Add this line for CSRF token if not already present #}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body x-data="{ openMenu: false }" 
+      x-init="
+        Alpine.store('cart', {
+            items: JSON.parse(localStorage.getItem('cartItems')) || [],
+            businessId: localStorage.getItem('cartBusinessId') || null,
+            businessName: localStorage.getItem('cartBusinessName') || null,
+
+            // --- FUNCIÓN addItem MEJORADA ---
+            addItem(productId, productName, productPrice, newBusinessId, newBusinessName, quantityToAdd = 1) {
+                if (quantityToAdd <= 0) return;
+
+                if (this.businessId && this.businessId !== newBusinessId) {
+                    if (!confirm(`Ya tienes ítems de ${this.businessName} en tu carrito. ¿Quieres limpiar el carrito y añadir este ítem de ${newBusinessName}?`)) {
+                        return;
+                    }
+                    this.clearCart();
+                }
+
+                this.businessId = newBusinessId;
+                this.businessName = newBusinessName;
+
+                const existingItem = this.items.find(item => item.productId === productId);
+                if (existingItem) {
+                    existingItem.quantity += quantityToAdd; // Suma la cantidad especificada
+                } else {
+                    // Añade el producto con la cantidad especificada
+                    this.items.push({ productId, productName, productPrice, quantity: quantityToAdd, type: 'product' });
+                }
+                this.saveCart();
+                this.showNotification(`${quantityToAdd} x ${productName} añadido(s) al carrito.`);
+            },
+
+            removeItem(productId) {
+                this.items = this.items.filter(item => item.productId !== productId);
+                this.saveCart();
+                if (this.items.length === 0) {
+                    this.clearCart();
+                }
+                this.showNotification('Producto eliminado del carrito.');
+            },
+
+            updateQuantity(productId, newQuantity) {
+                let item = this.items.find(i => i.productId === productId);
+                if (item) {
+                    if (newQuantity <= 0) {
+                        this.removeItem(productId);
+                    } else {
+                        item.quantity = newQuantity;
+                    }
+                    this.saveCart();
+                }
+            },
+
+            itemCount() {
+                return this.items.reduce((total, item) => total + item.quantity, 0);
+            },
+
+            cartTotal() {
+                return this.items.reduce((total, item) => total + (item.productPrice * item.quantity), 0);
+            },
+
+            clearCart() {
+                this.items = [];
+                this.businessId = null;
+                this.businessName = null;
+                this.saveCart();
+				console.log('Cart cleared');
+                this.showNotification('Carrito vaciado.');
+            },
+
+            saveCart() {
+                localStorage.setItem('cartItems', JSON.stringify(this.items));
+                localStorage.setItem('cartBusinessId', this.businessId);
+                localStorage.setItem('cartBusinessName', this.businessName);
+            },
+
+            showNotification(message) {
+                let notification = document.createElement('div');
+                notification.textContent = message;
+                notification.className = 'fixed bottom-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-xl z-50 transition-all duration-300 transform translate-y-full opacity-0';
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.classList.remove('translate-y-full', 'opacity-0');
+                    notification.classList.add('translate-y-0', 'opacity-100');
+                }, 10);
+
+                setTimeout(() => {
+                    notification.classList.remove('translate-y-0', 'opacity-100');
+                    notification.classList.add('translate-y-full', 'opacity-0');
+                    notification.addEventListener('transitionend', () => notification.remove());
+                }, 3000);
+            }
+        });
+      "
+>
+    <header class="bg-blue-600 text-white p-4 shadow-md">
+        <nav class="container mx-auto flex justify-between items-center">
+		
+			<!-- >>> AJUSTE 1: El enlace del logo ahora es condicional <<< -->
+            <a href="{% if current_user.is_authenticated and current_user.role == 'customer' %}{{ url_for('customer.dashboard') }}{% else %}{{ url_for('public.home') }}{% endif %}" class="text-2xl font-bold">Domicilios RM</a>
+
+            <div class="hidden md:flex space-x-4 items-center">
+                
+                <!-- >>> AJUSTE 2: El enlace de "Inicio" ahora es condicional <<< -->
+                <a href="{% if current_user.is_authenticated and current_user.role == 'customer' %}{{ url_for('customer.dashboard') }}{% else %}{{ url_for('public.home') }}{% endif %}" class="hover:text-blue-200">Inicio</a>
+		
+            
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'customer' %}
+                        
+						<a href="{{ url_for('customer.list_businesses') }}" class="hover:text-blue-200">Negocios</a>
+						<a href="{{ url_for('customer.create_package') }}" class="text-white hover:text-blue-200">Enviar Paquete</a> {# Nuevo enlace #}
+                        <a href="{{ url_for('customer.my_orders') }}" class="hover:text-blue-200">Mis Pedidos</a>
+                        <a href="{{ url_for('customer.view_cart') }}" class="bg-white text-blue-600 px-3 py-1 rounded-full flex items-center hover:bg-gray-100 transition relative">
+                            <i class="fas fa-shopping-cart mr-2"></i> Carrito
+                            <span x-text="Alpine.store('cart').itemCount()" x-cloak
+                                  class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                                  :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
+                            </span>
+                        </a>
+                    {% elif current_user.role == 'driver' %}
+                        <a href="{{ url_for('driver.dashboard') }}" class="hover:text-blue-200">Mis Entregas</a>
+						<a href="{{ url_for('driver.my_orders') }}" class="hover:text-blue-200">Historial</a>
+                    {% elif current_user.role == 'business' %}
+                        <a href="{{ url_for('business.dashboard') }}" class="hover:text-blue-200">Mi Negocio</a>
+                    {% elif current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="hover:text-blue-200">Admin Dashboard</a>
+                        <a href="{{ url_for('admin.user_management') }}" class="hover:text-blue-200">Usuarios</a>
+                        <a href="{{ url_for('admin.business_management') }}" class="hover:text-blue-200">Negocios</a>
+                        <a href="{{ url_for('admin.driver_management') }}" class="hover:text-blue-200">Motorizados</a>
+                        <a href="{{ url_for('admin.order_management') }}" class="hover:text-blue-200">Pedidos</a>
+                    {% endif %}
+                    <a href="{{ url_for('public.logout') }}" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg shadow-md transition">Cerrar Sesión</a>
+                {% else %}
+                    <a href="{{ url_for('public.login') }}" class="hover:text-blue-200">Iniciar Sesión</a>
+                    <a href="{{ url_for('public.register') }}" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg shadow-md transition">Registrarse</a>
+                {% endif %}
+            </div>
+            <div class="md:hidden">
+                <button @click="openMenu = !openMenu" class="text-white focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div x-show="openMenu" @click.away="openMenu = false" class="md:hidden bg-blue-700 py-2 transition-all duration-300 ease-in-out" x-cloak>
+            <a href="{{ url_for('public.home') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Inicio</a>
+            {% if current_user.is_authenticated %}
+                {% if current_user.role == 'customer' %}
+					
+                    <a href="{{ url_for('customer.list_businesses') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Negocios</a>
+					<a href="{{ url_for('customer.create_package') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Enviar Paquete</a> {# Nuevo enlace #}
+                    <a href="{{ url_for('customer.my_orders') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Mis Pedidos</a>
+                    <a href="{{ url_for('customer.view_cart') }}" class="block px-4 py-2 text-white hover:bg-blue-600 relative">
+                        <i class="fas fa-shopping-cart mr-2"></i> Carrito
+                        <span x-text="Alpine.store('cart').itemCount()" x-cloak
+                                class="absolute top-2 right-4 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                                :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
+                        </span>
+                    </a>
+                {% elif current_user.role == 'driver' %}
+                    <a href="{{ url_for('driver.dashboard') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Mis Entregas</a>
+					<a href="{{ url_for('driver.my_orders') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Historial</a>
+                {% elif current_user.role == 'business' %}
+                    <a href="{{ url_for('business.dashboard') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Mi Negocio</a>
+                {% elif current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Admin Dashboard</a>
+                    <a href="{{ url_for('admin.user_management') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Usuarios</a>
+                    <a href="{{ url_for('admin.business_management') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Negocios</a>
+                    <a href="{{ url_for('admin.driver_management') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Motorizados</a>
+                    <a href="{{ url_for('admin.order_management') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Pedidos</a>
+                {% endif %}
+                <a href="{{ url_for('public.logout') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Cerrar Sesión</a>
+            {% else %}
+                <a href="{{ url_for('public.login') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Iniciar Sesión</a>
+                <a href="{{ url_for('public.register') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Registrarse</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4">
+        {% include '_messages.html' %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white p-6 mt-8 text-center">
+        <div class="container mx-auto">
+            <p>&copy; {{ moment().format('YYYY') }} Domicilios RM. Todos los derechos reservados.</p>
+            <div class="flex justify-center space-x-4 mt-3">
+                <a href="#" class="hover:text-blue-400"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="hover:text-blue-400"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-blue-400"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/es.min.js"></script>
+    <script>
+        moment.locale('es');
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu pedido ha sido aceptado</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background-color: #3B82F6; color: #ffffff; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { padding: 20px 0; line-height: 1.6; color: #333333; }
+        .button { display: inline-block; background-color: #22C55E; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        .footer { text-align: center; font-size: 0.8em; color: #777777; margin-top: 20px; border-top: 1px solid #eeeeee; padding-top: 10px; }
+        .order-details { background-color: #f9f9f9; border-left: 5px solid #3B82F6; padding: 15px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>¡Tu pedido ha sido aceptado!</h2>
+        </div>
+        <div class="content">
+            <p>Hola {{ order.user.first_name if order.user else 'Cliente' }},</p>
+            <p>Queremos informarte que tu pedido <strong>#{{ order.id }}</strong> ha sido aceptado y un motorizado ha sido asignado para recogerlo.</p>
+            
+            <div class="order-details">
+                <p><strong>Negocio:</strong> {{ order.business.name }}</p>
+                <p><strong>Motorizado:</strong> {{ driver.first_name }} {{ driver.last_name }} (Tel: {{ driver.phone_number }})</p>
+                <p><strong>Estado Actual:</strong> {{ order.status }}</p>
+                <p><strong>Total:</strong> ${{ "%.2f" | format(order.total_amount) }}</p>
+                <p><strong>Dirección de Entrega:</strong> {{ order.delivery_address }}</p>
+            </div>
+
+            <p style="text-align: center; margin-top: 25px;">
+                <a href="{{ url_for('customer.my_orders', _external=True) }}" class="button">Ver Detalles del Pedido</a>
+            </p>
+            <p>Pronto el motorizado estará en camino con tu pedido. ¡Gracias por tu compra!</p>
+        </div>
+        <div class="footer">
+            <p>Este es un mensaje automático, por favor no respondas a este email.</p>
+            <p>&copy; Domicilios RM.</p>
+        </div>
+    </div>
+</body>
+</html>

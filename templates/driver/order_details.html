@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalles Pedido #{{ order.id }} - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Detalles del Pedido #{{ order.id }}</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-clipboard-list mr-3 text-blue-600"></i> Información General
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                    <div>
+                        <p><span class="font-semibold">Comercio:</span> {{ order.service_name }} ({{ order.service_type }})</p>
+                        <p><span class="font-semibold">Cliente:</span> {{ order.customer_name }}</p>
+                        <p><span class="font-semibold">Ganancia:</span> <span class="font-bold text-green-600">${{ '{:,.0f}'.format(order.earning) }}</span></p>
+                        <p><span class="font-semibold">Ítems:</span> {{ order.items_count }}</p>
+                    </div>
+                    <div>
+                        <p><span class="font-semibold">Estado:</span> <span class="font-bold text-blue-600">{{ order.order_status }}</span></p>
+                        <p><span class="font-semibold">Método de Pago:</span> {{ order.payment_method }}</p>
+                        <p><span class="font-semibold">Distancia:</span> {{ order.distance }}</p>
+                        <p><span class="font-semibold">Tiempo estimado:</span> {{ order.estimated_time }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-300">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-route mr-3 text-blue-600"></i> Ruta y Direcciones
+                </h2>
+                <div class="mb-4">
+                    <p class="font-semibold text-gray-800 mb-2">Punto de Recogida:</p>
+                    <div class="flex items-start bg-gray-50 p-4 rounded-lg">
+                        <i class="fas fa-store text-blue-600 text-xl mr-3 mt-1"></i>
+                        <div>
+                            <p class="text-gray-700">{{ order.pickup_address }}</p>
+                            <p class="text-gray-600 text-sm mt-1">Instrucciones: <span class="font-semibold">{{ order.pickup_instructions }}</span></p>
+                            <a href="tel:{{ order.service_phone }}" class="text-blue-600 hover:underline text-sm"><i class="fas fa-phone mr-1"></i> Llamar al Comercio</a>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800 mb-2">Punto de Entrega:</p>
+                    <div class="flex items-start bg-gray-50 p-4 rounded-lg">
+                        <i class="fas fa-home text-blue-600 text-xl mr-3 mt-1"></i>
+                        <div>
+                            <p class="text-gray-700">{{ order.delivery_address }}</p>
+                            <p class="text-gray-600 text-sm mt-1">Instrucciones: <span class="font-semibold">{{ order.delivery_instructions }}</span></p>
+                            <a href="tel:{{ order.customer_phone }}" class="text-blue-600 hover:underline text-sm"><i class="fas fa-phone mr-1"></i> Llamar al Cliente</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-400">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Actualizar Estado del Pedido</h2>
+                <form action="{{ url_for('driver.update_order_status', order_id=order.id) }}" method="POST">
+                    <div class="mb-4">
+                        <label for="new_status" class="block text-gray-700 text-sm font-semibold mb-2">Selecciona el nuevo estado:</label>
+                        <select id="new_status" name="new_status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                            <option value="En Ruta al Comercio" {% if order.order_status == 'En Ruta al Comercio' %}selected{% endif %}>En Ruta al Comercio</option>
+                            <option value="En Comercio (Recogiendo)" {% if order.order_status == 'En Comercio (Recogiendo)' %}selected{% endif %}>En Comercio (Recogiendo)</option>
+                            <option value="Recogido, En Camino" {% if order.order_status == 'Recogido, En Camino' %}selected{% endif %}>Recogido, En Camino</option>
+                            <option value="Llegando al Cliente" {% if order.order_status == 'Llegando al Cliente' %}selected{% endif %}>Llegando al Cliente</option>
+                            <option value="Entregado" {% if order.order_status == 'Entregado' %}selected{% endif %}>Entregado</option>
+                            <option value="Problema con el Pedido" {% if order.order_status == 'Problema con el Pedido' %}selected{% endif %}>Problema con el Pedido</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition shadow-md">
+                        Actualizar Estado
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:sticky lg:top-[96px] lg:h-[calc(100vh-120px)] self-start bg-white p-6 rounded-lg shadow-lg overflow-hidden animate-fade-in-up delay-500">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Ver Ruta en Mapa</h2>
+            <div class="relative w-full h-96 rounded-lg overflow-hidden">
+                <iframe
+                    width="100%"
+                    height="100%"
+                    frameborder="0"
+                    style="border:0"
+                    src="https://www.google.com/maps/embed/v1/directions?key=YOUR_API_KEY&origin={{ order.pickup_address }}&destination={{ order.delivery_address }}"
+                    allowfullscreen>
+                </iframe>
+                <div class="absolute inset-0 flex items-center justify-center bg-black/20 text-white text-center text-lg font-bold">
+                    Cargando Mapa de Ruta...
+                    {# Reemplazar con Google Maps Embed API para mostrar la ruta #}
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-4 text-center">Navega fácilmente a tu destino con el mapa.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

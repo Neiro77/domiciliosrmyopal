@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Domicilios RM Yopal - Tu plataforma multiservicios{% endblock %}
+
+{% block content %}
+<!-- Sección de Héroe -->
+<div class="relative bg-cover bg-center text-white py-24 px-10" style="background-image: url('{{ url_for('static', filename='img/hero-bg-multiservice.jpg') }}')">
+    <div class="absolute inset-0 bg-black opacity-60"></div>
+    <div class="relative container mx-auto text-center">
+        <h1 class="text-5xl font-extrabold mb-4 leading-tight">Todo lo que necesitas, a tu puerta.</h1>
+        <p class="text-xl mb-8">Comida, paquetes, compras y más. La solución completa de domicilios para Yopal.</p>
+        <div class="flex justify-center space-x-4">
+            <a href="{{ url_for('public.register') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transition duration-300">¡Regístrate Ahora!</a>
+            <a href="{{ url_for('public.login') }}" class="bg-white hover:bg-gray-200 text-blue-600 font-bold py-3 px-8 rounded-lg text-lg shadow-lg transition duration-300">Iniciar Sesión</a>
+        </div>
+    </div>
+</div>
+<section class="py-16 bg-blue-50">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-10">Así funciona RM Domicilios</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+		<div class="flex flex-col items-center p-6 bg-white rounded-lg shadow-md">
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-store text-blue-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">1. Explora Servicios</h3>
+                <p class="text-gray-600 text-center">Busca tus comercios y servicios favoritos por categoría o nombre.</p>
+            </div>
+            <div class="flex flex-col items-center p-6 bg-white rounded-lg shadow-md">
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-map-marker-alt text-blue-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">2. Elige tu Ubicación</h3>
+                <p class="text-gray-600 text-center">Dinos dónde quieres recibir tu pedido para mostrarte los servicios disponibles.</p>
+            </div>
+            
+            <div class="flex flex-col items-center p-6 bg-white rounded-lg shadow-md">
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-motorcycle text-blue-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">3. Recibe en tu Puerta</h3>
+                <p class="text-gray-600 text-center">Realiza tu pedido y nuestros motorizados lo llevarán rápidamente.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Servicios -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4 text-center">
+		<h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Nuestros Servicios</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <a href="{{ url_for('customer.list_businesses') }}" class="block bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 group">
+                <img src="{{ url_for('static', filename='img/service-food.jpg') }}" alt="Comida a Domicilio" class="w-full h-48 object-cover rounded-t-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition">Comida Deliciosa</h3>
+                    <p class="text-gray-600 text-sm">Tus restaurantes favoritos, listos para enviar.</p>
+                </div>
+            </a>
+			
+			<!-- Tarjeta 2: Paquetería -->
+			<a href="{{ url_for('customer.create_package') }}" class="block bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2 group">
+				<div class="relative">
+					<img src="{{ url_for('static', filename='img/service-pharmacy.jpg') }}" alt="Envío de Paquetes" class="w-full h-56 object-cover rounded-t-lg">
+					<div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-t-lg">
+						<i class="fas fa-box-open text-white text-6xl opacity-80"></i>
+					</div>
+				</div>
+				<div class="p-6 text-center">
+					<h3 class="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition">Paquetería y Mensajería</h3>
+					<p class="text-gray-600">Envía documentos y paquetes a cualquier parte de Yopal.</p>
+				</div>
+			</a>
+			
+			<a href="#" class="block bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 group">
+                <img src="{{ url_for('static', filename='img/service-pharmacy.jpg') }}" alt="Farmacia a Domicilio" class="w-full h-48 object-cover rounded-t-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition">Farmacia y Salud</h3>
+                    <p class="text-gray-600 text-sm">Medicamentos y productos de cuidado personal. (Próximamente)</p>
+                </div>
+            </a>
+            <a href="#" class="block bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 group">
+                <img src="{{ url_for('static', filename='img/service-grocery.jpg') }}" alt="Mercado a Domicilio" class="w-full h-48 object-cover rounded-t-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition">Mercado y Víveres</h3>
+                    <p class="text-gray-600 text-sm">Dinos qué necesitas de la tienda y te lo llevamos. (Próximamente)</p>
+                </div>
+            </a>
+            <a href="#" class="block bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 group">
+                <img src="{{ url_for('static', filename='img/service-more.jpg') }}" alt="Otros Servicios" class="w-full h-48 object-cover rounded-t-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition">¡Y Mucho Más!</h3>
+                    <p class="text-gray-600 text-sm">Estamos en constante expansión para ofrecerte todo lo que necesitas en un solo lugar.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-blue-600 text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">¿Eres un comercio o motorizado?</h2>
+        <p class="text-lg mb-8">Únete a nuestra red y expande tus oportunidades en Yopal.</p>
+        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <a href="{{ url_for('public.register', role='restaurant') }}" class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-full hover:bg-gray-100 transition shadow-lg">Registra tu Comercio</a>
+            <a href="{{ url_for('public.register', role='motorizado') }}" class="px-8 py-3 border-2 border-white text-white font-semibold rounded-full hover:bg-blue-700 transition shadow-lg">Sé un Motorizado</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

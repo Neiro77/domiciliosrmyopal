@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Historial de Entregas - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Mi Historial de Entregas</h1>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8 animate-fade-in-up delay-200">
+        <h2 class="text-2xl font-bold text-gray-800 mb-5">Mis Entregas Anteriores</h2>
+        {% if history %}
+            <div class="space-y-6">
+                {% for delivery in history %}
+                <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition duration-300">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">Entrega #{{ delivery.id }} - {{ delivery.service_name }}</h3>
+                            <p class="text-gray-600 text-sm">{{ delivery.date }}</p>
+                        </div>
+                        <div class="mt-3 sm:mt-0 text-right">
+                            <span class="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full"><i class="fas fa-check-circle mr-1"></i> {{ delivery.status }}</span>
+                            <p class="text-lg font-bold text-green-600 mt-1">${{ '{:,.0f}'.format(delivery.earning) }}</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mb-4">Entregado en: <span class="font-semibold">{{ delivery.delivery_address }}</span></p>
+                    <div class="flex justify-end">
+                        <a href="{{ url_for('driver.order_details', order_id=delivery.id) }}" class="px-5 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition font-semibold">
+                            <i class="fas fa-info-circle mr-2"></i> Ver Detalles
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-10">
+                <i class="fas fa-history text-gray-400 text-5xl mb-4"></i>
+                <p class="text-gray-600 text-lg">Aún no tienes entregas en tu historial.</p>
+                <a href="{{ url_for('driver.dashboard') }}" class="text-blue-600 hover:underline mt-4 block">¡Empieza a ganar con nuevos pedidos!</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

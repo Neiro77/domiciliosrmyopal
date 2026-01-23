@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestionar Negocios - Administrador{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-6 text-center">Gestionar Negocios</h1>
+    <p class="text-lg text-gray-600 text-center mb-10">Revisa y activa/desactiva las cuentas de los negocios.</p>
+
+    <div class="bg-white rounded-lg shadow-xl p-6 mb-8">
+        <div class="overflow-x-auto">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            ID
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Nombre del Negocio
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Email de Contacto
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Teléfono
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Dirección
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Activo
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for business in businesses %}
+                    <tr>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ business.id }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ business.name }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ business.user.email if business.user else 'N/A' }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ business.phone_number }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ business.address }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <span class="relative inline-block px-3 py-1 font-semibold leading-tight">
+                                <span aria-hidden="true" class="absolute inset-0 {% if business.user.is_active %}bg-green-200{% else %}bg-red-200{% endif %} opacity-50 rounded-full"></span>
+                                <span class="relative text-xs {% if business.user.is_active %}text-green-900{% else %}text-red-900{% endif %}">
+                                    {{ "Activo" if business.user.is_active else "Inactivo" }}
+                                </span>
+                            </span>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <form action="{{ url_for('admin.toggle_user_active', user_id=business.user.id) }}" method="POST" class="inline-block">
+                                {{ form.csrf_token }}
+                                <button type="submit" 
+                                        class="{% if business.user.is_active %}bg-red-500 hover:bg-red-600{% else %}bg-green-500 hover:bg-green-600{% endif %} text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 text-xs">
+                                    {{ "Desactivar" if business.user.is_active else "Activar" }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

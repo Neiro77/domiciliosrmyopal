@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Actualización de tu Pedido - RM Domicilios</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background-color: #059669; padding: 20px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { padding: 30px; color: #333333; line-height: 1.6; }
+        .content h2 { color: #059669; font-size: 24px; margin-top: 0; }
+        .status-badge { display: inline-block; background-color: #DBEAFE; color: #1E40AF; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 1.1em; margin-top: 15px; }
+        .button { display: inline-block; background-color: #3B82F6; color: #ffffff; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 25px; }
+        .footer { background-color: #eee; padding: 20px; text-align: center; color: #777777; font-size: 12px; border-top: 1px solid #e0e0e0; }
+        .highlight { color: #059669; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>RM Domicilios</h1>
+            <p>¡Tu Pedido se ha Actualizado!</p>
+        </div>
+        <div class="content">
+            <h2>Hola, {{ customer_name }}</h2>
+            <p>Queremos informarte que el estado de tu pedido <span class="highlight">#{{ order.id }}</span> ha cambiado.</p>
+
+            <p><strong>Nuevo Estado:</strong></p>
+            <div class="status-badge">
+                {{ new_status }}
+            </div>
+
+            <p class="mt-4">
+                {% if new_status == 'En Preparación' %}
+                Tu pedido en {{ order.service_name }} está siendo preparado. ¡Pronto estará listo!
+                {% elif new_status == 'Listo para Recoger' %}
+                ¡Buenas noticias! Tu pedido en {{ order.service_name }} está listo para ser recogido por el motorizado.
+                {% elif new_status == 'En Camino' %}
+                Tu pedido está en camino a tu dirección. ¡El motorizado llegará pronto!
+                {% elif new_status == 'Entregado' %}
+                ¡Tu pedido de {{ order.service_name }} ha sido entregado con éxito! Esperamos que lo disfrutes.
+                {% elif new_status == 'Cancelado' %}
+                Lamentamos informarte que tu pedido de {{ order.service_name }} ha sido cancelado. Ponte en contacto con el comercio si tienes preguntas.
+                {% else %}
+                Tu pedido en {{ order.service_name }} ha sido actualizado.
+                {% endif %}
+            </p>
+
+            <p>Puedes seguir el estado de tu pedido en cualquier momento desde tu panel:</p>
+            <a href="{{ track_order_url }}" class="button">Seguir mi Pedido</a>
+        </div>
+        <div class="footer">
+            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+            <p>&copy; {{ current_year }} RM Domicilios. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

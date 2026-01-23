@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestionar Pedidos - Administrador{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-6 text-center">Gestionar Pedidos</h1>
+    <p class="text-lg text-gray-600 text-center mb-10">Supervisa y gestiona todos los pedidos del sistema.</p>
+
+    <div class="bg-white rounded-lg shadow-xl p-6 mb-8">
+        <div class="overflow-x-auto">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            ID Pedido
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Cliente
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Negocio
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Motorizado
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Total
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Estado
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Método de Pago
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Fecha
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ order.id }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ order.user.email if order.user else 'N/A' }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ order.business.name if order.business else 'N/A' }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ order.driver.first_name if order.driver else 'No Asignado' }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">${{ "%.2f" | format(order.total_amount) }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <span class="relative inline-block px-3 py-1 font-semibold leading-tight">
+                                <span aria-hidden="true" class="absolute inset-0 
+                                    {% if order.status == 'Entregado' %}bg-green-200
+                                    {% elif order.status == 'Pendiente' %}bg-yellow-200
+                                    {% elif order.status == 'Cancelado' %}bg-red-200
+                                    {% else %}bg-blue-200{% endif %} opacity-50 rounded-full"></span>
+                                <span class="relative text-xs 
+                                    {% if order.status == 'Entregado' %}text-green-900
+                                    {% elif order.status == 'Pendiente' %}text-yellow-900
+                                    {% elif order.status == 'Cancelado' %}text-red-900
+                                    {% else %}text-blue-900{% endif %}">
+                                    {{ order.status }}
+                                </span>
+                            </span>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ order.payment_method.name if order.payment_method else 'N/A' }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ moment(order.order_date).format('LLL') }}</p>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            {% if not order.driver %}
+                                <a href="{{ url_for('admin.assign_driver', order_id=order.id) }}" class="btn btn-sm btn-primary">Asignar</a>
+                            {% else %}
+                                <span class="text-gray-500">Asignado</span>
+                            {% endif %}
+                            </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

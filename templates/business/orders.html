@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedidos - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Gestión de Pedidos</h1>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8 animate-fade-in-up delay-200">
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
+            <h2 class="text-2xl font-bold text-gray-800 mb-3 sm:mb-0">Todos los Pedidos</h2>
+            <div class="flex space-x-2">
+                <a href="{{ url_for('business.orders', status='all') }}" class="px-4 py-2 rounded-lg text-sm font-semibold 
+                    {{ 'bg-blue-600 text-white' if status_filter == 'all' else 'bg-gray-100 text-gray-800 hover:bg-gray-200' }}">
+                    Todos
+                </a>
+                <a href="{{ url_for('business.orders', status='Nuevo Pedido') }}" class="px-4 py-2 rounded-lg text-sm font-semibold 
+                    {{ 'bg-blue-600 text-white' if status_filter == 'Nuevo Pedido' else 'bg-gray-100 text-gray-800 hover:bg-gray-200' }}">
+                    Nuevos
+                </a>
+                <a href="{{ url_for('business.orders', status='En Preparación') }}" class="px-4 py-2 rounded-lg text-sm font-semibold 
+                    {{ 'bg-blue-600 text-white' if status_filter == 'En Preparación' else 'bg-gray-100 text-gray-800 hover:bg-gray-200' }}">
+                    En Prep.
+                </a>
+                <a href="{{ url_for('business.orders', status='Listo para Recoger') }}" class="px-4 py-2 rounded-lg text-sm font-semibold 
+                    {{ 'bg-blue-600 text-white' if status_filter == 'Listo para Recoger' else 'bg-gray-100 text-gray-800 hover:bg-gray-200' }}">
+                    Listos
+                </a>
+            </div>
+        </div>
+
+        {% if active_orders %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Pedido</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Total</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora Pedido</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in active_orders %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 hover:underline"><a href="{{ url_for('business.order_details', order_id=order.id) }}">#{{ order.id }}</a></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ order.customer_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">${{ '{:,.0f}'.format(order.total_amount) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ moment(order.order_time).format('MMM D, HH:mm') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if order.status == 'Nuevo Pedido' %}bg-red-100 text-red-800
+                                    {% elif order.status == 'En Preparación' %}bg-yellow-100 text-yellow-800
+                                    {% elif order.status == 'Listo para Recoger' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="{{ url_for('business.order_details', order_id=order.id) }}" class="text-blue-600 hover:text-blue-900"><i class="fas fa-eye mr-1"></i> Ver</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-10">
+                <i class="fas fa-clipboard-check text-gray-400 text-5xl mb-4"></i>
+                <p class="text-gray-600 text-lg">No hay pedidos con el estado "{{ status_filter }}" en este momento.</p>
+                <a href="{{ url_for('business.dashboard') }}" class="text-blue-600 hover:underline mt-4 block">Volver al Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

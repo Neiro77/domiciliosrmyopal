@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Seguimiento de Pedido #{{ tracking.order_id }} - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Seguimiento de tu Pedido</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Pedido #{{ tracking.order_id }} - {{ tracking.service_name }}</h2>
+                <p class="text-gray-700 mb-4">Tiempo estimado de llegada: <span class="font-semibold text-blue-600">{{ tracking.estimated_arrival }}</span></p>
+
+                <div class="relative pt-1">
+                    <div class="flex mb-2 items-center justify-between">
+                        {% for step in tracking.status_steps %}
+                            <div class="flex-1 text-center {% if loop.index0 <= tracking.current_status_index %}text-blue-600{% else %}text-gray-400{% endif %}">
+                                <i class="fas fa-circle text-xs mb-1"></i>
+                                <p class="text-xs font-semibold">{{ step.name }}</p>
+                                {% if step.time %}<p class="text-xxs text-gray-500">{{ step.time }}</p>{% endif %}
+                            </div>
+                            {% if not loop.last %}
+                                <div class="flex-1 border-t-2 {% if loop.index0 < tracking.current_status_index %}border-blue-500{% else %}border-gray-200{% endif %} pt-2 relative">
+                                    <div class="absolute w-2 h-2 bg-white border-2 border-blue-500 rounded-full -left-1 top-1/2 -translate-y-1/2"></div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-lg mt-6 flex items-center justify-between animate-fade-in-up delay-300">
+                    <div>
+                        <p class="font-semibold text-blue-800">Estado Actual:</p>
+                        <p class="text-blue-600 text-xl font-bold">{{ tracking.status_steps[tracking.current_status_index].name }}</p>
+                    </div>
+                    {% if tracking.motorizado %}
+                        <div class="flex items-center space-x-3">
+                            <img src="{{ url_for('static', filename='img/' + tracking.motorizado.photo) }}" alt="{{ tracking.motorizado.name }}" class="w-12 h-12 rounded-full object-cover border-2 border-blue-400">
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ tracking.motorizado.name }}</p>
+                                <a href="tel:{{ tracking.motorizado.phone }}" class="text-blue-600 hover:underline text-sm"><i class="fas fa-phone mr-1"></i> Llamar</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if tracking.motorizado %}
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-400">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Tu Motorizado</h2>
+                <div class="flex items-center space-x-4">
+                    <img src="{{ url_for('static', filename='img/' + tracking.motorizado.photo) }}" alt="{{ tracking.motorizado.name }}" class="w-20 h-20 rounded-full object-cover border-4 border-blue-200">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">{{ tracking.motorizado.name }}</h3>
+                        <p class="text-gray-600 mb-2">Está en camino con tu pedido.</p>
+                        <a href="tel:{{ tracking.motorizado.phone }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                            <i class="fas fa-phone mr-2"></i> Llamar a Juan
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="lg:sticky lg:top-[96px] lg:h-[calc(100vh-120px)] self-start bg-white p-6 rounded-lg shadow-lg overflow-hidden animate-fade-in-up delay-500">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Ubicación en Tiempo Real</h2>
+            <div class="relative w-full h-80 rounded-lg overflow-hidden">
+                <iframe
+                    width="100%"
+                    height="100%"
+                    frameborder="0"
+                    style="border:0"
+                    src="{{ tracking.map_link }}" {# Usar Google Maps Embed API con tu clave #}
+                    allowfullscreen>
+                </iframe>
+                <div class="absolute inset-0 flex items-center justify-center bg-black/20 text-white text-center text-lg font-bold">
+                    {# Este texto es solo si el mapa no carga o si es un placeholder #}
+                    Cargando mapa...
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-4 text-center">La ubicación del motorizado se actualiza en tiempo real.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

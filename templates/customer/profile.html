@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Perfil - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Mi Perfil</h1>
+
+    <div x-data="{ activeTab: 'personal_info' }" class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-200">
+        <div class="flex border-b border-gray-200 mb-6 flex-wrap">
+            <button @click="activeTab = 'personal_info'" :class="{ 'border-blue-600 text-blue-600': activeTab === 'personal_info', 'border-transparent text-gray-600 hover:text-gray-800': activeTab !== 'personal_info' }" class="px-4 py-2 text-lg font-semibold border-b-2 transition duration-300 focus:outline-none pb-3 mr-4">
+                Información Personal
+            </button>
+            <button @click="activeTab = 'addresses'" :class="{ 'border-blue-600 text-blue-600': activeTab === 'addresses', 'border-transparent text-gray-600 hover:text-gray-800': activeTab !== 'addresses' }" class="px-4 py-2 text-lg font-semibold border-b-2 transition duration-300 focus:outline-none pb-3 mr-4">
+                Mis Direcciones
+            </button>
+            <button @click="activeTab = 'payment_methods'" :class="{ 'border-blue-600 text-blue-600': activeTab === 'payment_methods', 'border-transparent text-gray-600 hover:text-gray-800': activeTab !== 'payment_methods' }" class="px-4 py-2 text-lg font-semibold border-b-2 transition duration-300 focus:outline-none pb-3 mr-4">
+                Métodos de Pago
+            </button>
+            <button @click="activeTab = 'password'" :class="{ 'border-blue-600 text-blue-600': activeTab === 'password', 'border-transparent text-gray-600 hover:text-gray-800': activeTab !== 'password' }" class="px-4 py-2 text-lg font-semibold border-b-2 transition duration-300 focus:outline-none pb-3">
+                Cambiar Contraseña
+            </button>
+        </div>
+
+        <div x-show="activeTab === 'personal_info'">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Detalles Personales</h3>
+            <form action="{{ url_for('customer.profile') }}" method="POST">
+                {{ form.csrf_token }} {# Si usas Flask-WTF #}
+                <div class="mb-5">
+                    <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">Nombre Completo</label>
+                    <input type="text" id="name" name="name" value="{{ user.name }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                </div>
+                <div class="mb-5">
+                    <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-600" readonly>
+                </div>
+                <div class="mb-6">
+                    <label for="phone" class="block text-gray-700 text-sm font-semibold mb-2">Número de Teléfono</label>
+                    <input type="tel" id="phone" name="phone" value="{{ user.phone }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">
+                    Guardar Cambios
+                </button>
+            </form>
+        </div>
+
+        <div x-show="activeTab === 'addresses'">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Mis Direcciones Guardadas</h3>
+            <div class="space-y-4 mb-6">
+                {% if user.addresses %}
+                    {% for address in user.addresses %}
+                    <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center bg-gray-50">
+                        <div>
+                            <p class="font-semibold text-gray-900">{{ address.label }}</p>
+                            <p class="text-gray-700 text-sm">{{ address.address }}</p>
+                            <p class="text-gray-500 text-xs">{{ address.details }}</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="text-blue-600 hover:text-blue-800 transition"><i class="fas fa-edit"></i></button>
+                            <button class="text-red-600 hover:text-red-800 transition"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-600">Aún no tienes direcciones guardadas.</p>
+                {% endif %}
+            </div>
+            <button class="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">
+                <i class="fas fa-plus mr-2"></i> Añadir Nueva Dirección
+            </button>
+        </div>
+
+        <div x-show="activeTab === 'payment_methods'">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Mis Métodos de Pago</h3>
+            <div class="space-y-4 mb-6">
+                {% if user.payment_methods %}
+                    {% for method in user.payment_methods %}
+                    <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center bg-gray-50">
+                        <div>
+                            <p class="font-semibold text-gray-900">{{ method.type }} <span class="text-gray-600">{{ method.last_digits }}</span></p>
+                            <p class="text-gray-500 text-xs">Expira: {{ method.expires }}</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="text-red-600 hover:text-red-800 transition"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-600">Aún no tienes métodos de pago guardados.</p>
+                {% endif %}
+            </div>
+            <button class="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">
+                <i class="fas fa-plus mr-2"></i> Añadir Nueva Tarjeta
+            </button>
+        </div>
+
+        <div x-show="activeTab === 'password'">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Cambiar Contraseña</h3>
+            <form action="{{ url_for('customer.profile') }}" method="POST"> {# Acción para cambiar contraseña #}
+                <div class="mb-5">
+                    <label for="current_password" class="block text-gray-700 text-sm font-semibold mb-2">Contraseña Actual</label>
+                    <input type="password" id="current_password" name="current_password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                </div>
+                <div class="mb-5">
+                    <label for="new_password" class="block text-gray-700 text-sm font-semibold mb-2">Nueva Contraseña</label>
+                    <input type="password" id="new_password" name="new_password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                </div>
+                <div class="mb-6">
+                    <label for="confirm_new_password" class="block text-gray-700 text-sm font-semibold mb-2">Confirmar Nueva Contraseña</label>
+                    <input type="password" id="confirm_new_password" name="confirm_new_password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">
+                    Actualizar Contraseña
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

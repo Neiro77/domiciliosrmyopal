@@ -1,0 +1,98 @@
+/* rm_domicilios_yopal/static/css/input.css */
+
+/* Estas son las directivas esenciales de Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Regla para x-cloak de Alpine.js */
+[x-cloak] {
+    display: none !important;
+}
+/*
+Aquí es donde puedes añadir tus propios estilos CSS personalizados
+si necesitas algo que Tailwind no proporciona directamente con sus utilidades,
+o si quieres sobrescribir algunos estilos base.
+*/
+/* Ejemplo: Para un estilo global básico del body */
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+    background-color: #f4f4f4;
+}
+
+/* Estilos para el contenedor principal de la aplicación, haciéndolo responsive */
+.container-rm {
+    @apply mx-auto px-4; /* Centra el contenido y añade padding horizontal */
+    max-width: 1200px; /* Límite de ancho para pantallas grandes */
+}
+
+/* Estilos básicos para el encabezado/navegación si no usas muchas clases directas en HTML */
+.header-rm {
+    @apply bg-white shadow-md py-4;
+}
+.nav-link-rm {
+    @apply text-gray-700 hover:text-blue-600 font-medium;
+}
+
+/* Para que las imágenes se adapten */
+img {
+    @apply max-w-full h-auto;
+}
+
+/* Estilos para formularios */
+.input-field-rm {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500;
+}
+
+/* Estilos para botones */
+.btn-primary-rm {
+    @apply bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Estilos para mensajes flash */
+.flash-success {
+    @apply bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4;
+}
+.flash-info {
+    @apply bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4;
+}
+.flash-warning {
+    @apply bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-4;
+}
+.flash-danger {
+    @apply bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4;
+}
+
+/* Estilos para que el footer se quede abajo (si tu diseño lo requiere) */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+#app-container { /* Un div envolvente en tu base.html */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main {
+    flex: 1; /* Permite que el contenido principal crezca y empuje el footer hacia abajo */
+}
+footer {
+    @apply bg-gray-800 text-white py-4 mt-8; /* Añade un poco de margin-top */
+}
+
+/* Para hacer la navegación responsive si usas un enfoque de menú hamburguesa */
+/* Estas clases son ejemplos, tendrías que aplicarlas en tu HTML con JS para toggle */
+@media (max-width: 768px) {
+    .mobile-menu-hidden {
+        display: none;
+    }
+}
+
+.animate-fade-in-up.delay-200 {
+    animation-delay: 0.2s;
+}
+.animate-fade-in-up.delay-400 {
+    animation-delay: 0.4s;
+}
+/* etc. para otros delays si los usas */

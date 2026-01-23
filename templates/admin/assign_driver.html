@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Asignar Conductor{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Asignar Conductor al Pedido #{{ order.id }}</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Detalles del Pedido</h5>
+                    <ul class="list-group list-group-flush mb-4">
+						<li class="list-group-item"><b>Deuda cliente:</b> {{ order.user.customer_profile.deuda_cancelacion }} </li>
+                        <li class="list-group-item"><b>Cliente:</b> {{ order.user.customer_profile.first_name }} {{ order.user.customer_profile.last_name }}</li>
+						<li class="list-group-item"><b>Negocio:</b> {{ order.business.name if order.business else 'N/A (Pedido de Paquete/Mandado)' }}</li>
+						<li class="list-group-item"><b>Recoger en:</b> {{ order.pickup_address or 'N/A' }}</li>
+                        <li class="list-group-item"><b>Dirección de Entrega:</b> {{ order.delivery_address }}</li>
+                        <li class="list-group-item"><b>Monto Total:</b> ${{ "%.2f"|format(order.total_amount) }}</li>
+                    </ul>
+
+
+					<h5 class="card-title mt-4">Detalles del Contenido</h5>
+                    <ul class="list-group list-group-flush mb-4">
+                        {% for item in order.items %}
+                            {# CASO 1: Es un producto de comida #}
+                            {% if item.tipo_item == 'producto_comida' and item.product %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        {{ item.quantity }} x {{ item.product.name }}
+                                    </span>
+                                    <span class="badge bg-primary rounded-pill">${{ "%.2f"|format(item.price_at_order * item.quantity) }}</span>
+                                </li>
+
+                            {# --- >>> NUEVO BLOQUE PARA PAQUETES <<< --- #}
+                            {# CASO 2: Es un envío de paquete #}
+                            {% elif item.tipo_item == 'paquete_envio' and item.paquete_envio %}
+                                <li class="list-group-item">
+                                    <p class="mb-1"><strong>Tipo de Paquete:</strong> {{ item.paquete_envio.tipo_paquete | capitalize }}</p>
+                                    <p class="mb-1"><strong>Descripción:</strong> {{ item.paquete_envio.descripcion or 'No especificada' }}</p>
+                                    <p class="mb-1"><strong>Peso:</strong> {{ item.paquete_envio.peso_kg or 'N/A' }} kg</p>
+                                    <p class="mb-1"><strong>Dimensiones:</strong> {{ item.paquete_envio.dimensiones_cm or 'N/A' }}</p>
+                                    <p class="mb-1"><strong>Valor Declarado:</strong> ${{ "%.2f"|format(item.paquete_envio.valor_declarado or 0) }}</p>
+                                    <p class="mb-0"><strong>Instrucciones:</strong> {{ item.paquete_envio.instrucciones_especiales or 'Ninguna' }}</p>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="list-group-item">No se encontraron ítems para este pedido.</li>
+                        {% endfor %}
+                    </ul>
+
+					<h5 class="card-title mt-4">Datos de la Asignación</h5>
+                    <form method="POST" action="{{ url_for('admin.assign_driver', order_id=order.id) }}">
+                        {{ form.hidden_tag() }}
+						<div class="mb-3">
+							<label for="costo_domicilio" class="form-label">Costo del Domicilio (COP)</label>
+							<input type="number" class="form-control" id="costo_domicilio" name="costo_domicilio" 
+								   value="{{ order.costo_domicilio or '' }}" 
+								   min="0" step="100" placeholder="Ej: 5000" required>
+						</div>
+                        <div class="mb-3">
+                            <label for="driver_id" class="form-label">Conductores Disponibles (con saldo)</label>
+                            {% if drivers %}
+                                <select class="form-select" id="driver_id" name="driver_id" required>
+                                    <option value="" selected disabled>-- Elige un conductor --</option>
+                                    {% for driver in drivers %}
+                                        <option value="{{ driver.id }}">
+                                            {{ driver.first_name }} {{ driver.last_name }} (Saldo: ${{ "%.2f"|format(driver.saldo_cuenta) }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <div class="alert alert-warning" role="alert">
+                                    No hay conductores disponibles o con saldo suficiente en este momento.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if drivers %}
+                            <button type="submit" class="btn btn-success w-100">Asignar Conductor y Guardar Costo</button>
+                        {% endif %}
+                        <a href="{{ url_for('admin.order_management') }}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

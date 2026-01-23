@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Recargar Saldo{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Recargar Saldo de la Cuenta</h4>
+                </div>
+                <div class="card-body">
+                    <p>Elige un monto para recargar. El mínimo es de 10,000 pesos.</p>
+                    
+                    <form method="POST" action="{{ url_for('driver.recharge_balance') }}">
+                        {{ form.hidden_tag() }} <div class="mb-3">
+                            <label for="amount" class="form-label">Monto a Recargar (COP)</label>
+                            <input type="number" class="form-control" id="amount" name="amount" 
+                                   min="10000" step="1000" placeholder="Ej: 20000" required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Continuar al Pago</button>
+                            <a href="{{ url_for('driver.my_orders') }}" class="btn btn-secondary mt-2">Cancelar</a>
+                        </div>
+                    </form>
+                    
+                    <div class="alert alert-info mt-4" role="alert">
+                        <strong>Nota:</strong> Esta es una simulación. En un sistema real, este formulario te redirigiría a una pasarela de pagos (como PayU, Wompi, etc.).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

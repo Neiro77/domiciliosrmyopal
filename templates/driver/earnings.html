@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Ganancias - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Mis Ganancias</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-blue-600 text-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-200">
+            <h2 class="text-2xl font-bold mb-3">Ganancias de esta Semana</h2>
+            <p class="text-5xl font-extrabold mb-4">${{ '{:,.0f}'.format(total_earnings_week) }}</p>
+            <p class="text-blue-100 text-lg">Entregas completadas: <span class="font-bold">{{ total_deliveries_week }}</span></p>
+            <p class="text-blue-100 text-sm mt-2">Última actualización: {{ moment().format('D MMMM YYYY, HH:mm') }}</p>
+            <button class="mt-6 w-full bg-white text-blue-600 py-3 rounded-lg font-semibold hover:bg-gray-100 transition shadow-md">
+                <i class="fas fa-chart-line mr-2"></i> Ver Reporte Detallado
+            </button>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-300">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Estadísticas Clave</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-blue-50 p-4 rounded-lg flex items-center">
+                    <i class="fas fa-motorcycle text-blue-600 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-gray-600 text-sm">Entregas Totales</p>
+                        <p class="text-xl font-bold text-gray-800">580</p> {# Simular datos reales #}
+                    </div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg flex items-center">
+                    <i class="fas fa-star text-green-600 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-gray-600 text-sm">Calificación Promedio</p>
+                        <p class="text-xl font-bold text-gray-800">4.9</p> {# Simular #}
+                    </div>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg flex items-center">
+                    <i class="fas fa-hourglass-half text-yellow-600 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-gray-600 text-sm">Tiempo Promedio</p>
+                        <p class="text-xl font-bold text-gray-800">22 min</p> {# Simular #}
+                    </div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg flex items-center">
+                    <i class="fas fa-hand-holding-usd text-purple-600 text-2xl mr-3"></i>
+                    <div>
+                        <p class="text-gray-600 text-sm">Pagos en Efectivo</p>
+                        <p class="text-xl font-bold text-gray-800">$1,200,000</p> {# Simular #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg mt-8 animate-fade-in-up delay-400">
+        <h2 class="text-2xl font-bold text-gray-800 mb-5">Detalle de Entregas Recientes</h2>
+        {% if recent_deliveries %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Pedido</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comercio</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ganancia</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for delivery in recent_deliveries %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 hover:underline"><a href="{{ url_for('driver.order_details', order_id=delivery.id) }}">#{{ delivery.id }}</a></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ delivery.service_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ delivery.date }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">${{ '{:,.0f}'.format(delivery.earning) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="bg-green-100 text-green-800 px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                    {{ delivery.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-600 py-6 text-center">No hay registros de entregas recientes para mostrar.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

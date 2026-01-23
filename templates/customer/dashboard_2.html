@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Cliente{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center text-gray-650 mb-6 animate-fade-in-up">¡Bienvenido, {{ customer_profile.first_name }}!</h1>
+	<p class="text-lg text-gray-600 mb-10">Explora los negocios disponibles y haz tu pedido.</p>
+	
+	<div class="flex justify-center">
+        <a href="{{ url_for('customer.list_businesses') }}" 
+           class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg 
+                  transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+            <i class="fas fa-store mr-2"></i> Ver Negocios
+        </a>
+    </div>
+	
+	
+    <div x-data="{ open: false }" class="relative bg-white p-6 rounded-lg shadow-lg mb-8 animate-fade-in-up delay-200">
+        <h2 class="text-xl font-semibold text-gray-800 mb-3">¿Qué servicio necesitas hoy?</h2>
+        <div class="relative flex items-center">
+            <input type="text" placeholder="Tu ubicación actual: Calle 10 #20-30" class="w-full px-5 py-3 pl-12 border border-gray-300 rounded-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" readonly @click="open = !open">
+            <i class="fas fa-map-marker-alt absolute left-4 text-gray-400"></i>
+            <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white rounded-full px-5 py-2 hover:bg-blue-700 transition">Cambiar</button>
+        </div>
+        <div x-show="open" @click.outside="open = false" class="absolute top-full left-0 right-0 mt-3 bg-white rounded-lg shadow-xl p-6 z-10 border border-gray-200">
+            <h4 class="font-semibold text-gray-700 mb-3 text-xl">Selecciona o añade una dirección</h4>
+            <input type="text" placeholder="Ej: Calle 20 #15-30, Yopal..." class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-gray-800">
+            <button class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition text-lg shadow-md">Confirmar Ubicación</button>
+        </div>
+    </div>
+
+    <div class="mb-10 animate-fade-in-up delay-300">
+        <h2 class="text-2xl font-bold text-gray-800 mb-5">Tus Pedidos Recientes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if services %}
+                {% for service in services[:3] %} {# Muestra solo los primeros 3 como "recientes" #}
+                <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                    <img src="{{ url_for('static', filename='img/' + service.image) }}" alt="{{ service.name }}" class="w-full h-40 object-cover">
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ service.name }}</h3>
+                        <p class="text-gray-600 text-sm mb-3">{{ service.type }} &bull; {{ service.cuisine }}</p>
+                        <div class="flex items-center text-yellow-500 text-sm mb-3">
+                            <i class="fas fa-star mr-1"></i> {{ service.rating }} ({{ service.reviews }} reseñas)
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-700 mb-4">
+                            <span><i class="fas fa-truck mr-1"></i> {{ service.delivery_time }}</span>
+                            <span><i class="fas fa-dollar-sign mr-1"></i> Envío: ${{ '{:,.0f}'.format(service.delivery_fee) }}</span>
+                        </div>
+                        <a href="{{ url_for('customer.service_detail', service_id=service.id) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-semibold">
+                            Ver o Pedir de Nuevo
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-600 col-span-full">No has realizado pedidos recientes. ¡Empieza a explorar!</p>
+            {% endif %}
+        </div>
+        <div class="text-center mt-8">
+            <a href="{{ url_for('customer.order_history') }}" class="inline-block text-blue-600 hover:underline font-semibold">Ver todo mi historial de pedidos <i class="fas fa-arrow-right ml-2"></i></a>
+        </div>
+    </div>
+
+    <div class="mb-10 animate-fade-in-up delay-400">
+        <h2 class="text-2xl font-bold text-gray-800 mb-5">Explora por Tipo de Servicio</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <a href="{{ url_for('customer.services_listing', type='comida') }}" class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-pizza-slice text-red-600 text-2xl"></i>
+                </div>
+                <span class="text-gray-800 font-semibold text-sm">Comida</span>
+            </a>
+            <a href="{{ url_for('customer.services_listing', type='farmacia') }}" class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-pills text-green-600 text-2xl"></i>
+                </div>
+                <span class="text-gray-800 font-semibold text-sm">Farmacia</span>
+            </a>
+            <a href="{{ url_for('customer.services_listing', type='mercado') }}" class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-shopping-basket text-yellow-600 text-2xl"></i>
+                </div>
+                <span class="text-gray-800 font-semibold text-sm">Mercado</span>
+            </a>
+            <a href="{{ url_for('customer.services_listing', type='lavanderia') }}" class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-tshirt text-blue-600 text-2xl"></i>
+                </div>
+                <span class="text-gray-800 font-semibold text-sm">Lavandería</span>
+            </a>
+            <a href="{{ url_for('customer.services_listing', type='mascotas') }}" class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-paw text-purple-600 text-2xl"></i>
+                </div>
+                <span class="text-gray-800 font-semibold text-sm">Mascotas</span>
+            </a>
+            <a href="{{ url_for('customer.services_listing') }}" class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-ellipsis-h text-gray-600 text-2xl"></i>
+                </div>
+                <span class="text-gray-800 font-semibold text-sm">Más...</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="animate-fade-in-up delay-500">
+        <h2 class="text-2xl font-bold text-gray-800 mb-5">Ofertas y Promociones Exclusivas</h2>
+        <div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 md:p-8 rounded-lg shadow-lg flex flex-col md:flex-row items-center justify-between">
+            <div class="mb-4 md:mb-0 md:mr-6 text-center md:text-left">
+                <h3 class="text-2xl font-bold mb-2">¡20% de descuento en tu primera compra!</h3>
+                <p class="text-blue-100">Usa el código: RMBIENVENIDO</p>
+            </div>
+            <button class="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition shadow-md">
+                Aplicar Oferta
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

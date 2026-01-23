@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>¡Nuevo Domicilio Asignado! - RM Domicilios</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background-color: #1C64F2; padding: 20px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { padding: 30px; color: #333333; line-height: 1.6; }
+        .content h2 { color: #1C64F2; font-size: 24px; margin-top: 0; }
+        .delivery-details { background-color: #f9f9f9; border: 1px solid #e0e0e0; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .delivery-details p { margin: 5px 0; }
+        .button { display: inline-block; background-color: #10B981; color: #ffffff; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 25px; }
+        .footer { background-color: #eee; padding: 20px; text-align: center; color: #777777; font-size: 12px; border-top: 1px solid #e0e0e0; }
+        .highlight { color: #1C64F2; font-weight: bold; }
+        .warning { color: #EF4444; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>RM Domicilios</h1>
+            <p>¡Nuevo Domicilio Asignado!</p>
+        </div>
+        <div class="content">
+            <h2>Hola, {{ driver_name }}</h2>
+            <p>¡Se te ha asignado un nuevo domicilio! Dirígete a recogerlo y entrega con éxito.</p>
+
+            <div class="delivery-details">
+                <p><strong>ID del Pedido:</strong> <span class="highlight">#{{ order.id }}</span></p>
+                <p><strong>Comercio:</strong> {{ order.service_name }}</p>
+                <p><strong>Dirección de Recogida:</strong> {{ order.pickup_address }}</p>
+                <p><strong>Dirección de Entrega:</strong> {{ order.delivery_address }}</p>
+                <p><strong>Ganancia Estimada:</strong> <span class="highlight">${{ '{:,.0f}'.format(order.earning) }}</span></p>
+                <p><strong>Método de Pago (cliente):</strong> <span class="{{ 'warning' if order.payment_method == 'Efectivo' else '' }}">{{ order.payment_method }}</span></p>
+            </div>
+
+            <p>Usa tu aplicación para ver los detalles completos del pedido y la ruta.</p>
+            <a href="{{ dashboard_url }}" class="button">Ir a mi Dashboard de Domicilios</a>
+        </div>
+        <div class="footer">
+            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+            <p>&copy; {{ current_year }} RM Domicilios. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+
+
+-- Asegúrate de estar conectado a la base de datos correcta: eqdllruj_rm_domicilios_casanare_db
+
+-- 1. Reasignar la propiedad de todos los objetos existentes (tablas, secuencias, funciones, tipos)
+-- creados por el usuario actual (eqdllruj_admin)
+-- al usuario de la aplicación (eqdllruj_postgres_admin).
+-- Esto es CRÍTICO y debería solucionar los problemas de permisos de propiedad.
+REASSIGN OWNED BY CURRENT_USER TO eqdllruj_postgres_admin;
+
+-- 2. Revocar todos los permisos del rol PUBLIC (si los hay) para mayor seguridad y control granular
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
+-- La siguiente línea causaba el error de sintaxis. La eliminamos ya que los permisos sobre tipos
+-- se manejan con GRANT USAGE ON TYPE más abajo.
+-- REVOKE ALL ON ALL TYPES IN SCHEMA public FROM PUBLIC;
+
+-- 3. Otorgar permisos completos al usuario de tu aplicación (eqdllruj_postgres_admin)
+-- Esto garantiza que eqdllruj_postgres_admin pueda leer, escribir, etc., en todos los objetos existentes.
+
+-- Permisos sobre el esquema (necesario para ver objetos dentro y crear nuevos si es necesario)
+GRANT USAGE ON SCHEMA public TO eqdllruj_postgres_admin;
+GRANT CREATE ON SCHEMA public TO eqdllruj_postgres_admin;
+
+-- Permisos sobre TODAS las tablas existentes
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO eqdllruj_postgres_admin;
+
+-- Permisos sobre TODAS las secuencias existentes (para IDs auto-incrementales)
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO eqdllruj_postgres_admin;
+
+-- Permisos sobre TODAS las funciones existentes (si tu app las usa o tiene triggers)
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO eqdllruj_postgres_admin;
+
+-- Permisos sobre tipos (como ENUMs). Esta sintaxis es correcta y explícita.
+GRANT USAGE ON TYPE transactiontype TO eqdllruj_postgres_admin;
+-- Basado en tu `models.py` (lo busqué de nuevo en los archivos anteriores):
+-- orderstatus y paymentstatus también son ENUMs. Asegurémonos de darles permiso explícito.
+GRANT USAGE ON TYPE orderstatus TO eqdllruj_postgres_admin;
+GRANT USAGE ON TYPE paymentstatus TO eqdllruj_postgres_admin;
+
+
+-- 4. Configurar privilegios por defecto para OBJETOS FUTUROS
+-- Esto es VITAL para que cualquier tabla, secuencia, función o tipo que se cree *después* de este momento
+-- (por ejemplo, por futuras migraciones de Alembic o por tu propia aplicación)
+-- automáticamente tenga los permisos correctos para eqdllruj_postgres_admin.
+
+ALTER DEFAULT PRIVILEGES FOR ROLE eqdllruj_postgres_admin IN SCHEMA public
+GRANT ALL PRIVILEGES ON TABLES TO eqdllruj_postgres_admin;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE eqdllruj_postgres_admin IN SCHEMA public
+GRANT ALL PRIVILEGES ON SEQUENCES TO eqdllruj_postgres_admin;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE eqdllruj_postgres_admin IN SCHEMA public
+GRANT ALL PRIVILEGES ON FUNCTIONS TO eqdllruj_postgres_admin;
+
+-- También eliminamos la línea de DEFAULT PRIVILEGES ON TYPES, ya que es probable que cause el mismo error.
+-- Los permisos sobre tipos futuros suelen ser implícitos si el usuario tiene CREATE en el esquema
+-- y los tipos se crean por el mismo usuario.
+-- ALTER DEFAULT PRIVILEGES FOR ROLE eqdllruj_postgres_admin IN SCHEMA public
+-- GRANT ALL PRIVILEGES ON TYPES TO eqdllruj_postgres_admin;
+

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Explorar Servicios - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Explora Servicios en Yopal</h1>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8 animate-fade-in-up delay-200">
+        <form action="{{ url_for('customer.services_listing') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-center">
+            <div class="relative flex-grow w-full md:w-auto">
+                <input type="text" name="query" value="{{ query }}" placeholder="Buscar por nombre, tipo o categoría..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <select name="type" class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Todos los Tipos</option>
+                <option value="comida" {% if service_type_filter == 'comida' %}selected{% endif %}>Comida</option>
+                <option value="farmacia" {% if service_type_filter == 'farmacia' %}selected{% endif %}>Farmacia</option>
+                <option value="mercado" {% if service_type_filter == 'mercado' %}selected{% endif %}>Mercado</option>
+                <option value="lavanderia" {% if service_type_filter == 'lavanderia' %}selected{% endif %}>Lavandería</option>
+                <option value="mascotas" {% if service_type_filter == 'mascotas' %}selected{% endif %}>Mascotas</option>
+                {# Añade más tipos según tu negocio #}
+            </select>
+            <button type="submit" class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-md">
+                Filtrar
+            </button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in-up delay-300">
+        {% if services %}
+            {% for service in services %}
+            <a href="{{ url_for('customer.service_detail', service_id=service.id) }}" class="block bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 overflow-hidden">
+                <img src="{{ url_for('static', filename='img/' + service.image) }}" alt="{{ service.name }}" class="w-full h-48 object-cover">
+                <div class="p-5">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2 truncate">{{ service.name }}</h3>
+                    <p class="text-gray-600 text-sm mb-3">{{ service.type }} &bull; {{ service.cuisine }}</p>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center text-yellow-500 text-sm">
+                            <i class="fas fa-star mr-1"></i> {{ service.rating }} ({{ service.reviews }})
+                        </div>
+                        {% if service.open %}
+                            <span class="text-green-600 text-sm font-semibold flex items-center"><i class="fas fa-circle text-xs mr-1"></i> Abierto</span>
+                        {% else %}
+                            <span class="text-red-600 text-sm font-semibold flex items-center"><i class="fas fa-circle text-xs mr-1"></i> Cerrado</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex justify-between items-center text-sm text-gray-700">
+                        <span><i class="fas fa-clock mr-1"></i> {{ service.delivery_time }}</span>
+                        <span><i class="fas fa-truck mr-1"></i> ${{ '{:,.0f}'.format(service.delivery_fee) }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="col-span-full text-center py-10">
+                <i class="fas fa-box-open text-gray-400 text-5xl mb-4"></i>
+                <p class="text-gray-600 text-lg">No se encontraron servicios con los criterios seleccionados.</p>
+                <a href="{{ url_for('customer.services_listing') }}" class="text-blue-600 hover:underline mt-4 block">Ver todos los servicios</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

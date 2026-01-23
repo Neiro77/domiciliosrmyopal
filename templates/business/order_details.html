@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalles Pedido #{{ order.id }} - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <a href="{{ url_for('business.orders') }}" class="text-blue-600 hover:underline mb-4 inline-block animate-fade-in-up">
+        <i class="fas fa-arrow-left mr-2"></i> Volver a Pedidos
+    </a>
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up delay-100">Detalles del Pedido #{{ order.id }}</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-3 text-blue-600"></i> Información General
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                    <div>
+                        <p><span class="font-semibold">Cliente:</span> {{ order.customer_name }}</p>
+                        <p><span class="font-semibold">Valor Total:</span> <span class="font-bold text-green-600 text-xl">${{ '{:,.0f}'.format(order.total_amount) }}</span></p>
+                        <p><span class="font-semibold">Método de Pago:</span> {{ order.payment_method }}</p>
+                    </div>
+                    <div>
+                        <p><span class="font-semibold">Hora del Pedido:</span> {{ moment(order.order_time).format('MMM D, YYYY - HH:mm') }}</p>
+                        <p><span class="font-semibold">Estado Actual:</span> <span class="font-bold text-blue-600">{{ order.status }}</span></p>
+                        <p><span class="font-semibold">Notas del Cliente:</span> <span class="text-red-500 font-semibold">{{ order.customer_notes if order.customer_notes else 'Ninguna' }}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-300">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-shopping-basket mr-3 text-blue-600"></i> Ítems del Pedido
+                </h2>
+                <ul class="space-y-3">
+                    {% for item in order.items %}
+                    <li class="flex justify-between items-center border-b border-gray-100 pb-2 last:border-b-0 last:pb-0">
+                        <span class="text-gray-800 font-semibold">{{ item.quantity }}x {{ item.name }}</span>
+                        <span class="text-gray-700">${{ '{:,.0f}'.format(item.price) }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center text-lg font-bold text-gray-900">
+                    <span>Subtotal:</span>
+                    <span>${{ '{:,.0f}'.format(order.total_amount) }}</span> {# Asumiendo que total_amount es el subtotal aquí #}
+                </div>
+                {# Puedes añadir desglose de costos (envío, descuentos) si es necesario #}
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-400">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-map-marker-alt mr-3 text-blue-600"></i> Dirección de Entrega
+                </h2>
+                <p class="text-gray-700 text-lg font-semibold">{{ order.delivery_address }}</p>
+                <a href="tel:{{ order.customer_phone }}" class="text-blue-600 hover:underline mt-3 inline-block">
+                    <i class="fas fa-phone mr-2"></i> Contactar Cliente: {{ order.customer_name }} ({{ order.customer_phone }})
+                </a>
+                <p class="text-gray-500 text-sm mt-2">En un sistema real, aquí iría el número de teléfono del cliente.</p>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-500">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Acciones del Pedido</h2>
+                <form action="{{ url_for('business.update_order_status', order_id=order.id) }}" method="POST">
+                    <div class="mb-4">
+                        <label for="new_status" class="block text-gray-700 text-sm font-semibold mb-2">Cambiar Estado:</label>
+                        <select id="new_status" name="new_status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                            <option value="Nuevo Pedido" {% if order.status == 'Nuevo Pedido' %}selected{% endif %}>Nuevo Pedido</option>
+                            <option value="En Preparación" {% if order.status == 'En Preparación' %}selected{% endif %}>En Preparación</option>
+                            <option value="Listo para Recoger" {% if order.status == 'Listo para Recoger' %}selected{% endif %}>Listo para Recoger</option>
+                            <option value="Cancelado" {% if order.status == 'Cancelado' %}selected{% endif %}>Cancelar Pedido</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition shadow-md">
+                        Actualizar Estado
+                    </button>
+                </form>
+                {% if order.status == 'Nuevo Pedido' %}
+                <form action="{{ url_for('business.update_order_status', order_id=order.id) }}" method="POST" class="mt-4">
+                    <input type="hidden" name="new_status" value="En Preparación">
+                    <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-green-700 transition shadow-md">
+                        <i class="fas fa-check-circle mr-2"></i> Aceptar y Empezar a Preparar
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in-up delay-600">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Estado de la Entrega</h2>
+                {% if order.status == 'Listo para Recoger' %}
+                    <p class="text-gray-700 mb-4">El pedido está listo para que un motorizado lo recoja.</p>
+                    <button class="w-full bg-yellow-500 text-white py-3 rounded-lg font-semibold text-lg cursor-not-allowed opacity-75">
+                        <i class="fas fa-bell mr-2"></i> Notificar a Motorizados (Automático)
+                    </button>
+                {% else %}
+                    <p class="text-gray-700">La entrega se coordinará automáticamente cuando el pedido esté 'Listo para Recoger'.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

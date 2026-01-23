@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Carrito{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8" x-data="{ cart: Alpine.store('cart') }">
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-8 text-center">Tu Carrito de Compras</h1>
+
+    <template x-if="cart.items.length === 0">
+        <div class="text-center text-gray-600 text-lg py-12 border border-dashed border-gray-300 rounded-lg">
+            <i class="fas fa-shopping-cart text-6xl text-gray-400 mb-4"></i>
+            <p>Tu carrito está vacío. ¡Añade algunos productos!</p>
+            <a href="{{ url_for('customer.list_businesses') }}" class="text-blue-600 hover:underline mt-4 block">
+                <i class="fas fa-store mr-2"></i> Explorar Negocios
+            </a>
+        </div>
+    </template>
+
+    <template x-if="cart.items.length > 0">
+        <div class="bg-white rounded-lg shadow-xl p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Negocio: <span x-text="cart.businessName"></span></h2>
+
+            <div class="space-y-4 mb-6">
+                <template x-for="(item, index) in cart.items" :key="index" :key="item.productId">
+                    <div class="border-b pb-4">
+                        <template x-if="item.type === 'product'">
+                            <div class="flex justify-between">
+                                <span x-text="item.quantity + ' x ' + item.productName + ' --------------------------------------- '+ '$' + (item.productPrice * item.quantity).toFixed(2)"></span>
+                                <span class="text-2xl font-bold text-gray-800">
+								<div class="flex items-center space-x-3 ml-4">
+								<button @click="cart.updateQuantity(item.productId, item.quantity - 1)"
+										class="bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200 transition duration-200"
+										title="Disminuir cantidad">
+									<i class="fas fa-minus text-sm"></i>
+								</button>
+								<span class="font-bold text-gray-800" x-text="item.quantity"></span>
+								<button @click="cart.updateQuantity(item.productId, item.quantity + 1)"
+										class="bg-green-100 text-green-600 p-2 rounded-full hover:bg-green-200 transition duration-200"
+										title="Aumentar cantidad">
+									<i class="fas fa-plus text-sm"></i>
+								</button>
+								<button @click="cart.removeItem(item.productId)"
+										class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition duration-200"
+										title="Eliminar producto">
+									<i class="fas fa-trash-alt text-sm"></i>
+								</button>
+								</div>
+								</span>
+                            </div>
+							
+                        </template>
+                        <template x-if="item.type === 'package'">
+                            <div class="text-blue-800">
+                                <p class="font-semibold" x-text="item.tipo_paquete"></p>
+                                <p class="text-sm" x-text="'Recogida: ' + (item.direccion_recogida || 'N/D')"></p>
+                                <p class="text-sm" x-text="'Entrega: ' + (item.direccion_entrega || 'N/D')"></p>
+                                <p class="text-sm" x-text="'Peso: ' + (item.peso_kg ? item.peso_kg + ' kg' : 'N/D')"></p>
+                                <p class="text-sm" x-text="'Dimensiones: ' + (item.dimensiones_cm || 'N/D')"></p>
+                                <p class="text-sm" x-text="'Valor Declarado: $' + (item.valor_declarado || 0).toFixed(2)"></p>
+                                <p class="font-semibold mt-1" x-text="'Costo Envío: $' + item.precio_calculado.toFixed(2)"></p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <div class="flex justify-between items-center border-t pt-4">
+                <span class="text-2xl font-bold text-gray-800">Total:</span>
+                <span class="text-2xl font-bold text-blue-600" x-text="'$' + cart.cartTotal().toFixed(2)"></span>
+            </div>
+
+            <div class="mt-8 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                <button @click="cart.clearCart()"
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition duration-300">
+                    <i class="fas fa-trash-alt mr-2"></i> Vaciar Carrito
+                </button>
+
+                <button @click="proceedToCheckout()"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 text-center">
+                    <i class="fas fa-money-check-alt mr-2"></i> Pagar Pedido
+                </button>
+				
+				<div class="mt-8 text-center">
+					<a :href="'/customer/business/' + cart.businessId" 
+					   class="text-blue-600 hover:underline font-semibold">
+						<i class="fas fa-store mr-2"></i> Seguir comprando en este negocio
+					</a>
+				</div>
+            </div>
+        </div>
+    </template>
+</div>
+
+<script>
+    function proceedToCheckout() {
+        const cartItems = Alpine.store('cart').items;
+        const businessId = Alpine.store('cart').businessId;
+        const businessName = Alpine.store('cart').businessName;
+
+        if (cartItems.length === 0) {
+            alert('Tu carrito está vacío. Añade ítems antes de pagar.');
+            return;
+        }
+
+        fetch('/customer/update_session_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                cart_items: cartItems,
+                business_id: businessId,
+                business_name: businessName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '{{ url_for("customer.checkout") }}';
+            } else {
+                alert('Error al procesar el carrito: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión al procesar el carrito.');
+        });
+    }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('add_item_type') === 'paquete_envio') {
+            const paqueteId = parseInt(urlParams.get('add_item_id'));
+            const nombre = urlParams.get('add_item_name');
+            const precio = parseFloat(urlParams.get('add_item_price'));
+
+            Alpine.store('cart').items.push({
+                type: 'package',
+                paqueteId: paqueteId,
+                tipo_paquete: nombre,
+                precio_calculado: precio,
+                direccion_recogida: urlParams.get('pickup') || '',
+                direccion_entrega: urlParams.get('delivery') || '',
+				peso_kg: parseFloat(urlParams.get('peso') || 0),
+                dimensiones_cm: urlParams.get('dimensiones') || '',
+                valor_declarado: parseFloat(urlParams.get('valor') || 0),
+                quantity: 1
+            });
+
+            Alpine.store('cart').saveCart();
+            Alpine.store('cart').showNotification('Paquete añadido al carrito');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    });
+</script>
+
+{% endblock %}

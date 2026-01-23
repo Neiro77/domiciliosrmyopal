@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <h1>Mis Domicilios</h1>
+        <div class="d-flex align-items-center">
+            <span class="fs-5 me-3">Saldo: <b class="text-success">${{ "%.2f"|format(driver.saldo_cuenta) }}</b></span>
+            <a href="{{ url_for('driver.recharge_balance') }}" class="btn btn-primary">Recargar Saldo</a>
+        </div>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="card-title mb-0">Mi Estado</h5>
+                <p class="card-text">
+                    Actualmente estás: 
+                    {% if driver.is_available %}
+                        <span class="badge bg-success">Disponible</span>
+                    {% else %}
+                        <span class="badge bg-secondary">No Disponible</span>
+                    {% endif %}
+                </p>
+            </div>
+            <form action="{{ url_for('driver.toggle_availability') }}" method="POST">
+                {{ form.hidden_tag() }} <button type="submit" class="btn btn-outline-primary">Cambiar Estado</button>
+            </form>
+        </div>
+    </div>
+
+    <h2 class="mb-3">Pedidos Asignados</h2>
+    <div class="list-group">
+        {% if orders %}
+            {% for order in orders %}
+            <div class="list-group-item list-group-item-action flex-column align-items-start mb-3 shadow-sm border-left-primary">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Pedido #{{ order.id }} - {{ order.service.name }}</h5>
+                    <small>{{ order.order_date.strftime('%d %b %Y %I:%M %p') }}</small>
+                </div>
+                <p class="mb-1"><b>Cliente:</b> {{ order.user.customer_profile.first_name }}</p>
+                <p class="mb-1"><b>Dirección:</b> {{ order.delivery_address }}</p>
+                <p class="mb-1"><b>Estado Actual:</b> <span class="badge bg-info">{{ order.status }}</span></p>
+                <small><b>Total:</b> ${{ "%.2f"|format(order.total_amount) }}</small>
+                
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info text-center">
+                {% if driver.saldo_cuenta <= 0 %}
+                    No puedes ver pedidos porque no tienes saldo.
+                {% else %}
+                    No tienes pedidos asignados en este momento.
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Historial de Pedidos - RM Domicilios{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">Mi Historial de Pedidos</h1>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8 animate-fade-in-up delay-200">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Pedidos Recientes</h2>
+        {% if orders %}
+        <div class="space-y-6">
+            {% for order in orders %}
+            <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition duration-300">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">Pedido #{{ order.id }}</h3>
+                        <p class="text-gray-600 text-sm">{{ order.service_name }} &bull; {{ order.date }}</p>
+                    </div>
+                    <div class="mt-3 sm:mt-0">
+                        {% if order.status == 'Entregado' or order.status == 'Completado' %}
+                            <span class="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full"><i class="fas fa-check-circle mr-1"></i> {{ order.status }}</span>
+                        {% elif order.status == 'En Preparación' or order.status == 'En Camino' %}
+                            <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full animate-pulse-light"><i class="fas fa-spinner fa-spin mr-1"></i> {{ order.status }}</span>
+                        {% elif order.status == 'Cancelado' %}
+                            <span class="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full"><i class="fas fa-times-circle mr-1"></i> {{ order.status }}</span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-800 text-sm font-semibold px-3 py-1 rounded-full">{{ order.status }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center text-lg font-bold text-gray-900 mb-4">
+                    <span>Total:</span>
+                    <span>${{ '{:,.0f}'.format(order.total) }}</span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+                    <a href="{{ url_for('customer.order_tracking', order_id=order.id) }}" class="px-5 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition font-semibold">
+                        <i class="fas fa-eye mr-2"></i> Ver Detalles
+                    </a>
+                    {% if order.status == 'Entregado' or order.status == 'Completado' %}
+                        <button class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                            <i class="fas fa-redo-alt mr-2"></i> Pedir de Nuevo
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="text-center py-10">
+                <i class="fas fa-box-open text-gray-400 text-5xl mb-4"></i>
+                <p class="text-gray-600 text-lg">Aún no tienes pedidos en tu historial.</p>
+                <a href="{{ url_for('customer.dashboard') }}" class="text-blue-600 hover:underline mt-4 block">¡Haz tu primer pedido!</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
