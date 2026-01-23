@@ -5,7 +5,6 @@ Werkzeug
 Jinja2
 Flask
 flask_sqlalchemy
-psycopg2
 Werkzeug
 flask_mail
 requests
@@ -19,3 +18,4 @@ SQLAlchemy
 Flask-WTF
 WTForms
 gunicorn==21.2.0
+psycopg2-binary
