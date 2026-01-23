@@ -18,3 +18,4 @@ itsdangerous==2.0.1
 SQLAlchemy
 Flask-WTF
 WTForms
+gunicorn==21.2.0
