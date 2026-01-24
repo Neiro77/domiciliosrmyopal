@@ -31,9 +31,9 @@ class RegistrationForm(FlaskForm):
     license_plate = StringField('Placa del Vehículo', validators=[Optional(), Length(max=20)])
 
     # Campos específicos para Negocios (pueden ser opcionales en el registro inicial si se completan después)
-    business_name = StringField('Nombre del Negocio', validators=[Optional(), Length(min=2, max=120)])
+    business_name = StringField('Nombre del Negocio', validators=[Optional(), Length(max=120)])
     business_address = StringField('Dirección del Negocio', validators=[Optional(), Length(max=255)])
-    business_description = TextAreaField('Descripción del Negocio', validators=[Optional()])
+    business_description = TextAreaField('Descripción del Negocio', validators=[Optional(), Length(max=255)])
    
     submit = SubmitField('Registrarse')
 

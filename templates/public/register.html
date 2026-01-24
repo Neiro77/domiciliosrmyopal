@@ -106,14 +106,14 @@
                 <!-- ... (campos vehicle_type y license_plate) ... -->
 				<div class="mb-5">
                     <label for="{{ form.vehicle_type.id }}" class="block text-sm font-medium text-gray-700">{{ form.vehicle_type.label }}</label>
-					{{ form.vehicle_type(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Moto", required=true) }}
+					{{ form.vehicle_type(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Moto") }}
                     {% if form.vehicle_type.errors %}
                         <ul class="text-red-600 text-sm mt-1">{% for error in form.vehicle_type.errors %}<li>{{ error }}</li>{% endfor %}</ul>
                     {% endif %}
                 </div>
                 <div class="mb-6">
                     <label for="{{ form.license_plate.id }}" class="block text-sm font-medium text-gray-700">{{ form.license_plate.label }}</label>
-					{{ form.license_plate(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: RCB09J", required=true) }}
+					{{ form.license_plate(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: RCB09J") }}
                     {% if form.license_plate.errors %}
                         <ul class="text-red-600 text-sm mt-1">{% for error in form.license_plate.errors %}<li>{{ error }}</li>{% endfor %}</ul>
                     {% endif %}
@@ -126,14 +126,14 @@
                 <!-- ... (campos business_name, business_address, business_description) ... -->
 				<div class="mb-5">
                     <label for="{{ form.business_name.id }}" class="block text-sm font-medium text-gray-700">{{ form.business_name.label }}</label>
-					{{ form.business_name(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Droguería Salvador", required=true) }}
+					{{ form.business_name(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Droguería Salvador") }}
                     {% if form.business_name.errors %}
                         <ul class="text-red-600 text-sm mt-1">{% for error in form.business_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
                     {% endif %}
                 </div>
                 <div class="mb-5">
                     <label for="{{ form.business_address.id }}" class="block text-sm font-medium text-gray-700">{{ form.business_address.label }}</label>
-					{{ form.business_address(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Cra 10 10-10", required=true) }}
+					{{ form.business_address(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Cra 10 10-10") }}
                     {% if form.business_address.errors %}
                         <ul class="text-red-600 text-sm mt-1">{% for error in form.business_address.errors %}<li>{{ error }}</li>{% endfor %}</ul>
                     {% endif %}
