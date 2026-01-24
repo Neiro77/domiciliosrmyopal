@@ -117,6 +117,13 @@ def register():
         return redirect(url_for('public.index')) 
 
     form = RegistrationForm() 
+    
+    # Pre-cargar el rol si viene por la URL (ej: /register?role=driver)
+    if request.method == 'GET' and request.args.get('role'):
+        arg_role = request.args.get('role')
+        # Mapeo de roles de la URL a los roles de la base de datos
+        role_map = {'restaurant': 'business', 'motorizado': 'driver', 'driver': 'driver', 'business': 'business'}
+        form.role.data = role_map.get(arg_role, 'customer')
 
     if form.validate_on_submit():
         # La lógica de creación de usuarios para todos los roles se mantiene aquí
@@ -135,22 +142,22 @@ def register():
             db.session.commit()
 
             if user.role == 'customer':
-                customer_profile = Customer(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data)
-                db.session.add(customer_profile)
+                profile = Customer(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data)
+                #db.session.add(customer_profile)
                 flash('Tu cuenta de cliente ha sido creada. ¡Ya puedes iniciar sesión!', 'success')
                 return redirect(url_for('public.login'))
 
             elif user.role == 'driver':
-                driver_profile = Driver(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data, vehicle_type=form.vehicle_type.data, license_plate=form.license_plate.data)
-                db.session.add(driver_profile)
+                profile = Driver(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data, vehicle_type=form.vehicle_type.data, license_plate=form.license_plate.data)
+                #db.session.add(driver_profile)
                 flash('Tu cuenta de conductor ha sido creada y será revisada por un administrador.', 'info')
                 return redirect(url_for('public.login'))
 
             elif user.role == 'business':
                 business_slug = slugify(form.business_name.data)
                 # ... (lógica para asegurar slug único) ...
-                business_profile = Business(user_id=user.id, name=form.business_name.data, address=form.business_address.data, phone_number=form.phone_number.data, description=form.business_description.data, slug=business_slug)
-                db.session.add(business_profile)
+                profile = Business(user_id=user.id, name=form.business_name.data, address=form.business_address.data, phone_number=form.phone_number.data, description=form.business_description.data, slug=business_slug)
+                #db.session.add(business_profile)
                 flash('Tu cuenta de negocio ha sido creada y será revisada por un administrador.', 'info')
                 return redirect(url_for('public.login'))
             
