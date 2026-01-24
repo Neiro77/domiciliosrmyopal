@@ -38,7 +38,7 @@
             </div>
 		
 		{# Campo oculto del rol, para que Flask-WTF lo reciba #}
-            {{ form.role(class="hidden", x-ref="roleField") }}
+            {{ form.role(class="hidden", **{'x-ref': 'roleField', 'x-model': 'userRole'}) }}<!--  x-ref="roleField") }}-->
             {% if form.role.errors %}
                 <ul class="text-red-600 text-sm mt-1">
                     {% for error in form.role.errors %}

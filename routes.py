@@ -122,7 +122,7 @@ def register():
         # La lógica de creación de usuarios para todos los roles se mantiene aquí
         # (El código que ya tienes para crear customer, driver y business)
         try:
-            is_active_user = form.role.data == 'customer'
+            is_active_user = True if form.role.data == 'customer' else False
 
             user = User(
                 email=form.email.data,
@@ -131,6 +131,7 @@ def register():
             )
             user.set_password(form.password.data)
             db.session.add(user)
+            db.session.flush() # Para obtener el ID antes del commit
             db.session.commit()
 
             if user.role == 'customer':
@@ -153,7 +154,15 @@ def register():
                 flash('Tu cuenta de negocio ha sido creada y será revisada por un administrador.', 'info')
                 return redirect(url_for('public.login'))
             
+            db.session.add(profile)
             db.session.commit()
+            
+            if is_active:
+                flash('Registro exitoso. ¡Ya puedes iniciar sesión!', 'success')
+            else:
+                flash('Registro recibido. Tu cuenta será activada por un administrador pronto.', 'info')
+            
+            return redirect(url_for('public.login'))
 
         except Exception as e:
             db.session.rollback()
