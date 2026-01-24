@@ -28,6 +28,9 @@ class Config:
     # Intenta leer DATABASE_URL de Render; si no existe, usa la de Neon por defecto
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql://neondb_owner:npg_eaFydS6Tt2xv@ep-blue-hat-acgjjxt5-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True
+    }
     MAIL_SERVER = 'smtp.googlemail.com' 
     MAIL_PORT = 587
     MAIL_USE_TLS = True
