@@ -142,26 +142,26 @@ def register():
             db.session.commit()
 
             if user.role == 'customer':
-                profile = Customer(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data)
-                #db.session.add(customer_profile)
+                customer_profile = Customer(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data)
+                db.session.add(customer_profile)
                 flash('Tu cuenta de cliente ha sido creada. ¡Ya puedes iniciar sesión!', 'success')
                 return redirect(url_for('public.login'))
 
             elif user.role == 'driver':
-                profile = Driver(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data, vehicle_type=form.vehicle_type.data, license_plate=form.license_plate.data)
-                #db.session.add(driver_profile)
+                driver_profile = Driver(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data, vehicle_type=form.vehicle_type.data, license_plate=form.license_plate.data)
+                db.session.add(driver_profile)
                 flash('Tu cuenta de conductor ha sido creada y será revisada por un administrador.', 'info')
                 return redirect(url_for('public.login'))
 
             elif user.role == 'business':
                 business_slug = slugify(form.business_name.data)
                 # ... (lógica para asegurar slug único) ...
-                profile = Business(user_id=user.id, name=form.business_name.data, address=form.business_address.data, phone_number=form.phone_number.data, description=form.business_description.data, slug=business_slug)
-                #db.session.add(business_profile)
+                business_profile = Business(user_id=user.id, name=form.business_name.data, address=form.business_address.data, phone_number=form.phone_number.data, description=form.business_description.data, slug=business_slug)
+                db.session.add(business_profile)
                 flash('Tu cuenta de negocio ha sido creada y será revisada por un administrador.', 'info')
                 return redirect(url_for('public.login'))
             
-            db.session.add(profile)
+            #db.session.add(profile)
             db.session.commit()
             
             if is_active:
