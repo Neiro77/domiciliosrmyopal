@@ -63,10 +63,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="{{ form.first_name.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.first_name.label }}</label>
+					{{ form.first_name(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Juan Andrés") }}
                     {{ form.first_name(class="w-full px-4 py-3 border border-gray-300 rounded-lg ...") }}
                 </div>
                 <div>
                     <label for="{{ form.last_name.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.last_name.label }}</label>
+					{{ form.last_name(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800", placeholder="Ej: Gómez Páez") }}
                     {{ form.last_name(class="w-full px-4 py-3 border border-gray-300 rounded-lg ...") }}
                 </div>
 				<div class="mb-5">

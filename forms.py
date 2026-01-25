@@ -27,13 +27,13 @@ class RegistrationForm(FlaskForm):
     phone_number = StringField('Número de Teléfono', validators=[DataRequired(), Length(min=7, max=20)])
 
     # Campos específicos para Conductores (pueden ser opcionales en el registro inicial si se completan después)
-    vehicle_type = StringField('Tipo de Vehículo', validators=[Optional(), Length(max=50)])
-    license_plate = StringField('Placa del Vehículo', validators=[Optional(), Length(max=20)])
+    vehicle_type = StringField('Tipo de Vehículo', validators=[Optional()])
+    license_plate = StringField('Placa del Vehículo', validators=[Optional()])
 
     # Campos específicos para Negocios (pueden ser opcionales en el registro inicial si se completan después)
-    business_name = StringField('Nombre del Negocio', validators=[Optional(), Length(max=120)])
-    business_address = StringField('Dirección del Negocio', validators=[Optional(), Length(max=255)])
-    business_description = TextAreaField('Descripción del Negocio', validators=[Optional(), Length(max=255)])
+    business_name = StringField('Nombre del Negocio', validators=[Optional()])
+    business_address = StringField('Dirección del Negocio', validators=[Optional()])
+    business_description = TextAreaField('Descripción del Negocio', validators=[Optional()])
    
     submit = SubmitField('Registrarse')
 
