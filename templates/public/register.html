@@ -38,9 +38,7 @@
             </div>
 			
 			{# Busca la línea 41 y reemplaza el campo role por este código #}
-			<div class="hidden">
-				{{ form.role(class="hidden", **{'x-model': 'userRole', 'id': 'role-input'}) }}
-			</div>
+			{{ form.role(type="hidden", **{'x-model': 'userRole'}) }}
 	<!-- 	{# Campo oculto del rol, para que Flask-WTF lo reciba #}
             {{ form.role(class="hidden", **{'x-ref': 'roleField', 'x-model': 'userRole'}) }}<!--  x-ref="roleField") }}
             {% if form.role.errors %}
@@ -52,12 +50,15 @@
             {% endif %} -->
         </div>
 
-        <!-- Formulario Principal -->
+        <!-- Formulario Principal 
         <form action="{{ url_for('public.register') }}" method="POST">
-            {{ form.csrf_token }}
+            {{ form.csrf_token }} -->
+			
+		<form action="{{ url_for('public.register') }}" method="POST">
+			{{ form.hidden_tag() }}
             
-            <!-- Input oculto que se actualiza con Alpine.js -->
-            <input type="hidden" name="role" x-model="userRole">
+            <!-- Input oculto que se actualiza con Alpine.js 
+            <input type="hidden" name="role" x-model="userRole"> -->
             
             <!-- Campos Comunes -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

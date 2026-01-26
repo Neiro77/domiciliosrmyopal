@@ -134,6 +134,10 @@ def register():
         role_map = {'restaurant': 'business', 'motorizado': 'driver', 'driver': 'driver', 'business': 'business'}
         form.role.data = role_map.get(arg_role, 'customer')
 
+    if request.method == 'POST':
+    current_app.logger.info(f"REGISTER POST: {request.form}")
+    current_app.logger.info(f"REGISTER ERRORS: {form.errors}")
+
     if form.validate_on_submit():
         # La lógica de creación de usuarios para todos los roles se mantiene aquí
         # (El código que ya tienes para crear customer, driver y business)
