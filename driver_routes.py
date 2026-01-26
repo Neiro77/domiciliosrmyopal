@@ -101,12 +101,12 @@ def dashboard():
         return redirect(url_for('public.index'))
 
     # Obtener pedidos asignados (No entregados ni cancelados)
-    assigned_orders = db.session.execute(
-        db.select(Order).filter(
-            Order.driver_id == driver_profile.id,
-            Order.status.in_([OrderStatus.ACCEPTED.value, OrderStatus.OUT_FOR_DELIVERY.value])
-        ).order_by(Order.created_at.desc())
-    ).scalars().all()
+    # assigned_orders = db.session.execute(
+        # db.select(Order).filter(
+            # Order.driver_id == driver_profile.id,
+            # Order.status.in_([OrderStatus.ACCEPTED.value, OrderStatus.OUT_FOR_DELIVERY.value])
+        # ).order_by(Order.created_at.desc())
+    # ).scalars().all()
 
     return render_template(
         'driver/dashboard.html', 
