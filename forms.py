@@ -250,3 +250,6 @@ class PackageForm(FlaskForm):
 # Formulario vacío para CSRF en plantillas que no tienen un formulario de datos específico
 class EmptyForm(FlaskForm):
     submit = SubmitField('Submit') # Necesita al menos un campo para que csrf_token funcione correctamente
+
+class ToggleAvailabilityForm(FlaskForm):
+    submit = SubmitField('Cambiar estado')

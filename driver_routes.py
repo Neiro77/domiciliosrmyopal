@@ -5,7 +5,7 @@ from functools import wraps # <--- ¡IMPORTA ESTO!
 from extensions import db, mail # Importa db para futuras interacciones con la DB
 from sqlalchemy.orm import joinedload # Para cargar relaciones eficientemente
 from flask_mail import Message # Para construir mensajes de correo
-from forms import EmptyForm # <--- Importa el nuevo EmptyForm
+from forms import EmptyForm, ToggleAvailabilityForm # <--- Importa el nuevo EmptyForm
 from datetime import datetime # <--- ¡IMPORTA DATETIME AQUÍ!
 from sqlalchemy.sql import func # Para usar funciones de SQL como now()
 from decimal import Decimal # Importar Decimal para manejar valores monetarios
@@ -330,7 +330,7 @@ def update_delivery_status(order_id):
 @driver_required
 def my_orders():
     driver_profile = current_user.driver_profile
-    
+    form = ToggleAvailabilityForm()
     
     # --- >>> AÑADIDO: Crear instancia del formulario <<< ---
     # Se necesita para el token CSRF en la plantilla.
