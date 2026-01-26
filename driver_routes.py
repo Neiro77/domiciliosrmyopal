@@ -334,7 +334,7 @@ def my_orders():
     
     # --- >>> AÑADIDO: Crear instancia del formulario <<< ---
     # Se necesita para el token CSRF en la plantilla.
-    form = EmptyForm()
+    #form = EmptyForm()
 
     if form.validate_on_submit(): # Usar el formulario para validar en el POST
         driver_id = request.form.get('driver_id')
