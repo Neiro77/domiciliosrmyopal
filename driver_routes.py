@@ -36,62 +36,77 @@ def send_email(to_email, subject, template_name, **kwargs):
 # Decorador para requerir rol de conductor
 def driver_required(f):
     @wraps(f)
-    @login_required
     def decorated_function(*args, **kwargs):
-
-        # 🔒 Rol incorrecto → 403
+        if not current_user.is_authenticated:
+            return redirect(url_for('public.login', next=request.url))
+        
+        # DEBUG: Esto saldrá en tus logs de Render
+        print(f"DEBUG AUTH: Usuario {current_user.email} intentando acceder con rol: {current_user.role}")
+        
         if current_user.role != 'driver':
+            print(f"DEBUG AUTH: Acceso denegado. Rol '{current_user.role}' no es 'driver'")
             abort(403)
-
-        driver_profile = db.session.execute(
-            db.select(Driver).filter_by(user_id=current_user.id)
-        ).scalar_one_or_none()
-
-        # 🔒 Perfil no activo o inexistente → 403
-        if not driver_profile or not current_user.is_active:
-            abort(403)
-
         return f(*args, **kwargs)
-
     return decorated_function
 
 
+
 @driver_bp.route('/dashboard')
+@login_required
 @driver_required
 def dashboard():
     """
     Muestra el dashboard principal del conductor con sus pedidos activos.
     """
-    form = EmptyForm()
-    driver_profile = current_user.driver_profile
+    # form = EmptyForm()
+    # driver_profile = current_user.driver_profile
     
-    active_statuses = [
-        OrderStatus.ACCEPTED.value, 
-        OrderStatus.OUT_FOR_DELIVERY.value
-    ]
+    # active_statuses = [
+        # OrderStatus.ACCEPTED.value, 
+        # OrderStatus.OUT_FOR_DELIVERY.value
+    # ]
 
-    # --- CONSULTA OPTIMIZADA (CON LA CORRECCIÓN) ---
-    query = (
-        db.select(Order)
-        .filter(
-            Order.driver_id == driver_profile.id, 
-            Order.status.in_(active_statuses)
-        )
-        .options(
-            joinedload(Order.user).joinedload(User.customer_profile),
-            joinedload(Order.service),
-            joinedload(Order.items).joinedload(OrderItem.product),
-            joinedload(Order.items).joinedload(OrderItem.paquete_envio)
-        )
-        .order_by(Order.order_date.asc())
-    )
+    # # --- CONSULTA OPTIMIZADA (CON LA CORRECCIÓN) ---
+    # query = (
+        # db.select(Order)
+        # .filter(
+            # Order.driver_id == driver_profile.id, 
+            # Order.status.in_(active_statuses)
+        # )
+        # .options(
+            # joinedload(Order.user).joinedload(User.customer_profile),
+            # joinedload(Order.service),
+            # joinedload(Order.items).joinedload(OrderItem.product),
+            # joinedload(Order.items).joinedload(OrderItem.paquete_envio)
+        # )
+        # .order_by(Order.order_date.asc())
+    # )
     
-    # Primero ejecutamos la consulta
-    result = db.session.execute(query)
+    # # Primero ejecutamos la consulta
+    # result = db.session.execute(query)
     
-    # --- >>> CORRECCIÓN: Añadir .unique() para manejar la carga de múltiples items <<< ---
-    # Esto elimina los duplicados de 'Order' que genera el JOIN con 'OrderItem'
-    orders = result.unique().scalars().all()
+    # # --- >>> CORRECCIÓN: Añadir .unique() para manejar la carga de múltiples items <<< ---
+    # # Esto elimina los duplicados de 'Order' que genera el JOIN con 'OrderItem'
+    # orders = result.unique().scalars().all()
+
+    # Intentamos obtener el perfil del conductor
+    driver_profile = db.session.execute(
+        db.select(Driver).filter_by(user_id=current_user.id)
+    ).scalar_one_or_none()
+
+    if not driver_profile:
+        # Si el usuario tiene el rol pero no tiene perfil, lo creamos dinámicamente o informamos
+        print(f"DEBUG: El usuario {current_user.id} tiene rol driver pero no tiene perfil en la tabla Driver.")
+        flash("Tu perfil de conductor no está completo. Contacta al administrador.", "warning")
+        return redirect(url_for('public.index'))
+
+    # Obtener pedidos asignados (No entregados ni cancelados)
+    assigned_orders = db.session.execute(
+        db.select(Order).filter(
+            Order.driver_id == driver_profile.id,
+            Order.status.in_([OrderStatus.ACCEPTED.value, OrderStatus.OUT_FOR_DELIVERY.value])
+        ).order_by(Order.created_at.desc())
+    ).scalars().all()
 
     return render_template(
         'driver/dashboard.html', 
