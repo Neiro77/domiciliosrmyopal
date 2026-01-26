@@ -87,7 +87,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-50 p-4">
+                <!-- <div class="bg-gray-50 p-4">
                     <form action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}" method="POST" class="flex flex-col sm:flex-row items-center gap-4">
                         {{ form.hidden_tag() }}
                         <label for="new_status-{{ order.id }}" class="font-semibold text-gray-700">Actualizar estado:</label>
@@ -99,8 +99,24 @@
                             <option value="{{ OrderStatus.CANCELLED.value }}">Cancelar</option>
                         </select>
                         <button type="submit" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">Actualizar</button>
-                    </form>
-                </div>
+                    </form> -->
+					
+				<div class="mt-6 flex flex-col sm:flex-row items-center gap-4">
+					<form action="{{ url_for('driver.update_order_status', order_id=order.id) }}" method="POST" class="flex flex-col sm:flex-row items-center gap-4 w-full">
+						{{ form.hidden_tag() }} <!-- Ahora esto no fallará porque 'form' existe -->
+						<label for="new_status-{{ order.id }}" class="font-semibold text-gray-700">Actualizar estado:</label>
+						<select name="new_status" id="new_status-{{ order.id }}" class="flex-grow w-full sm:w-auto border px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+							{% if order.status == OrderStatus.ACCEPTED.value %}
+								<option value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">En Camino</option>
+							{% endif %}
+							<option value="{{ OrderStatus.DELIVERED.value }}">Entregado</option>
+							<option value="{{ OrderStatus.CANCELLED.value }}">Cancelar</option>
+						</select>
+						<button type="submit" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">Actualizar</button>
+					</form>
+				</div>
+				
+                <!-- </div> -->
             </div>
         {% endfor %}
         </div>

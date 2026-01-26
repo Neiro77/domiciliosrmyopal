@@ -114,6 +114,7 @@ def dashboard():
         #orders=orders, 
         #form=form,
         #OrderStatus=OrderStatus
+        form = EmptyForm()
     )
 
 
