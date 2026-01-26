@@ -336,22 +336,22 @@ def my_orders():
     # Se necesita para el token CSRF en la plantilla.
     #form = EmptyForm()
 
-    if form.validate_on_submit(): # Usar el formulario para validar en el POST
-        driver_id = request.form.get('driver_id')
-        if driver_id:
-            order.driver_id = int(driver_id)
-            order.status = OrderStatus.ACCEPTED.value # Buen momento para actualizar el estado
-            db.session.commit()
-            flash(f'Pedido #{order.id} asignado exitosamente.', 'success')
-            return redirect(url_for('admin.order_management')) # Redirigir a la lista de pedidos
-        else:
-            flash('Debes seleccionar un conductor.', 'warning')
+    # if form.validate_on_submit(): # Usar el formulario para validar en el POST
+        # driver_id = request.form.get('driver_id')
+        # if driver_id:
+            # order.driver_id = int(driver_id)
+            # order.status = OrderStatus.ACCEPTED.value # Buen momento para actualizar el estado
+            # db.session.commit()
+            # flash(f'Pedido #{order.id} asignado exitosamente.', 'success')
+            # return redirect(url_for('admin.order_management')) # Redirigir a la lista de pedidos
+        # else:
+            # flash('Debes seleccionar un conductor.', 'warning')
     
     
     # Restricción: Sin saldo, no hay pedidos
     if driver_profile.saldo_cuenta <= 0:
         flash('No tienes saldo suficiente en tu cuenta para aceptar pedidos. Por favor, recarga.', 'warning')
-        return render_template('driver/my_orders.html', orders=[], driver=driver_profile)
+        return render_template('driver/my_orders.html', orders=[], driver=driver_profile, form=form)
 
     # Alerta de saldo bajo
     if driver_profile.saldo_cuenta <= 500:
