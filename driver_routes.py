@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request, abort
 from flask_login import login_required, current_user
 from models import User, Driver, Order, Business, OrderStatus, Customer, Product, OrderItem, DetallesPaqueteEnvio, Service, TransactionType, create_transaction # <-- Importa lo nuevo # Importa modelos necesarios y OrderStatus Enum
 from functools import wraps # <--- ¡IMPORTA ESTO!
@@ -38,15 +38,21 @@ def driver_required(f):
     @wraps(f)
     @login_required
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'driver':
-            flash('Acceso denegado. Solo para conductores.', 'danger')
-            return redirect(url_for('public.login'))
-        
-        driver_profile = db.session.execute(db.select(Driver).filter_by(user_id=current_user.id)).scalar_one_or_none()
-        if not driver_profile or not current_user.is_active: # is_active controla si el admin lo ha activado
-            flash('Tu cuenta de conductor aún no ha sido activada por un administrador o tu perfil no está completo.', 'warning')
-            return redirect(url_for('public.login'))
+
+        # 🔒 Rol incorrecto → 403
+        if current_user.role != 'driver':
+            abort(403)
+
+        driver_profile = db.session.execute(
+            db.select(Driver).filter_by(user_id=current_user.id)
+        ).scalar_one_or_none()
+
+        # 🔒 Perfil no activo o inexistente → 403
+        if not driver_profile or not current_user.is_active:
+            abort(403)
+
         return f(*args, **kwargs)
+
     return decorated_function
 
 
