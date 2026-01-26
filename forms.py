@@ -14,7 +14,7 @@ class RegistrationForm(FlaskForm):
     email = StringField('Correo Electrónico', validators=[DataRequired(), Email(), Length(min=6, max=120)])
     password = PasswordField('Contraseña', validators=[DataRequired(), Length(min=8, message="La contraseña debe tener al menos 8 caracteres.")])
     confirm_password = PasswordField('Confirmar Contraseña', validators=[DataRequired(), EqualTo('password', message='Las contraseñas no coinciden.')])
-    role = HiddenField('Tipo de Cuenta', validators=[DataRequired()]) # <-- Cámbialo a HiddenField
+    role = StringField('Rol', validators=[DataRequired()]) #HiddenField('Tipo de Cuenta', validators=[DataRequired()]) # <-- Cámbialo a HiddenField
     # role = SelectField('Registrarse como', choices=[
         # ('customer', 'Cliente'),
         # ('driver', 'Conductor'),

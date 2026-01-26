@@ -36,11 +36,6 @@
                     <i class="fas fa-motorcycle mr-2"></i> Conductor
                 </button>
             </div>
-			
-			{# Busca la línea 41 y reemplaza el campo role por este código #}
-			<div class="hidden">
-				{{ form.role(**{'x-model': 'userRole'}) }}
-			</div>
 
         </div>
 
@@ -48,8 +43,8 @@
 		<form action="{{ url_for('public.register') }}" method="POST">
 			{{ form.hidden_tag() }}
             
-            <!-- Input oculto que se actualiza con Alpine.js 
-            <input type="hidden" name="role" x-model="userRole"> -->
+            <!-- Input oculto que se actualiza con Alpine.js -->
+			<input type="hidden" name="role" :value="userRole">
             
             <!-- Campos Comunes -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
