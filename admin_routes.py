@@ -191,9 +191,9 @@ def toggle_user_active(user_id):
                 
         # db.session.commit()
         # flash(f'Estado de activación para {user.email} cambiado a {user.is_active}.', 'success')
-    else:
-        flash('Usuario no encontrado.', 'danger')
-    return redirect(url_for('admin.user_management'))
+    # else:
+        # flash('Usuario no encontrado.', 'danger')
+    # return redirect(url_for('admin.user_management'))
 
 # --- Rutas de gestión de Negocios ---
 @admin_bp.route('/businesses')
