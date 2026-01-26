@@ -61,14 +61,14 @@ def login():
     # if current_user.is_authenticated:
         # return redirect(url_for('public.index'))        
     if current_user.is_authenticated:
-    if current_user.role == 'admin':
-        return redirect(url_for('admin.dashboard'))
-    elif current_user.role == 'customer':
-        return redirect(url_for('customer.dashboard'))
-    elif current_user.role == 'driver':
-        return redirect(url_for('driver.dashboard'))
-    elif current_user.role == 'business':
-        return redirect(url_for('business.dashboard'))    
+        if current_user.role == 'admin':
+            return redirect(url_for('admin.dashboard'))
+        elif current_user.role == 'customer':
+            return redirect(url_for('customer.dashboard'))
+        elif current_user.role == 'driver':
+            return redirect(url_for('driver.dashboard'))
+        elif current_user.role == 'business':
+            return redirect(url_for('business.dashboard'))    
 
     login_form = LoginForm()
     register_form = CustomerRegistrationForm()
