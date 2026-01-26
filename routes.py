@@ -122,44 +122,17 @@ def login():
 # --- PÁGINA DE REGISTRO AVANZADA (PARA TODOS LOS ROLES) ---
 @public_bp.route('/register', methods=['GET', 'POST'])
 def register():
+
     if current_user.is_authenticated:
-        return redirect(url_for('public.index')) 
+        return redirect(url_for('public.index'))
 
-    form = RegistrationForm() 
-    
-    # Pre-cargar el rol si viene por la URL (ej: /register?role=driver)
-    if request.method == 'GET' and request.args.get('role'):
-        arg_role = request.args.get('role')
-        # Mapeo de roles de la URL a los roles de la base de datos
-        role_map = {'restaurant': 'business', 'motorizado': 'driver', 'driver': 'driver', 'business': 'business'}
-        form.role.data = role_map.get(arg_role, 'customer')
-
-    if request.method == 'POST':
-        current_app.logger.info(f"REGISTER POST: {request.form}")
-        current_app.logger.info(f"REGISTER ERRORS: {form.errors}")
-        
-        current_app.logger.info(f"FORM DATA: {request.form}")
-        current_app.logger.info(f"ROLE FIELD: {form.role.data}")
+    form = RegistrationForm()
 
     if form.validate_on_submit():
-        # La lógica de creación de usuarios para todos los roles se mantiene aquí
-        # (El código que ya tienes para crear customer, driver y business)
         current_app.logger.info("VALID FORM — CREATING USER")
 
-        user = User(
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
-            phone_number=form.phone_number.data,
-            role=form.role.data,
-            password_hash=generate_password_hash(form.password.data),
-            is_active=form.role.data == 'customer'
-        )
-        db.session.add(user)
-        db.session.flush()  # 🔥 CLAVE
-        
         try:
-            is_active_user = True if form.role.data == 'customer' else False
+            is_active_user = form.role.data == 'customer'
 
             user = User(
                 email=form.email.data,
@@ -168,47 +141,51 @@ def register():
             )
             user.set_password(form.password.data)
             db.session.add(user)
-            db.session.flush() # Para obtener el ID antes del commit
-            #db.session.commit()
+            db.session.flush()  # obtenemos user.id
 
-            if user.role == 'customer':
-                customer_profile = Customer(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data)
-                db.session.add(customer_profile)
-                flash('Tu cuenta de cliente ha sido creada. ¡Ya puedes iniciar sesión!', 'success')
-                return redirect(url_for('public.login'))
+            if form.role.data == 'customer':
+                db.session.add(Customer(
+                    user_id=user.id,
+                    first_name=form.first_name.data,
+                    last_name=form.last_name.data,
+                    phone_number=form.phone_number.data
+                ))
 
-            elif user.role == 'driver':
-                driver_profile = Driver(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data, vehicle_type=form.vehicle_type.data, license_plate=form.license_plate.data)
-                db.session.add(driver_profile)
-                flash('Tu cuenta de conductor ha sido creada y será revisada por un administrador.', 'info')
-                return redirect(url_for('public.login'))
+            elif form.role.data == 'driver':
+                db.session.add(Driver(
+                    user_id=user.id,
+                    first_name=form.first_name.data,
+                    last_name=form.last_name.data,
+                    phone_number=form.phone_number.data,
+                    vehicle_type=form.vehicle_type.data,
+                    license_plate=form.license_plate.data,
+                    is_available=False
+                ))
 
-            elif user.role == 'business':
-                business_slug = slugify(form.business_name.data)
-                # ... (lógica para asegurar slug único) ...
-                business_profile = Business(user_id=user.id, name=form.business_name.data, address=form.business_address.data, phone_number=form.phone_number.data, description=form.business_description.data, slug=business_slug)
-                db.session.add(business_profile)
-                flash('Tu cuenta de negocio ha sido creada y será revisada por un administrador.', 'info')
-                return redirect(url_for('public.login'))
-            
-            #db.session.add(profile)
+            elif form.role.data == 'business':
+                db.session.add(Business(
+                    user_id=user.id,
+                    name=form.business_name.data,
+                    address=form.business_address.data,
+                    phone_number=form.phone_number.data,
+                    description=form.business_description.data,
+                    status='Cerrado'
+                ))
+
             db.session.commit()
-            
-            if is_active:
-                flash('Registro exitoso. ¡Ya puedes iniciar sesión!', 'success')
-            else:
-                flash('Registro recibido. Tu cuenta será activada por un administrador pronto.', 'info')
-            
+            flash('Registro exitoso. Ahora puedes iniciar sesión.', 'success')
             return redirect(url_for('public.login'))
 
         except Exception as e:
             db.session.rollback()
-            flash(f'Ocurrió un error al registrar tu cuenta: {str(e)}', 'danger')
-            current_app.logger.error(f"Error de registro: {e}")
-            current_app.logger.info(f"FORM ERRORS: {form.errors}")
+            current_app.logger.error(f"REGISTER ERROR: {e}")
+            flash('Error al crear la cuenta.', 'danger')
+
+    else:
+        if request.method == 'POST':
+            current_app.logger.error(f"FORM ERRORS: {form.errors}")
 
     return render_template('public/register.html', form=form)
-
 
 @public_bp.route("/logout")
 @login_required
