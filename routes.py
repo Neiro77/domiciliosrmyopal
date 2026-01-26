@@ -137,10 +137,27 @@ def register():
     if request.method == 'POST':
         current_app.logger.info(f"REGISTER POST: {request.form}")
         current_app.logger.info(f"REGISTER ERRORS: {form.errors}")
+        
+        current_app.logger.info(f"FORM DATA: {request.form}")
+        current_app.logger.info(f"ROLE FIELD: {form.role.data}")
 
     if form.validate_on_submit():
         # La lógica de creación de usuarios para todos los roles se mantiene aquí
         # (El código que ya tienes para crear customer, driver y business)
+        current_app.logger.info("VALID FORM — CREATING USER")
+
+        user = User(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            phone_number=form.phone_number.data,
+            role=form.role.data,
+            password_hash=generate_password_hash(form.password.data),
+            is_active=form.role.data == 'customer'
+        )
+        db.session.add(user)
+        db.session.flush()  # 🔥 CLAVE
+        
         try:
             is_active_user = True if form.role.data == 'customer' else False
 
@@ -188,6 +205,7 @@ def register():
             db.session.rollback()
             flash(f'Ocurrió un error al registrar tu cuenta: {str(e)}', 'danger')
             current_app.logger.error(f"Error de registro: {e}")
+            current_app.logger.info(f"FORM ERRORS: {form.errors}")
 
     return render_template('public/register.html', form=form)
 

@@ -38,21 +38,12 @@
             </div>
 			
 			{# Busca la línea 41 y reemplaza el campo role por este código #}
-			{{ form.role(type="hidden", **{'x-model': 'userRole'}) }}
-	<!-- 	{# Campo oculto del rol, para que Flask-WTF lo reciba #}
-            {{ form.role(class="hidden", **{'x-ref': 'roleField', 'x-model': 'userRole'}) }}<!--  x-ref="roleField") }}
-            {% if form.role.errors %}
-                <ul class="text-red-600 text-sm mt-1">
-                    {% for error in form.role.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %} -->
+			<div class="hidden">
+				{{ form.role(**{'x-model': 'userRole'}) }}
+			</div>
+
         </div>
 
-        <!-- Formulario Principal 
-        <form action="{{ url_for('public.register') }}" method="POST">
-            {{ form.csrf_token }} -->
 			
 		<form action="{{ url_for('public.register') }}" method="POST">
 			{{ form.hidden_tag() }}
