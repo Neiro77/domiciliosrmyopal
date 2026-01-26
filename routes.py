@@ -148,7 +148,7 @@ def register():
             user.set_password(form.password.data)
             db.session.add(user)
             db.session.flush() # Para obtener el ID antes del commit
-            db.session.commit()
+            #db.session.commit()
 
             if user.role == 'customer':
                 customer_profile = Customer(user_id=user.id, first_name=form.first_name.data, last_name=form.last_name.data, phone_number=form.phone_number.data)
