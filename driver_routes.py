@@ -58,7 +58,7 @@ def dashboard():
     """
     Muestra el dashboard principal del conductor con sus pedidos activos.
     """
-    # form = EmptyForm()
+    form = EmptyForm()
     # driver_profile = current_user.driver_profile
     
     # active_statuses = [
@@ -114,7 +114,8 @@ def dashboard():
         #orders=orders, 
         #form=form,
         #OrderStatus=OrderStatus
-        form = EmptyForm()
+        form = form
+        
     )
 
 

@@ -25,9 +25,22 @@
                     {% endif %}
                 </p>
             </div>
-            <form action="{{ url_for('driver.toggle_availability') }}" method="POST">
-                {{ form.hidden_tag() }} <button type="submit" class="btn btn-outline-primary">Cambiar Estado</button>
-            </form>
+            <!-- <form action="{{ url_for('driver.toggle_availability') }}" method="POST"> -->
+                <!-- {{ form.hidden_tag() }} <button type="submit" class="btn btn-outline-primary">Cambiar Estado</button> -->
+            <!-- </form> -->
+			
+			<form action="{{ url_for('driver.toggle_availability') }}" method="POST">
+				{{ form.hidden_tag() }}
+				{% if driver_profile.is_available %}
+					<button type="submit" class="w-full sm:w-auto px-6 py-2 bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 rounded-lg font-bold transition duration-300 shadow-sm">
+						<i class="fas fa-power-off mr-2"></i> Desconectarme
+					</button>
+				{% else %}
+					<button type="submit" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg font-bold transition duration-300 shadow-md">
+						<i class="fas fa-check-circle mr-2"></i> Ponerme Disponible
+					</button>
+				{% endif %}
+			</form>
         </div>
     </div>
 
