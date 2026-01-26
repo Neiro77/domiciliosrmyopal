@@ -106,7 +106,7 @@ def user_management():
 @admin_bp.route('/users/<int:user_id>/toggle_active', methods=['POST'])
 @admin_required
 def toggle_user_active(user_id):
-    form = EmptyForm() # Instancia el formulario para validar CSRF
+    form = EmptyForm()
     if not form.validate_on_submit():
         flash('Error de seguridad. Recargue la página e intente de nuevo.', 'danger')
         return redirect(url_for('admin.user_management'))
@@ -115,72 +115,122 @@ def toggle_user_active(user_id):
     if not user:
         flash('Usuario no encontrado.', 'danger')
         return redirect(url_for('admin.user_management'))
-    
-    # if user:
-        # user.is_active = not user.is_active
-        
-        # # Lógica adicional basada en el rol para sincronizar el estado
-        # if user.role == 'driver':
-            # driver_profile = db.session.execute(db.select(Driver).filter_by(user_id=user.id)).scalar_one_or_none()
-            # if driver_profile:
-                # driver_profile.is_available = user.is_active # Sincroniza disponibilidad con estado activo
-    # Toggle estado
+
+    # Alternar estado del usuario
     user.is_active = not user.is_active
 
-    # ==========================
-    # DRIVER
-    # ==========================
+    # --- DRIVER ---
     if user.role == 'driver':
         driver_profile = db.session.execute(
             db.select(Driver).filter_by(user_id=user.id)
         ).scalar_one_or_none()
 
-        # 🔥 CREAR PERFIL SI SE ACTIVA Y NO EXISTE
-        if user.is_active and not driver_profile:
-            driver_profile = Driver(
-                user_id=user.id,
-                is_available=True,
-                created_at=datetime.utcnow()
+        if not driver_profile:
+            flash(
+                'No se puede activar el motorizado porque no ha completado su registro.',
+                'warning'
             )
-            db.session.add(driver_profile)
+            user.is_active = False
+            db.session.rollback()
+            return redirect(url_for('admin.user_management'))
 
-        # Sincronizar disponibilidad
-        if driver_profile:
-            driver_profile.is_available = user.is_active    
+        driver_profile.is_available = user.is_active
 
-    # ==========================
-    # CUSTOMER
-    # ==========================
-    elif user.role == 'customer':
-        customer_profile = db.session.execute(
-            db.select(Customer).filter_by(user_id=user.id)
-        ).scalar_one_or_none()
-
-        # 🔥 CREAR PERFIL SI SE ACTIVA Y NO EXISTE
-        if user.is_active and not customer_profile:
-            customer_profile = Customer(
-                user_id=user.id,
-                created_at=datetime.utcnow()
-            )
-            db.session.add(customer_profile)
-
-    # ==========================
-    # BUSINESS
-    # ==========================
+    # --- BUSINESS ---
     elif user.role == 'business':
         business_profile = db.session.execute(
             db.select(Business).filter_by(user_id=user.id)
         ).scalar_one_or_none()
 
         if business_profile:
-            business_profile.status = 'Cerrado' if not user.is_active else 'Abierto'
+            business_profile.status = 'Abierto' if user.is_active else 'Cerrado'
 
     db.session.commit()
-    flash(
-        f'Estado de activación para {user.email} cambiado a {user.is_active}.',
-        'success'
-    )
+
+    estado = 'activado' if user.is_active else 'desactivado'
+    flash(f'Usuario {user.email} {estado} correctamente.', 'success')
+
     return redirect(url_for('admin.user_management'))
+
+
+# @admin_bp.route('/users/<int:user_id>/toggle_active', methods=['POST'])
+# @admin_required
+# def toggle_user_active(user_id):
+    # form = EmptyForm() # Instancia el formulario para validar CSRF
+    # if not form.validate_on_submit():
+        # flash('Error de seguridad. Recargue la página e intente de nuevo.', 'danger')
+        # return redirect(url_for('admin.user_management'))
+
+    # user = db.session.get(User, user_id)
+    # if not user:
+        # flash('Usuario no encontrado.', 'danger')
+        # return redirect(url_for('admin.user_management'))
+    
+    # # if user:
+        # # user.is_active = not user.is_active
+        
+        # # # Lógica adicional basada en el rol para sincronizar el estado
+        # # if user.role == 'driver':
+            # # driver_profile = db.session.execute(db.select(Driver).filter_by(user_id=user.id)).scalar_one_or_none()
+            # # if driver_profile:
+                # # driver_profile.is_available = user.is_active # Sincroniza disponibilidad con estado activo
+    # # Toggle estado
+    # user.is_active = not user.is_active
+
+    # # ==========================
+    # # DRIVER
+    # # ==========================
+    # if user.role == 'driver':
+        # driver_profile = db.session.execute(
+            # db.select(Driver).filter_by(user_id=user.id)
+        # ).scalar_one_or_none()
+
+        # # 🔥 CREAR PERFIL SI SE ACTIVA Y NO EXISTE
+        # if user.is_active and not driver_profile:
+            # driver_profile = Driver(
+                # user_id=user.id,
+                # is_available=True,
+                # created_at=datetime.utcnow()
+            # )
+            # db.session.add(driver_profile)
+
+        # # Sincronizar disponibilidad
+        # if driver_profile:
+            # driver_profile.is_available = user.is_active    
+
+    # # ==========================
+    # # CUSTOMER
+    # # ==========================
+    # elif user.role == 'customer':
+        # customer_profile = db.session.execute(
+            # db.select(Customer).filter_by(user_id=user.id)
+        # ).scalar_one_or_none()
+
+        # # 🔥 CREAR PERFIL SI SE ACTIVA Y NO EXISTE
+        # if user.is_active and not customer_profile:
+            # customer_profile = Customer(
+                # user_id=user.id,
+                # created_at=datetime.utcnow()
+            # )
+            # db.session.add(customer_profile)
+
+    # # ==========================
+    # # BUSINESS
+    # # ==========================
+    # elif user.role == 'business':
+        # business_profile = db.session.execute(
+            # db.select(Business).filter_by(user_id=user.id)
+        # ).scalar_one_or_none()
+
+        # if business_profile:
+            # business_profile.status = 'Cerrado' if not user.is_active else 'Abierto'
+
+    # db.session.commit()
+    # flash(
+        # f'Estado de activación para {user.email} cambiado a {user.is_active}.',
+        # 'success'
+    # )
+    # return redirect(url_for('admin.user_management'))
         
         # elif user.role == 'business':
             # business_profile = db.session.execute(db.select(Business).filter_by(user_id=user.id)).scalar_one_or_none()
