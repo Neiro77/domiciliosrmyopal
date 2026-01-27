@@ -66,28 +66,28 @@ def dashboard():
         # OrderStatus.OUT_FOR_DELIVERY.value
     # ]
 
-    # # --- CONSULTA OPTIMIZADA (CON LA CORRECCIÓN) ---
-    # query = (
-        # db.select(Order)
-        # .filter(
-            # Order.driver_id == driver_profile.id, 
-            # Order.status.in_(active_statuses)
-        # )
-        # .options(
-            # joinedload(Order.user).joinedload(User.customer_profile),
-            # joinedload(Order.service),
-            # joinedload(Order.items).joinedload(OrderItem.product),
-            # joinedload(Order.items).joinedload(OrderItem.paquete_envio)
-        # )
-        # .order_by(Order.order_date.asc())
-    # )
+    # --- CONSULTA OPTIMIZADA (CON LA CORRECCIÓN) ---
+    query = (
+        db.select(Order)
+        .filter(
+            Order.driver_id == driver_profile.id, 
+            Order.status.in_(active_statuses)
+        )
+        .options(
+            joinedload(Order.user).joinedload(User.customer_profile),
+            joinedload(Order.service),
+            joinedload(Order.items).joinedload(OrderItem.product),
+            joinedload(Order.items).joinedload(OrderItem.paquete_envio)
+        )
+        .order_by(Order.order_date.asc())
+    )
     
-    # # Primero ejecutamos la consulta
-    # result = db.session.execute(query)
+    # Primero ejecutamos la consulta
+    result = db.session.execute(query)
     
-    # # --- >>> CORRECCIÓN: Añadir .unique() para manejar la carga de múltiples items <<< ---
-    # # Esto elimina los duplicados de 'Order' que genera el JOIN con 'OrderItem'
-    # orders = result.unique().scalars().all()
+    # --- >>> CORRECCIÓN: Añadir .unique() para manejar la carga de múltiples items <<< ---
+    # Esto elimina los duplicados de 'Order' que genera el JOIN con 'OrderItem'
+    orders = result.unique().scalars().all()
 
     # Intentamos obtener el perfil del conductor
     driver_profile = db.session.execute(
