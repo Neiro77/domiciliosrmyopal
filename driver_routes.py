@@ -111,9 +111,9 @@ def dashboard():
     return render_template(
         'driver/dashboard.html', 
         driver_profile=driver_profile, 
-        #orders=orders, 
+        orders=orders, 
         #form=form,
-        OrderStatus=OrderStatus
+        OrderStatus=OrderStatus,
         form = form
         
     )
