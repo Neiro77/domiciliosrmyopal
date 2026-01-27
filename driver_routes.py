@@ -49,8 +49,6 @@ def driver_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
-
 @driver_bp.route('/dashboard')
 @login_required
 @driver_required
@@ -59,18 +57,30 @@ def dashboard():
     Muestra el dashboard principal del conductor con sus pedidos activos.
     """
     form = EmptyForm()
-    # driver_profile = current_user.driver_profile
-    
-    # active_statuses = [
-        # OrderStatus.ACCEPTED.value, 
-        # OrderStatus.OUT_FOR_DELIVERY.value
-    # ]
 
-    # --- CONSULTA OPTIMIZADA (CON LA CORRECCIÓN) ---
+    # 1️⃣ Obtener perfil del conductor (PRIMERO)
+    driver_profile = db.session.execute(
+        db.select(Driver).filter_by(user_id=current_user.id)
+    ).scalar_one_or_none()
+
+    if not driver_profile:
+        current_app.logger.warning(
+            f"Usuario {current_user.id} tiene rol driver pero no perfil Driver."
+        )
+        flash("Tu perfil de conductor no está completo. Contacta al administrador.", "warning")
+        return redirect(url_for('public.index'))
+
+    # 2️⃣ Estados activos
+    active_statuses = [
+        OrderStatus.ACCEPTED.value,
+        OrderStatus.OUT_FOR_DELIVERY.value
+    ]
+
+    # 3️⃣ Consulta de pedidos asignados
     query = (
         db.select(Order)
         .filter(
-            Order.driver_id == driver_profile.id, 
+            Order.driver_id == driver_profile.id,
             Order.status.in_(active_statuses)
         )
         .options(
@@ -81,43 +91,19 @@ def dashboard():
         )
         .order_by(Order.order_date.asc())
     )
-    
-    # Primero ejecutamos la consulta
+
     result = db.session.execute(query)
-    
-    # --- >>> CORRECCIÓN: Añadir .unique() para manejar la carga de múltiples items <<< ---
-    # Esto elimina los duplicados de 'Order' que genera el JOIN con 'OrderItem'
+
+    # 🔑 Evita duplicados por JOIN con items
     orders = result.unique().scalars().all()
 
-    # Intentamos obtener el perfil del conductor
-    driver_profile = db.session.execute(
-        db.select(Driver).filter_by(user_id=current_user.id)
-    ).scalar_one_or_none()
-
-    if not driver_profile:
-        # Si el usuario tiene el rol pero no tiene perfil, lo creamos dinámicamente o informamos
-        print(f"DEBUG: El usuario {current_user.id} tiene rol driver pero no tiene perfil en la tabla Driver.")
-        flash("Tu perfil de conductor no está completo. Contacta al administrador.", "warning")
-        return redirect(url_for('public.index'))
-
-    #Obtener pedidos asignados (No entregados ni cancelados)
-    assigned_orders = db.session.execute(
-        db.select(Order).filter(
-            Order.driver_id == driver_profile.id,
-            Order.status.in_([OrderStatus.ACCEPTED.value, OrderStatus.OUT_FOR_DELIVERY.value])
-        ).order_by(Order.created_at.desc())
-    ).scalars().all()
-
     return render_template(
-        'driver/dashboard.html', 
-        driver_profile=driver_profile, 
-        orders=orders, 
-        #form=form,
-        OrderStatus=OrderStatus,
-        form = form
-        
+        'driver/dashboard.html',
+        driver_profile=driver_profile,
+        orders=orders,
+        form=form,
+        OrderStatus=OrderStatus
     )
-
 
 @driver_bp.route('/profile/setup', methods=['GET', 'POST'])
 @driver_required
