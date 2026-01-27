@@ -163,13 +163,22 @@ def register():
                 ))
 
             elif form.role.data == 'business':
+                base_slug = slugify(form.business_name.data)
+                slug = base_slug
+                counter = 1
+
+                while Business.query.filter_by(slug=slug).first():
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+
                 db.session.add(Business(
                     user_id=user.id,
                     name=form.business_name.data,
                     address=form.business_address.data,
                     phone_number=form.phone_number.data,
                     description=form.business_description.data,
-                    status='Cerrado'
+                    status='Cerrado',
+                    slug=slug
                 ))
 
             db.session.commit()
