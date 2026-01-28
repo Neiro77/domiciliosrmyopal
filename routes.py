@@ -8,6 +8,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message 
 import re # Para slugify
+from threading import Thread
 
 # Importaciones adicionales para itsdangerous
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
@@ -202,7 +203,10 @@ def logout():
     logout_user()
     return redirect(url_for('public.login'))
     
-    
+def send_async_email(app, msg):
+    with app.app_context():
+        current_app.extensions['mail'].send(msg)
+        
 # --- Función auxiliar para enviar el email (usa la instancia global 'mail') ---
 def send_password_reset_email(user):
     token = user.get_reset_token()
@@ -216,9 +220,20 @@ Si tú no solicitaste esto, simplemente ignora este mensaje y tu contraseña per
 '''
     try:
         # ACCESO A FLASK-MAIL A TRAVÉS DE current_app.extensions
-        current_app.extensions['mail'].send(msg)
+        # current_app.extensions['mail'].send(msg)
+        Thread(
+            target=send_async_email,
+            args=(current_app._get_current_object(), msg)
+        ).start()
+
+        current_app.logger.info(
+            f"Password reset email queued for {user.email}"
+        )
         print(f"DEBUG: Correo de restablecimiento enviado a {user.email}")
     except Exception as e:
+        current_app.logger.error(
+            f"ERROR enviando correo a {user.email}: {e}"
+        )
         print(f"ERROR: No se pudo enviar el correo a {user.email}: {e}")
         flash('Hubo un problema al intentar enviar el correo de restablecimiento. Por favor, inténtalo de nuevo más tarde.', 'danger')
 
