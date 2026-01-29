@@ -34,16 +34,26 @@ public_bp = Blueprint('public', __name__)
 @public_bp.route('/')
 def index():
     # Si el usuario ya está autenticado, lo redirige a su dashboard correspondiente
+    # if current_user.is_authenticated:
+        # if current_user.role == 'customer':
+            # return redirect(url_for('customer.dashboard'))
+        # elif current_user.role == 'driver':
+            # return redirect(url_for('driver.dashboard'))
+        # elif current_user.role == 'business':
+            # return redirect(url_for('business.dashboard'))
+        # elif current_user.role == 'admin':
+            # return redirect(url_for('admin.dashboard'))
+    # # Si no está autenticado, la página principal es el login
+    # return render_template('public/index.html')
+    
     if current_user.is_authenticated:
-        if current_user.role == 'customer':
-            return redirect(url_for('customer.dashboard'))
-        elif current_user.role == 'driver':
+        if current_user.role == 'driver':
             return redirect(url_for('driver.dashboard'))
         elif current_user.role == 'business':
             return redirect(url_for('business.dashboard'))
         elif current_user.role == 'admin':
             return redirect(url_for('admin.dashboard'))
-    # Si no está autenticado, la página principal es el login
+        # SOLO customer puede ver index
     return render_template('public/index.html')
 
 # --- >>> NUEVA RUTA PARA LA PÁGINA DE INICIO PÚBLICA <<< ---
