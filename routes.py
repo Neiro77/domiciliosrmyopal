@@ -63,7 +63,10 @@ def home():
     Esta ruta renderiza la página de aterrizaje (index.html)
     que contiene información pública sobre el negocio.
     """
-    return render_template('public/index.html')
+    if current_user.is_authenticated and current_user.role != 'customer':
+        return redirect(url_for(f"{current_user.role}.dashboard"))
+        
+    #return render_template('public/index.html')
     
 # --- PÁGINA DE LOGIN Y REGISTRO DE CLIENTE UNIFICADA ---
 @public_bp.route('/login', methods=['GET', 'POST'])
