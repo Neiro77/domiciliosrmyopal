@@ -194,7 +194,11 @@ class PackageForm(FlaskForm):
     # NUEVOS CAMPOS (los que sí quieres)
     descripcion = TextAreaField(
         'Descripción del paquete',
-        validators=[DataRequired(), description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).', Length(max=500)]
+        description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).',
+        validators=[
+            DataRequired(),
+            Length(max=500)
+        ]
     )
 
     nombre_quien_recibe = StringField(
