@@ -349,10 +349,17 @@ class OpeningHour(db.Model):
 class DetallesPaqueteEnvio(db.Model):
     __tablename__ = 'detalles_paquete_envio'
     id = db.Column(db.Integer, primary_key=True)
+    # NUEVOS CAMPOS (los que quieres)
+    descripcion = db.Column(db.Text, nullable=True)
+
+    nombre_quien_recibe = db.Column(db.String(100), nullable=False)
+    telefono_quien_recibe = db.Column(db.String(20), nullable=False)
+    
+    # CAMPOS ANTIGUOS (SE DEJAN, pero no se usan)
     tipo_paquete = db.Column(db.String(255), nullable=False)
     #direccion_recogida = db.Column(db.Text, nullable=False)
     #direccion_entrega = db.Column(db.Text, nullable=False)
-    descripcion = db.Column(db.Text, nullable=True)
+    #descripcion = db.Column(db.Text, nullable=True)
     tamano_paquete = db.Column(db.String(20), nullable=True)
     peso_kg = db.Column(db.Float, nullable=True)
     dimensiones_cm = db.Column(db.String(50), nullable=True)
@@ -368,7 +375,7 @@ class DetallesPaqueteEnvio(db.Model):
     #destino_address = db.relationship('Address', foreign_keys=[destino_direccion_id], backref='paquetes_destino', lazy=True)
 
     def __repr__(self):
-        return f"<DetallesPaqueteEnvio {self.id} Tipo: {self.tipo_paquete}>"
+        return f"<DetallesPaqueteEnvio {self.id}>"
 
 # Tabla de Detalles de Ítems de Compra
 class DetallesItemCompra(db.Model): # Renombrado a camelCase

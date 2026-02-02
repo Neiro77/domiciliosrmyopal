@@ -191,11 +191,28 @@ class CheckoutForm(FlaskForm):
 
 # Nuevo formulario para crear un pedido de paquete
 class PackageForm(FlaskForm):
+    # NUEVOS CAMPOS (los que sí quieres)
+    descripcion = TextAreaField(
+        'Descripción del paquete',
+        validators=[DataRequired(), description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).', Length(max=500)]
+    )
+
+    nombre_quien_recibe = StringField(
+        'Nombre de quien recibe',
+        validators=[DataRequired(), Length(max=100)]
+    )
+
+    telefono_quien_recibe = StringField(
+        'Teléfono de quien recibe',
+        validators=[DataRequired(), Length(min=7, max=20)]
+    )
+    
+    
     # Información general del paquete (esto no cambia)
     tipo_paquete = StringField('Tipo de Paquete', validators=[DataRequired(), Length(max=255)], 
                                description='Ej: Documentos, Ropa, Electrónica, Alimentos no perecederos.')
-    descripcion = TextAreaField('Descripción del Contenido', validators=[DataRequired()], 
-                                description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).')
+    # descripcion = TextAreaField('Descripción del Contenido', validators=[DataRequired()], 
+                                # description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).')
     tamano_paquete = SelectField('Tamaño Estimado', choices=[
         ('pequeno', 'Pequeño (ej. sobres, documentos)'),
         ('mediano', 'Mediano (ej. caja de zapatos)'),

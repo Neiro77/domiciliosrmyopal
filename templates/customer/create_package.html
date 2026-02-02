@@ -30,6 +30,48 @@
                     </ul>
                 </div>
             {% endif %}
+			
+			<!-- DESCRIPCIÓN -->
+			<div>
+				<label class="block text-sm font-semibold text-gray-700 mb-1">
+					¿Qué estás enviando?
+				</label>
+				{{ form.descripcion(
+					class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none",
+					placeholder="Ej: Documentos, encomienda, regalo, etc."
+				) }}
+				{% for error in form.descripcion.errors %}
+					<p class="text-red-500 text-sm mt-1">{{ error }}</p>
+				{% endfor %}
+			</div>
+
+			<!-- NOMBRE RECEPTOR -->
+			<div>
+				<label class="block text-sm font-semibold text-gray-700 mb-1">
+					Nombre de quien recibe
+				</label>
+				{{ form.nombre_quien_recibe(
+					class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none",
+					placeholder="Nombre completo"
+				) }}
+				{% for error in form.nombre_quien_recibe.errors %}
+					<p class="text-red-500 text-sm mt-1">{{ error }}</p>
+				{% endfor %}
+			</div>
+
+			<!-- TELÉFONO RECEPTOR -->
+			<div>
+				<label class="block text-sm font-semibold text-gray-700 mb-1">
+					Teléfono de contacto
+				</label>
+				{{ form.telefono_quien_recibe(
+					class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none",
+					placeholder="Ej: 3001234567"
+				) }}
+				{% for error in form.telefono_quien_recibe.errors %}
+					<p class="text-red-500 text-sm mt-1">{{ error }}</p>
+				{% endfor %}
+			</div>
 
             <div class="mb-5">
                 <label for="{{ form.tipo_paquete.id }}" class="block text-gray-700 text-sm font-semibold mb-2">{{ form.tipo_paquete.label }}</label>
@@ -96,7 +138,7 @@
 				
 				<button type="submit" 
 						class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold text-lg shadow-md">
-					<i class="fas fa-cart-plus mr-2"></i> Añadir al Carrito
+					<i class="fas fa-cart-plus mr-2"></i> 🚚 Solicitar Envío
 				</button>
 			</div>
         </form>
