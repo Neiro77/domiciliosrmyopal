@@ -355,25 +355,8 @@ class DetallesPaqueteEnvio(db.Model):
     nombre_quien_recibe = db.Column(db.String(100), nullable=False)
     telefono_quien_recibe = db.Column(db.String(20), nullable=False)
     
-    # CAMPOS ANTIGUOS (SE DEJAN, pero no se usan)
-    tipo_paquete = db.Column(db.String(255), nullable=False)
-    #direccion_recogida = db.Column(db.Text, nullable=False)
-    #direccion_entrega = db.Column(db.Text, nullable=False)
-    #descripcion = db.Column(db.Text, nullable=True)
-    tamano_paquete = db.Column(db.String(20), nullable=True)
-    peso_kg = db.Column(db.Float, nullable=True)
-    dimensiones_cm = db.Column(db.String(50), nullable=True)
-    valor_declarado = db.Column(db.Float, nullable=True)
-    instrucciones_especiales = db.Column(db.Text, nullable=True)
-    precio_calculado = db.Column(db.Float, nullable=False)
-    # NUEVO
-    # order_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
-    # servicio_id = db.Column(db.Integer, db.ForeignKey('services.id'))
-    # order = db.relationship('Order', back_populates='paquete_envio')
+    precio_calculado = db.Column(db.Float, nullable=False, default=0.0)
     
-    #origen_address = db.relationship('Address', foreign_keys=[origen_direccion_id], backref='paquetes_origen', lazy=True)
-    #destino_address = db.relationship('Address', foreign_keys=[destino_direccion_id], backref='paquetes_destino', lazy=True)
-
     def __repr__(self):
         return f"<DetallesPaqueteEnvio {self.id}>"
 
