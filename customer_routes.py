@@ -719,7 +719,7 @@ def cancel_order(order_id):
 
     return redirect(url_for('customer.my_orders'))
     
-@customer_bp.route("/notifications")
+@customer_bp.route("/customer/notifications")
 @customer_required
 def notifications():
     notifs = Notification.query.filter_by(
@@ -732,8 +732,8 @@ def notifications():
     db.session.commit()
 
     return render_template(
-        "notifications.html",
-        notifications=notifs
+        'customer/notifications.html',
+        notifications=notificaciones
     )    
     
 

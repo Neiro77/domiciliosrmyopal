@@ -279,8 +279,9 @@ def update_delivery_status(order_id):
         flash(f'Estado del pedido #{order.id} actualizado a "{new_status}"', 'success')
         
         notify(
-            order.customer_id,
-            f"Tu pedido #{order.id} ahora está en estado: {nuevo_estado}"
+            customer_user_id = order.user_id,
+            # order.customer_id,
+            f"Tu pedido #{order.id} ahora está en estado: {new_status}"
         )
 
         # --- Notificaciones Email ---
@@ -302,6 +303,13 @@ def update_delivery_status(order_id):
                         driver=driver_profile,
                         special_message=special_message
                     )
+                    notification = Notification(
+                        user_id=customer_user_id,
+                        title="Actualización de tu pedido",
+                        message=f"Tu pedido #{order.id} cambió de estado a '{order.status}'.",
+                    )
+
+                    db.session.add(notification)
                 except Exception as e:
                     current_app.logger.warning(
                         f"Email no enviado (bloqueado o timeout): {e}"
