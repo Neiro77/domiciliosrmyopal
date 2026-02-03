@@ -196,7 +196,7 @@ class PackageForm(FlaskForm):
         'Descripción del paquete',
         description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).',
         validators=[
-            DataRequired(),
+            #DataRequired(),
             Length(max=500)
         ]
     )
@@ -212,24 +212,24 @@ class PackageForm(FlaskForm):
     )
     
     
-    # Información general del paquete (esto no cambia)
-    tipo_paquete = StringField('Tipo de Paquete', validators=[DataRequired(), Length(max=255)], 
-                               description='Ej: Documentos, Ropa, Electrónica, Alimentos no perecederos.')
-    # descripcion = TextAreaField('Descripción del Contenido', validators=[DataRequired()], 
-                                # description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).')
-    tamano_paquete = SelectField('Tamaño Estimado', choices=[
-        ('pequeno', 'Pequeño (ej. sobres, documentos)'),
-        ('mediano', 'Mediano (ej. caja de zapatos)'),
-        ('grande', 'Grande (ej. mochila, caja de electrodoméstico pequeño)')
-    ], validators=[DataRequired()], description='Selecciona un tamaño estimado para el paquete.')
-    peso_kg = DecimalField('Peso Estimado (kg)', validators=[Optional(), NumberRange(min=0.01)], places=2, 
-                           description='Peso aproximado del paquete en kilogramos. (Ej: 0.5, 2.3)')
-    dimensiones_cm = StringField('Dimensiones (cm)', validators=[Optional(), Length(max=50)], 
-                                 description='Ej: 20x15x10 (largo x ancho x alto) o solo texto.')
-    valor_declarado = DecimalField('Valor Declarado (opcional)', validators=[Optional(), NumberRange(min=0.0)], places=2, 
-                                   description='Valor asegurado del contenido. Se usará para calcular el costo del seguro.')
-    instrucciones_especiales = TextAreaField('Instrucciones Especiales', validators=[Optional()], 
-                                            description='Ej: Frágil, Entregar solo a [Nombre], Dejar en portería.')
+    # # Información general del paquete (esto no cambia)
+    # tipo_paquete = StringField('Tipo de Paquete', validators=[DataRequired(), Length(max=255)], 
+                               # description='Ej: Documentos, Ropa, Electrónica, Alimentos no perecederos.')
+    # # descripcion = TextAreaField('Descripción del Contenido', validators=[DataRequired()], 
+                                # # description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).')
+    # tamano_paquete = SelectField('Tamaño Estimado', choices=[
+        # ('pequeno', 'Pequeño (ej. sobres, documentos)'),
+        # ('mediano', 'Mediano (ej. caja de zapatos)'),
+        # ('grande', 'Grande (ej. mochila, caja de electrodoméstico pequeño)')
+    # ], validators=[DataRequired()], description='Selecciona un tamaño estimado para el paquete.')
+    # peso_kg = DecimalField('Peso Estimado (kg)', validators=[Optional(), NumberRange(min=0.01)], places=2, 
+                           # description='Peso aproximado del paquete en kilogramos. (Ej: 0.5, 2.3)')
+    # dimensiones_cm = StringField('Dimensiones (cm)', validators=[Optional(), Length(max=50)], 
+                                 # description='Ej: 20x15x10 (largo x ancho x alto) o solo texto.')
+    # valor_declarado = DecimalField('Valor Declarado (opcional)', validators=[Optional(), NumberRange(min=0.0)], places=2, 
+                                   # description='Valor asegurado del contenido. Se usará para calcular el costo del seguro.')
+    # instrucciones_especiales = TextAreaField('Instrucciones Especiales', validators=[Optional()], 
+                                            # description='Ej: Frágil, Entregar solo a [Nombre], Dejar en portería.')
     
     # --- CAMBIO CLAVE: Convertir campos de dirección a SelectField ---
     # Ahora serán listas desplegables con las direcciones del usuario.
@@ -238,7 +238,7 @@ class PackageForm(FlaskForm):
     #direccion_entrega = SelectField('Dirección de Entrega', coerce=int, validators=[DataRequired()],
     #                                description='Selecciona una de tus direcciones guardadas para la entrega.')
     
-    precio_calculado = HiddenField('Precio Calculado', validators=[Optional()])
+    #precio_calculado = HiddenField('Precio Calculado', validators=[Optional()])
 
     submit = SubmitField('Añadir paquete al Carrito')
 

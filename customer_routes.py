@@ -289,16 +289,20 @@ def create_package():
             
             # Crear y guardar el objeto del paquete
             new_package_detail = DetallesPaqueteEnvio(
-                tipo_paquete=form.tipo_paquete.data,
                 descripcion=form.descripcion.data,
-                tamano_paquete=form.tamano_paquete.data,
-                peso_kg=form.peso_kg.data,
-                dimensiones_cm=form.dimensiones_cm.data,
-                valor_declarado=form.valor_declarado.data,
-                instrucciones_especiales=form.instrucciones_especiales.data,
-                #direccion_recogida=form.direccion_recogida.data,
-                #direccion_entrega=form.direccion_entrega.data,
-                precio_calculado=float(base_price) # Guardar como float
+                nombre_quien_recibe=form.nombre_quien_recibe.data,
+                telefono_quien_recibe=form.telefono_quien_recibe.data,
+            
+                # tipo_paquete=form.tipo_paquete.data,
+                # descripcion=form.descripcion.data,
+                # tamano_paquete=form.tamano_paquete.data,
+                # peso_kg=form.peso_kg.data,
+                # dimensiones_cm=form.dimensiones_cm.data,
+                # valor_declarado=form.valor_declarado.data,
+                # instrucciones_especiales=form.instrucciones_especiales.data,
+                # #direccion_recogida=form.direccion_recogida.data,
+                # #direccion_entrega=form.direccion_entrega.data,
+                # precio_calculado=float(base_price) # Guardar como float
             )
             db.session.add(new_package_detail)
             db.session.commit() # Hacemos commit para obtener el ID final
@@ -311,7 +315,7 @@ def create_package():
             session['cart_items'] = [{
                 'type': 'package',
                 'id': new_package_detail.id,
-                'name': f"Envío de Paquete: {new_package_detail.tipo_paquete}",
+                'name': f"Envío de Paquete: {new_package_detail.descripcion}",
                 'price': new_package_detail.precio_calculado,
                 'quantity': 1
             }]
@@ -328,6 +332,13 @@ def create_package():
             flash(f'Ocurrió un error al crear el paquete: {str(e)}', 'danger')
 
     return render_template('customer/create_package.html', form=form)
+    
+    if not form.validate_on_submit():
+        flash('Por favor completa todos los campos requeridos.', 'danger')
+        return render_template(
+            'customer/create_package.html',
+            form=form
+        )
 
 @customer_bp.route('/update_session_cart', methods=['POST'])
 @customer_required
