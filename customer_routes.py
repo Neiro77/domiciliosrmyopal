@@ -61,9 +61,14 @@ def dashboard():
     if customer_profile is None:
         flash('Tu perfil de cliente no ha sido configurado. Por favor, completa tus datos.', 'warning')
         customer_profile = Customer(first_name="Usuario", last_name="Nuevo", phone_number="N/A", user_id=current_user.id) 
+        
+    unread_notifications_count = Notification.query.filter_by(
+        user_id=current_user.id,
+        is_read=False
+    ).count()    
     
     # Renderiza la nueva plantilla del dashboard
-    return render_template('customer/dashboard.html', customer_profile=customer_profile)
+    return render_template('customer/dashboard.html', unread_notifications_count=unread_notifications_count, customer_profile=customer_profile)
 # @customer_bp.route('/dashboard')
 # @customer_required
 # def dashboard():
@@ -722,18 +727,19 @@ def cancel_order(order_id):
 @customer_bp.route("/customer/notifications")
 @customer_required
 def notifications():
-    notifs = Notification.query.filter_by(
+    notifications = Notification.query.filter_by(
         user_id=current_user.id
     ).order_by(Notification.created_at.desc()).all()
 
-    for n in notifs:
-        n.is_read = True
+    for n in notifications:
+        if not n.is_read:
+            n.is_read = True
 
     db.session.commit()
 
     return render_template(
         'customer/notifications.html',
-        notifications=notificaciones
+        notifications=notifications
     )    
     
 

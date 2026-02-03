@@ -149,13 +149,11 @@
                                   :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                             </span>
                         </a>
-						<a href="{{ url_for('customer.notifications') }}" class="nav-link position-relative">
-						  🔔
-						  {% if unread_notifications > 0 %}
-							<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-							  {{ unread_notifications }}
-							</span>
-						  {% endif %}
+						<a href="{{ url_for('customer.notifications') }}" class="notification-bell">
+							🔔
+							{% if unread_notifications_count > 0 %}
+								<span class="badge">{{ unread_notifications_count }}</span>
+							{% endif %}
 						</a>
                     {% elif current_user.role == 'driver' %}
                         <a href="{{ url_for('driver.dashboard') }}" class="hover:text-blue-200">Mis Entregas</a>
@@ -206,13 +204,11 @@
                                 :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                         </span>
                     </a>
-					<a href="{{ url_for('customer.notifications') }}" class="nav-link position-relative">
-					  🔔
-					  {% if unread_notifications > 0 %}
-						<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-						  {{ unread_notifications }}
-						</span>
-					  {% endif %}
+					<a href="{{ url_for('customer.notifications') }}" class="notification-bell">
+						🔔
+						{% if unread_notifications_count > 0 %}
+							<span class="badge">{{ unread_notifications_count }}</span>
+						{% endif %}
 					</a>
                 {% elif current_user.role == 'driver' %}
                     <a href="{{ url_for('driver.dashboard') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Mis Entregas</a>

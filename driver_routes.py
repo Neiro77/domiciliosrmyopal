@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request, abort
 from flask_login import login_required, current_user
-from models import User, Driver, Order, Business, OrderStatus, Customer, Product, OrderItem, DetallesPaqueteEnvio, Service, TransactionType, create_transaction # <-- Importa lo nuevo # Importa modelos necesarios y OrderStatus Enum
+from models import User, Driver, Order, Business, OrderStatus, Customer, Product, OrderItem, DetallesPaqueteEnvio, Service, TransactionType, create_transaction, Notification # <-- Importa lo nuevo # Importa modelos necesarios y OrderStatus Enum
 from functools import wraps # <--- ¡IMPORTA ESTO!
 from extensions import db, mail # Importa db para futuras interacciones con la DB
 from sqlalchemy.orm import joinedload # Para cargar relaciones eficientemente
@@ -303,12 +303,14 @@ def update_delivery_status(order_id):
                         special_message=special_message
                     )
                     notification = Notification(
-                        user_id=customer_user_id,
+                        user_id=order.customer_id,
                         title="Actualización de tu pedido",
-                        message=f"Tu pedido #{order.id} cambió de estado a '{order.status}'."
+                        message=f"Tu pedido #{order.id} cambió de estado a: {order.delivery_status}",
+                        is_read=False
                     )
 
                     db.session.add(notification)
+                    db.session.commit()
                 except Exception as e:
                     current_app.logger.warning(
                         f"Email no enviado (bloqueado o timeout): {e}"
