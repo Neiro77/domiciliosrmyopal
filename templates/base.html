@@ -149,7 +149,7 @@
                                   :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                             </span>
                         </a>
-						<a href="{{ url_for('notifications') }}" class="nav-link position-relative">
+						<a href="{{ url_for('customer.notifications') }}" class="nav-link position-relative">
 						  🔔
 						  {% if unread_notifications > 0 %}
 							<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -206,7 +206,7 @@
                                 :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                         </span>
                     </a>
-					<a href="{{ url_for('notifications') }}" class="nav-link position-relative">
+					<a href="{{ url_for('customer.notifications') }}" class="nav-link position-relative">
 					  🔔
 					  {% if unread_notifications > 0 %}
 						<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
