@@ -278,14 +278,6 @@ def create_package():
     
     if form.validate_on_submit():
         try:
-            # Lógica de cálculo de precio (la tuya está bien como ejemplo)
-            base_price = Decimal('0.00')#('5000.00')
-            if form.tamano_paquete.data == 'mediano':
-                base_price += Decimal('0.00')  #('2000.00')
-            elif form.tamano_paquete.data == 'grande':
-                base_price += Decimal('0.00') #('5000.00')
-            if form.valor_declarado.data:
-                base_price += form.valor_declarado.data * Decimal('0.00') #('0.02')
             
             # Crear y guardar el objeto del paquete
             new_package_detail = DetallesPaqueteEnvio(

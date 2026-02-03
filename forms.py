@@ -212,62 +212,8 @@ class PackageForm(FlaskForm):
         validators=[DataRequired(message="Este campo es obligatorio"), Length(min=7, max=20)]
     )
     
-    
-    # # Información general del paquete (esto no cambia)
-    # tipo_paquete = StringField('Tipo de Paquete', validators=[DataRequired(), Length(max=255)], 
-                               # description='Ej: Documentos, Ropa, Electrónica, Alimentos no perecederos.')
-    # # descripcion = TextAreaField('Descripción del Contenido', validators=[DataRequired()], 
-                                # # description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).')
-    # tamano_paquete = SelectField('Tamaño Estimado', choices=[
-        # ('pequeno', 'Pequeño (ej. sobres, documentos)'),
-        # ('mediano', 'Mediano (ej. caja de zapatos)'),
-        # ('grande', 'Grande (ej. mochila, caja de electrodoméstico pequeño)')
-    # ], validators=[DataRequired()], description='Selecciona un tamaño estimado para el paquete.')
-    # peso_kg = DecimalField('Peso Estimado (kg)', validators=[Optional(), NumberRange(min=0.01)], places=2, 
-                           # description='Peso aproximado del paquete en kilogramos. (Ej: 0.5, 2.3)')
-    # dimensiones_cm = StringField('Dimensiones (cm)', validators=[Optional(), Length(max=50)], 
-                                 # description='Ej: 20x15x10 (largo x ancho x alto) o solo texto.')
-    # valor_declarado = DecimalField('Valor Declarado (opcional)', validators=[Optional(), NumberRange(min=0.0)], places=2, 
-                                   # description='Valor asegurado del contenido. Se usará para calcular el costo del seguro.')
-    # instrucciones_especiales = TextAreaField('Instrucciones Especiales', validators=[Optional()], 
-                                            # description='Ej: Frágil, Entregar solo a [Nombre], Dejar en portería.')
-    
-    # --- CAMBIO CLAVE: Convertir campos de dirección a SelectField ---
-    # Ahora serán listas desplegables con las direcciones del usuario.
-    #direccion_recogida = SelectField('Dirección de Recogida', coerce=int, validators=[DataRequired()],
-    #                                 description='Selecciona una de tus direcciones guardadas para la recogida.')
-    #direccion_entrega = SelectField('Dirección de Entrega', coerce=int, validators=[DataRequired()],
-    #                                description='Selecciona una de tus direcciones guardadas para la entrega.')
-    
-    #precio_calculado = HiddenField('Precio Calculado', validators=[Optional()])
-
+   
     submit = SubmitField('Añadir paquete al Carrito')
-
-    # --- MÉTODO AÑADIDO: Para cargar dinámicamente las opciones de dirección ---
-    # def __init__(self, *args, **kwargs):
-        # super(PackageForm, self).__init__(*args, **kwargs)
-        # # Llenar las direcciones del usuario actual si está autenticado
-        # if current_app and current_user.is_authenticated:
-            # # Buscamos el perfil del cliente para acceder a sus direcciones
-            # customer_profile = db.session.execute(
-                # db.select(Customer).filter_by(user_id=current_user.id)
-            # ).scalar_one_or_none()
-
-            # if customer_profile:
-                # user_addresses = db.session.execute(
-                    # db.select(Address).filter_by(customer_id=customer_profile.id)
-                # ).scalars().all()
-                
-                # # Creamos la lista de opciones (value, label)
-                # choices = [(addr.id, addr.full_address) for addr in user_addresses]
-                
-                # # Asignamos las opciones a ambos campos
-                # self.direccion_recogida.choices = choices
-                # self.direccion_entrega.choices = choices
-            # else:
-                # # Si no hay perfil de cliente o direcciones, las opciones estarán vacías
-                # self.direccion_recogida.choices = []
-                # self.direccion_entrega.choices = []
 
 # Formulario vacío para CSRF en plantillas que no tienen un formulario de datos específico
 class EmptyForm(FlaskForm):
