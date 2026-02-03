@@ -279,8 +279,7 @@ def update_delivery_status(order_id):
         flash(f'Estado del pedido #{order.id} actualizado a "{new_status}"', 'success')
         
         notify(
-            customer_user_id = order.user_id,
-            # order.customer_id,
+            order.user_id,
             f"Tu pedido #{order.id} ahora está en estado: {new_status}"
         )
 
