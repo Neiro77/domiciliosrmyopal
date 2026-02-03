@@ -186,13 +186,18 @@ def accept_order(order_id):
         # --- Notificaciones Email ---
         # Notificar al cliente
         if order.user and order.user.email:
-            send_email(
-                order.user.email,
-                f'¡Tu pedido #{order.id} ha sido aceptado!',
-                'customer_order_accepted',
-                order=order,
-                driver=driver_profile
-            )
+            try:
+                send_email(
+                    order.user.email,
+                    f'¡Tu pedido #{order.id} ha sido aceptado!',
+                    'customer_order_accepted',
+                    order=order,
+                    driver=driver_profile
+                )
+            except Exception as e:
+                current_app.logger.warning(
+                    f"Email no enviado (bloqueado o timeout): {e}"
+                )
         
         # Notificar al negocio (si el negocio no lo había movido a 'Accepted' aún)
         if order.business and order.business.user and order.business.user.email: # Usamos order.business
@@ -281,15 +286,19 @@ def update_delivery_status(order_id):
             if special_message:
                 email_subject = f'¡Importante! Actualización de tu pedido #{order.id}'
                 template_to_render = 'customer_order_special_message' # Nueva plantilla para mensajes especiales
-
-            send_email(
-                order.user.email,
-                email_subject,
-                template_to_render,
-                order=order,
-                driver=driver_profile,
-                special_message=special_message
-            )
+                try:
+                    send_email(
+                        order.user.email,
+                        email_subject,
+                        template_to_render,
+                        order=order,
+                        driver=driver_profile,
+                        special_message=special_message
+                    )
+                except Exception as e:
+                    current_app.logger.warning(
+                        f"Email no enviado (bloqueado o timeout): {e}"
+                    )    
         
         # Notificar al negocio sobre el cambio de estado
         if order.business and order.business.user and order.business.user.email: # Usamos order.business
