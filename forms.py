@@ -196,6 +196,7 @@ class PackageForm(FlaskForm):
         'Descripción del paquete',
         description='Detalla lo que envías (Ej: Contrato importante, Caja de libros, Pastel de cumpleaños).',
         validators=[
+            Optional(),
             #DataRequired(),
             Length(max=500)
         ]
@@ -203,12 +204,12 @@ class PackageForm(FlaskForm):
 
     nombre_quien_recibe = StringField(
         'Nombre de quien recibe',
-        validators=[DataRequired(), Length(max=100)]
+        validators=[DataRequired(message="Este campo es obligatorio"), Length(max=100)]
     )
 
     telefono_quien_recibe = StringField(
         'Teléfono de quien recibe',
-        validators=[DataRequired(), Length(min=7, max=20)]
+        validators=[DataRequired(message="Este campo es obligatorio"), Length(min=7, max=20)]
     )
     
     

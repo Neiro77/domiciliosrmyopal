@@ -292,6 +292,7 @@ def create_package():
                 descripcion=form.descripcion.data,
                 nombre_quien_recibe=form.nombre_quien_recibe.data,
                 telefono_quien_recibe=form.telefono_quien_recibe.data,
+                precio_calculado=0.0
             
                 # tipo_paquete=form.tipo_paquete.data,
                 # descripcion=form.descripcion.data,
