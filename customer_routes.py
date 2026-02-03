@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from functools import wraps
 from extensions import db # Importa db para interacciones con la DB
-from models import User, Customer, Driver, Business, Product, Category, Order, OrderItem, PaymentMethod, Address, Service, OrderStatus, PaymentStatus, DetallesPaqueteEnvio, TransactionType, create_transaction # <-- Importa lo nuevo # Asegúrate de importar DetallesPaqueteEnvio # Importa los modelos necesarios
+from models import User, Customer, Driver, Business, Product, Category, Order, OrderItem, PaymentMethod, Address, Service, OrderStatus, PaymentStatus, DetallesPaqueteEnvio, TransactionType, create_transaction, Notification # <-- Importa lo nuevo # Asegúrate de importar DetallesPaqueteEnvio # Importa los modelos necesarios
 from forms import CheckoutForm, AddressForm, PackageForm, EmptyForm  # Importa los nuevos formularios # Importa los nuevos formularios
 import json # Necesario para parsear el JSON del carrito (aunque no en checkout directamente ahora)
 from sqlalchemy import exc # Para manejar excepciones de SQLAlchemy
@@ -718,7 +718,22 @@ def cancel_order(order_id):
 
     return redirect(url_for('customer.my_orders'))
     
-    
+@customer_bp.route("/notifications")
+@customer_required
+def notifications():
+    notifs = Notification.query.filter_by(
+        user_id=current_user.id
+    ).order_by(Notification.created_at.desc()).all()
+
+    for n in notifs:
+        n.is_read = True
+
+    db.session.commit()
+
+    return render_template(
+        "notifications.html",
+        notifications=notifs
+    )    
     
 
 

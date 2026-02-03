@@ -2852,3 +2852,15 @@ footer {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.card {
+  border-radius: 12px;
+}
+
+.card-header {
+  border-radius: 12px 12px 0 0;
+}
+
+.form-label {
+  font-size: 0.9rem;
+}

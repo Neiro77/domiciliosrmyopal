@@ -9,6 +9,7 @@ from forms import EmptyForm, ToggleAvailabilityForm # <--- Importa el nuevo Empt
 from datetime import datetime # <--- ¡IMPORTA DATETIME AQUÍ!
 from sqlalchemy.sql import func # Para usar funciones de SQL como now()
 from decimal import Decimal # Importar Decimal para manejar valores monetarios
+from utils.notifications import notify
 
 driver_bp = Blueprint('driver', __name__, url_prefix='/driver')
 
@@ -194,6 +195,7 @@ def accept_order(order_id):
                     order=order,
                     driver=driver_profile
                 )
+                
             except Exception as e:
                 current_app.logger.warning(
                     f"Email no enviado (bloqueado o timeout): {e}"
@@ -275,6 +277,11 @@ def update_delivery_status(order_id):
 
         db.session.commit()
         flash(f'Estado del pedido #{order.id} actualizado a "{new_status}"', 'success')
+        
+        notify(
+            order.customer_id,
+            f"Tu pedido #{order.id} ahora está en estado: {nuevo_estado}"
+        )
 
         # --- Notificaciones Email ---
         # Notificar al cliente sobre el cambio de estado

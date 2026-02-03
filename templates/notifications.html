@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h4>🔔 Notificaciones</h4>
+
+  {% if notifications %}
+    <ul class="list-group mt-3">
+      {% for n in notifications %}
+        <li class="list-group-item">
+          {{ n.message }}
+          <small class="text-muted d-block">
+            {{ n.created_at.strftime('%d/%m/%Y %H:%M') }}
+          </small>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted mt-3">No tienes notificaciones.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -2,29 +2,77 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Enviar un paquete</h2>
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
 
-    <form method="POST">
-        {{ form.hidden_tag() }}
-
-        <div class="mb-3">
-            {{ form.descripcion.label(class="form-label") }}
-            {{ form.descripcion(class="form-control") }}
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-box"></i> Enviar un paquete
+          </h5>
         </div>
 
-        <div class="mb-3">
-            {{ form.nombre_quien_recibe.label(class="form-label") }}
-            {{ form.nombre_quien_recibe(class="form-control", required=True) }}
-        </div>
+        <div class="card-body">
 
-        <div class="mb-3">
-            {{ form.telefono_quien_recibe.label(class="form-label") }}
-            {{ form.telefono_quien_recibe(class="form-control", required=True) }}
-        </div>
+          <form method="POST">
+            {{ form.hidden_tag() }}
 
-        <button type="submit" class="btn btn-primary">
-            Continuar
-        </button>
-    </form>
+            <!-- Tipo de paquete 
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                📦 Tipo de paquete
+              </label>
+              {{ form.tipo_paquete(class="form-select", required=true) }}
+            </div>
+			
+            <!-- Tamaño 
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                📐 Tamaño del paquete
+              </label>
+              {{ form.tamano_paquete(class="form-select", required=true) }}
+            </div>
+			-->
+            <hr>
+
+            <!-- Receptor -->
+            <h6 class="mb-3">👤 Datos de quien recibe</h6>
+
+            <div class="mb-3">
+              {{ form.nombre_quien_recibe(
+                class="form-control",
+                placeholder="Nombre completo",
+                required=true
+              ) }}
+            </div>
+
+            <div class="mb-3">
+              {{ form.telefono_quien_recibe(
+                class="form-control",
+                placeholder="Teléfono de contacto",
+                required=true
+              ) }}
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-3">
+              {{ form.descripcion(
+                class="form-control",
+                rows="3",
+                placeholder="Indicaciones adicionales (opcional)"
+              ) }}
+            </div>
+
+            <button class="btn btn-primary w-100 mt-3">
+              🚀 Crear envío
+            </button>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -110,6 +110,14 @@
     <header class="bg-blue-600 text-white p-4 shadow-md">
         <nav class="container mx-auto flex justify-between items-center">
 		
+			{% if current_user.is_authenticated %}
+			  {% set unread_notifications =
+				  current_user.notifications
+				  |selectattr("is_read", "equalto", false)
+				  |list
+				  |length %}
+			{% endif %}
+		
 			<!-- >>> AJUSTE 1: El enlace del logo ahora es condicional <<< -->
             <a href="{% if current_user.is_authenticated and current_user.role == 'customer' %}{{ url_for('customer.dashboard') }}{% else %}{{ url_for('public.home') }}{% endif %}" class="text-2xl font-bold">Domicilios RM</a>
 
@@ -141,6 +149,14 @@
                                   :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                             </span>
                         </a>
+						<a href="{{ url_for('notifications') }}" class="nav-link position-relative">
+						  🔔
+						  {% if unread_notifications > 0 %}
+							<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+							  {{ unread_notifications }}
+							</span>
+						  {% endif %}
+						</a>
                     {% elif current_user.role == 'driver' %}
                         <a href="{{ url_for('driver.dashboard') }}" class="hover:text-blue-200">Mis Entregas</a>
 						<a href="{{ url_for('driver.my_orders') }}" class="hover:text-blue-200">Historial</a>
@@ -190,6 +206,14 @@
                                 :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                         </span>
                     </a>
+					<a href="{{ url_for('notifications') }}" class="nav-link position-relative">
+					  🔔
+					  {% if unread_notifications > 0 %}
+						<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+						  {{ unread_notifications }}
+						</span>
+					  {% endif %}
+					</a>
                 {% elif current_user.role == 'driver' %}
                     <a href="{{ url_for('driver.dashboard') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Mis Entregas</a>
 					<a href="{{ url_for('driver.my_orders') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Historial</a>
