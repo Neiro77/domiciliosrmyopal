@@ -318,7 +318,8 @@ def create_package():
             session.modified = True
 
             return redirect(url_for('customer.checkout'))
-
+            print(form._fields.keys())
+            
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error al crear paquete: {e}")

@@ -16,24 +16,15 @@
 
           <form method="POST">
             {{ form.hidden_tag() }}
-
-            <!-- Tipo de paquete 
-            <div class="mb-3">
-              <label class="form-label fw-semibold">
-                📦 Tipo de paquete
-              </label>
-              {{ form.tipo_paquete(class="form-select", required=true) }}
-            </div>
 			
-            <!-- Tamaño 
+			<!-- Descripción -->
             <div class="mb-3">
-              <label class="form-label fw-semibold">
-                📐 Tamaño del paquete
-              </label>
-              {{ form.tamano_paquete(class="form-select", required=true) }}
+              {{ form.descripcion(
+                class="form-control",
+                rows="3",
+                placeholder="Indicaciones adicionales (opcional)"
+              ) }}
             </div>
-			-->
-            <hr>
 
             <!-- Receptor -->
             <h6 class="mb-3">👤 Datos de quien recibe</h6>
@@ -51,15 +42,6 @@
                 class="form-control",
                 placeholder="Teléfono de contacto",
                 required=true
-              ) }}
-            </div>
-
-            <!-- Descripción -->
-            <div class="mb-3">
-              {{ form.descripcion(
-                class="form-control",
-                rows="3",
-                placeholder="Indicaciones adicionales (opcional)"
               ) }}
             </div>
 
