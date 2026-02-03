@@ -306,7 +306,7 @@ def update_delivery_status(order_id):
                     notification = Notification(
                         user_id=customer_user_id,
                         title="Actualización de tu pedido",
-                        message=f"Tu pedido #{order.id} cambió de estado a '{order.status}'.",
+                        message=f"Tu pedido #{order.id} cambió de estado a '{order.status}'."
                     )
 
                     db.session.add(notification)
