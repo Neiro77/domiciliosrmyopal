@@ -129,7 +129,7 @@
 					<a href="{% if current_user.is_authenticated %}
 								{{ url_for('customer.dashboard') }}
 							 {% else %}
-								{{ url_for('public.home') }}
+								{{ url_for('public.index') }}
 							 {% endif %}"
 					   class="hover:text-blue-200">
 						Inicio
