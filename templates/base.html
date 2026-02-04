@@ -185,7 +185,7 @@
 				<a href="{% if current_user.is_authenticated %}
 							{{ url_for('customer.dashboard') }}
 						 {% else %}
-							{{ url_for('public.home') }}
+							{{ url_for('public.index') }}
 						 {% endif %}"
 				   class="block px-4 py-2 text-white hover:bg-blue-600">
 					Inicio
