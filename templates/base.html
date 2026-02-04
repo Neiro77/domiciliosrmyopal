@@ -119,7 +119,7 @@
 			{% endif %}
 		
 			<!-- >>> AJUSTE 1: El enlace del logo ahora es condicional <<< -->
-            <a href="{% if current_user.is_authenticated and current_user.role == 'customer' %}{{ url_for('customer.dashboard') }}{% else %}{{ url_for('public.home') }}{% endif %}" class="text-2xl font-bold">Domicilios RM</a>
+            <a href="{% if current_user.is_authenticated and current_user.role == 'customer' %}{{ url_for('customer.dashboard') }}{% else %}{{ url_for('public.index') }}{% endif %}" class="text-2xl font-bold">Domicilios RM</a>
 
             <div class="hidden md:flex space-x-4 items-center">
                 
