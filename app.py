@@ -81,7 +81,22 @@ def create_app():
     app.register_blueprint(customer_bp, url_prefix='/customer') 
     app.register_blueprint(driver_bp, url_prefix='/driver')     
     app.register_blueprint(business_bp, url_prefix='/business') 
-    app.register_blueprint(admin_bp, url_prefix='/admin')      
+    app.register_blueprint(admin_bp, url_prefix='/admin') 
+
+
+    @app.context_processor
+    def inject_unread_notifications():
+        if current_user.is_authenticated:
+            count = Notification.query.filter_by(
+                user_id=current_user.id,
+                is_read=False
+            ).count()
+        else:
+            count = 0
+
+        return dict(unread_notifications_count=count)
+
+    return app
 
     # Función para inicializar datos esenciales
     with app.app_context():
@@ -147,7 +162,7 @@ def create_app():
 
     return app
     
-@app.context_processor
+#@app.context_processor
 def inject_unread_notifications():
     if current_user.is_authenticated:
         count = Notification.query.filter_by(
