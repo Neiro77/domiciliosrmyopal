@@ -8,7 +8,7 @@ from extensions import db, login_manager, mail, migrate, moment # <--- ¡CAMBIO 
 # from config import Config # <-- Si tienes un archivo config.py, descomenta esto
 
 # PRIMERO: Importa db y los modelos desde models.py
-from models import User, Customer, Driver, Business, Product, Order, OrderItem, OpeningHour, PaymentMethod, Service, BusinessPaymentMethod, Category, DetallesPaqueteEnvio, DetallesItemCompra # Añadidos todos los modelos definidos # Importa Category ahora también
+from models import User, Customer, Driver, Business, Product, Order, OrderItem, OpeningHour, PaymentMethod, Service, BusinessPaymentMethod, Category, DetallesPaqueteEnvio, DetallesItemCompra, Notification # Añadidos todos los modelos definidos # Importa Category ahora también
 
 import os
 import requests
@@ -146,6 +146,18 @@ def create_app():
             print(f"AVISO: Omitiendo inicialización de datos (Tablas no listas): {e}")
 
     return app
+    
+@app.context_processor
+def inject_unread_notifications():
+    if current_user.is_authenticated:
+        count = Notification.query.filter_by(
+            user_id=current_user.id,
+            is_read=False
+        ).count()
+    else:
+        count = 0
+
+    return dict(unread_notifications_count=count)
     
 if __name__ == '__main__':
     app = create_app()  
