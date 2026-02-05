@@ -72,22 +72,26 @@ def dashboard():
     """
     Muestra el dashboard principal del conductor con sus pedidos activos.
     """
-    form = EmptyForm()
-    if not form.validate_on_submit():
-        flash('Error de seguridad.', 'danger')
-        return redirect(url_for('driver.dashboard'))
+    # form = EmptyForm()
+    # if not form.validate_on_submit():
+        # flash('Error de seguridad.', 'danger')
+        # return redirect(url_for('driver.dashboard'))
 
     # 1️⃣ Obtener perfil del conductor (PRIMERO)
     driver_profile = db.session.execute(
         db.select(Driver).filter_by(user_id=current_user.id)
     ).scalar_one_or_none()
 
+    # if not driver_profile:
+        # current_app.logger.warning(
+            # f"Usuario {current_user.id} tiene rol driver pero no perfil Driver."
+        # )
+        # flash("Tu perfil de conductor no está completo. Contacta al administrador.", "warning")
+        # #return redirect(url_for('public.index'))
+        
     if not driver_profile:
-        current_app.logger.warning(
-            f"Usuario {current_user.id} tiene rol driver pero no perfil Driver."
-        )
-        flash("Tu perfil de conductor no está completo. Contacta al administrador.", "warning")
-        #return redirect(url_for('public.index'))
+        flash("Tu perfil de conductor no está completo.", "warning")
+        return redirect(url_for('driver.profile_setup'))
 
     # 2️⃣ Estados activos
     active_statuses = [
@@ -96,25 +100,45 @@ def dashboard():
     ]
 
     # 3️⃣ Consulta de pedidos asignados
-    query = (
-        db.select(Order)
-        .filter(
-            Order.driver_id == driver_profile.id,
-            Order.status.in_(active_statuses)
+    # query = (
+        # db.select(Order)
+        # .filter(
+            # Order.driver_id == driver_profile.id,
+            # Order.status.in_(active_statuses)
+        # )
+        # .options(
+            # joinedload(Order.user).joinedload(User.customer_profile),
+            # joinedload(Order.service),
+            # joinedload(Order.items).joinedload(OrderItem.product),
+            # joinedload(Order.items).joinedload(OrderItem.paquete_envio)
+        # )
+        # .order_by(Order.order_date.asc())
+    # )
+    # 3️⃣ Pedidos activos del driver
+    orders = (
+        db.session.execute(
+            db.select(Order)
+            .filter(
+                Order.driver_id == driver_profile.id,
+                Order.status.in_(active_statuses)
+            )
+            .options(
+                joinedload(Order.user),
+                joinedload(Order.service),
+                joinedload(Order.items).joinedload(OrderItem.product),
+                joinedload(Order.items).joinedload(OrderItem.paquete_envio)
+            )
+            .order_by(Order.order_date.asc())
         )
-        .options(
-            joinedload(Order.user).joinedload(User.customer_profile),
-            joinedload(Order.service),
-            joinedload(Order.items).joinedload(OrderItem.product),
-            joinedload(Order.items).joinedload(OrderItem.paquete_envio)
-        )
-        .order_by(Order.order_date.asc())
+        .unique()
+        .scalars()
+        .all()
     )
 
-    result = db.session.execute(query)
+    # result = db.session.execute(query)
 
-    # 🔑 Evita duplicados por JOIN con items
-    orders = result.unique().scalars().all()
+    # # 🔑 Evita duplicados por JOIN con items
+    # orders = result.unique().scalars().all()
     
     # Todos los pedidos para el motorizado
     # driver = current_user.driver
