@@ -111,7 +111,7 @@ def dashboard():
 
     available_orders = []
     #if driver.saldo > 0 and not active_order:
-    if driver_profile.saldo > 0 and not active_order:
+    if driver_profile.saldo_cuenta > 0 and not active_order:
         available_orders = Order.query.filter(
             Order.driver_id.is_(None),
             Order.status.in_(["pending", "created"])
@@ -193,7 +193,7 @@ def accept_order(order_id):
         )
         return redirect(url_for('driver.dashboard'))    
 
-    if driver_profile.saldo <= 0:
+    if driver_profile.saldo_cuenta <= 0:
         flash(
             'No tienes saldo disponible para aceptar domicilios.',
             'danger'
