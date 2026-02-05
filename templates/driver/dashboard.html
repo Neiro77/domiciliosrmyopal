@@ -127,6 +127,29 @@
             <p>No tienes entregas asignadas en este momento.</p>
         </div>
     {% endif %}
+	
+	{% if available_orders %}
+	<div class="card mt-4">
+	  <div class="card-header">
+		<strong>Domicilios disponibles</strong>
+	  </div>
+	  <div class="card-body">
+		{% for order in available_orders %}
+		  <div class="border rounded p-2 mb-2">
+			<p><strong>Pedido #{{ order.id }}</strong></p>
+			<p>Dirección: {{ order.address }}</p>
+
+			<form method="POST"
+				  action="{{ url_for('driver.accept_order', order_id=order.id) }}">
+			  <button class="btn btn-success btn-sm">
+				Aceptar domicilio
+			  </button>
+			</form>
+		  </div>
+		{% endfor %}
+	  </div>
+	</div>
+	{% endif %}
 
 </div>
 {% endblock %}

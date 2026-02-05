@@ -50,6 +50,12 @@ def driver_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def driver_has_active_order(driver_id):
+    return Order.query.filter(
+        Order.driver_id == driver_id,
+        Order.status.notin_(["delivered", "cancelled"])
+    ).first() is not None
+
 @driver_bp.route('/dashboard')
 @login_required
 @driver_required
@@ -97,13 +103,27 @@ def dashboard():
 
     # 🔑 Evita duplicados por JOIN con items
     orders = result.unique().scalars().all()
+    
+    # Todos los pedidos para el motorizado
+    driver = current_user.driver
+
+    active_order = driver_has_active_order(driver.id)
+
+    available_orders = []
+    if driver.saldo > 0 and not active_order:
+        available_orders = Order.query.filter(
+            Order.driver_id.is_(None),
+            Order.status.in_(["pending", "created"])
+        ).order_by(Order.created_at.asc()).all()
 
     return render_template(
         'driver/dashboard.html',
         driver_profile=driver_profile,
         orders=orders,
         form=form,
-        OrderStatus=OrderStatus
+        OrderStatus=OrderStatus,
+        available_orders=available_orders,
+        active_order=active_order
     )
 
 @driver_bp.route('/profile/setup', methods=['GET', 'POST'])
@@ -152,7 +172,33 @@ def accept_order(order_id):
     if not driver_profile:
         flash('Perfil de motorizado no encontrado.', 'danger')
         return redirect(url_for('driver.dashboard'))
+        
+    # Validar que el driver no tenga otro pedido activo
+    active_order = db.session.execute(
+        db.select(Order)
+        .filter(
+            Order.driver_id == driver_profile.id,
+            Order.status.notin_([
+                OrderStatus.DELIVERED.value,
+                OrderStatus.CANCELLED.value
+            ])
+        )
+    ).scalar_one_or_none()
 
+    if active_order:
+        flash(
+            f'No puedes aceptar otro pedido mientras gestionas el pedido #{active_order.id}.',
+            'warning'
+        )
+        return redirect(url_for('driver.dashboard'))    
+
+    if driver_profile.saldo <= 0:
+    flash(
+        'No tienes saldo disponible para aceptar domicilios.',
+        'danger'
+    )
+    return redirect(url_for('driver.dashboard'))
+    
     order = db.session.execute(
         db.select(Order)
         .filter_by(id=order_id)
