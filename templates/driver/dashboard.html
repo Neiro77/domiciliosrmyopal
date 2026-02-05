@@ -140,7 +140,7 @@
 			<p>Dirección: {{ order.address }}</p>
 
 			<form action="{{ url_for('driver.accept_order', order_id=order.id) }}" method="POST">
-				{{ accept_form.hidden_tag() }}
+				{{ form.hidden_tag() }}
 				<button type="submit" class="btn btn-success btn-sm">
 					Aceptar domicilio
 				</button>

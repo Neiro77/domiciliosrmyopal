@@ -66,8 +66,8 @@ def dashboard():
     """
     Muestra el dashboard principal del conductor con sus pedidos activos.
     """
-    # form = EmptyForm()
-    form = AcceptOrderForm()
+    form = EmptyForm()
+    #form = AcceptOrderForm()
     if not form.validate_on_submit():
         abort(400)
 
