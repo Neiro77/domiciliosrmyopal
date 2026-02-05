@@ -211,16 +211,18 @@ def accept_order(order_id):
 
     driver_profile = db.session.execute(db.select(Driver).filter_by(user_id=current_user.id)).scalar_one_or_none()
     
-    if not driver_profile:
+    driver = current_user.driver_profile
+    if not driver:
         flash('Perfil de motorizado no encontrado.', 'danger')
         return redirect(url_for('driver.dashboard'))
         
     # Validar que el driver no tenga otro pedido activo
     order = Order.query.get_or_404(order_id)
 
-    # 1. Validar que el pedido esté disponible
+    # 1. Validar que el pedido esté disponible        
     if order.driver_id is not None:
-        abort(400, "Este domicilio ya fue tomado")
+        flash("Este pedido ya fue tomado por otro conductor", "warning")
+        return redirect(url_for("driver.dashboard"))
 
     if order.status in [
         OrderStatus.DELIVERED.value,
@@ -229,7 +231,8 @@ def accept_order(order_id):
         abort(400, "Este domicilio ya no está disponible")
 
     # 2. Validar que el driver no tenga otro activo
-    driver = current_user.driver
+    # driver = current_user.driver
+    driver = current_user.driver_profile
     if driver_has_active_order(driver.id):
         abort(400, "Ya tienes un domicilio en curso")
 
@@ -248,8 +251,8 @@ def accept_order(order_id):
         return redirect(url_for('driver.dashboard'))
 
     try:        
-        order.driver_id = driver_profile.id
-        order.status = OrderStatus.OUT_FOR_DELIVERY.value
+        order.driver_id = driver.id
+        order.status = OrderStatus.ACCEPTED.value
         order.fecha_asignacion = datetime.utcnow()
         db.session.commit()
         
@@ -264,7 +267,7 @@ def accept_order(order_id):
         # )
         # db.session.add(history_entry)
 
-        db.session.commit()
+        # db.session.commit()
         
         flash(f'Has aceptado el pedido #{order.id}.', 'success')
 
@@ -301,6 +304,7 @@ def accept_order(order_id):
         flash(f'Error al aceptar el pedido: {str(e)}', 'danger')
         current_app.logger.error(f"Error al aceptar pedido {order.id}: {e}")
 
+    flash("Pedido asignado correctamente 🚴‍♂️", "success")
     return redirect(url_for('driver.dashboard'))
 
 
