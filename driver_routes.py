@@ -131,7 +131,7 @@ def dashboard():
         'driver/dashboard.html',
         driver_profile=driver_profile,
         orders=orders,
-        form=form,
+        #form=form,
         #accept_form=form,
         OrderStatus=OrderStatus,
         available_orders=available_orders,
