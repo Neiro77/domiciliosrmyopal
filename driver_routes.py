@@ -62,7 +62,7 @@ def driver_has_active_order(driver_id):
             OrderStatus.DELIVERED.value,
             OrderStatus.CANCELLED.value
         ])
-    ).first() is not None
+    ).first() #is not None
 
 @driver_bp.route('/dashboard')
 @login_required
@@ -305,7 +305,7 @@ def accept_order(order_id):
         current_app.logger.error(f"Error al aceptar pedido {order.id}: {e}")
 
     flash("Pedido asignado correctamente 🚴‍♂️", "success")
-    return redirect(url_for('driver.dashboard'))
+    return redirect(url_for('driver.my_orders'))
 
 
 @driver_bp.route('/order/<int:order_id>/update_delivery_status', methods=['POST'])

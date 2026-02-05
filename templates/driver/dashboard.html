@@ -133,7 +133,7 @@
         </div>
     {% endif %}
 	
-	{% if available_orders %}
+	{% if available_orders and not active_order %}
 	<div class="card mt-4">
 	  <div class="card-header">
 		<strong>Domicilios disponibles</strong>
