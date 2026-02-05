@@ -87,7 +87,7 @@ def dashboard():
             f"Usuario {current_user.id} tiene rol driver pero no perfil Driver."
         )
         flash("Tu perfil de conductor no está completo. Contacta al administrador.", "warning")
-        return redirect(url_for('public.index'))
+        #return redirect(url_for('public.index'))
 
     # 2️⃣ Estados activos
     active_statuses = [

@@ -47,8 +47,8 @@ def index():
     # return render_template('public/index.html')
     
     if current_user.is_authenticated:
-        if current_user.role == 'driver':
-            return redirect(url_for('driver.dashboard'))
+        if current_user.role == 'customer':
+            return redirect(url_for('customer.dashboard'))
         elif current_user.role == 'business':
             return redirect(url_for('business.dashboard'))
         elif current_user.role == 'admin':
@@ -104,9 +104,20 @@ def login():
                     flash('Tu cuenta no ha sido activada por un administrador.', 'warning')
                     return redirect(url_for('public.login'))
                 
+                # login_user(user)
+                # flash('¡Inicio de sesión exitoso!', 'success')
+                # return redirect(url_for('public.index'))
                 login_user(user)
-                flash('¡Inicio de sesión exitoso!', 'success')
-                return redirect(url_for('public.index'))
+
+                if user.role == 'driver':
+                    return redirect(url_for('driver.dashboard'))
+                elif user.role == 'customer':
+                    return redirect(url_for('customer.dashboard'))
+                elif user.role == 'business':
+                    return redirect(url_for('business.dashboard'))
+                elif user.role == 'admin':
+                    return redirect(url_for('admin.dashboard'))
+
             else:
                 flash('Correo electrónico o contraseña incorrectos.', 'danger')
 
