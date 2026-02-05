@@ -139,11 +139,11 @@
 			<p><strong>Pedido #{{ order.id }}</strong></p>
 			<p>Dirección: {{ order.address }}</p>
 
-			<form method="POST"
-				  action="{{ url_for('driver.accept_order', order_id=order.id) }}">
-			  <button class="btn btn-success btn-sm">
-				Aceptar domicilio
-			  </button>
+			<form action="{{ url_for('driver.accept_order', order_id=order.id) }}" method="POST">
+				{{ csrf_token() }}
+				<button type="submit" class="btn btn-success btn-sm">
+					Aceptar domicilio
+				</button>
 			</form>
 		  </div>
 		{% endfor %}
