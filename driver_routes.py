@@ -165,6 +165,7 @@ def profile_setup():
 
 
 @driver_bp.route('/order/<int:order_id>/accept', methods=['POST'])
+@login_required
 @driver_required
 def accept_order(order_id):
     # Validar el token CSRF antes de procesar
@@ -180,30 +181,39 @@ def accept_order(order_id):
         return redirect(url_for('driver.dashboard'))
         
     # Validar que el driver no tenga otro pedido activo
-    active_order = db.session.execute(
-        db.select(Order)
-        .filter(
-            Order.driver_id == driver_profile.id,
-            Order.status.notin_([
-                OrderStatus.DELIVERED.value,
-                OrderStatus.CANCELLED.value
-            ])
-        )
-    ).scalar_one_or_none()
+    order = Order.query.get_or_404(order_id)
 
-    if active_order:
-        flash(
-            f'No puedes aceptar otro pedido mientras gestionas el pedido #{active_order.id}.',
-            'warning'
-        )
-        return redirect(url_for('driver.dashboard'))    
+    # 1. Validar que el pedido esté disponible
+    if order.driver_id is not None:
+        abort(400, "Este domicilio ya fue tomado")
 
-    if driver_profile.saldo_cuenta <= 0:
-        flash(
-            'No tienes saldo disponible para aceptar domicilios.',
-            'danger'
-        )
-        return redirect(url_for('driver.dashboard'))
+    if order.status in [
+        OrderStatus.DELIVERED.value,
+        OrderStatus.CANCELLED.value
+    ]:
+        abort(400, "Este domicilio ya no está disponible")
+
+    # 2. Validar que el driver no tenga otro activo
+    driver = current_user.driver
+    if driver_has_active_order(driver.id):
+        abort(400, "Ya tienes un domicilio en curso")
+
+    # 3. Asignar
+    order.driver_id = driver.id
+    order.status = OrderStatus.ACCEPTED.value
+    
+    # if driver_profile.saldo_cuenta <= 0:
+        # flash(
+            # 'No tienes saldo disponible para aceptar domicilios.',
+            # 'danger'
+        # )
+        # return redirect(url_for('driver.dashboard'))
+        
+    current_app.logger.warning(
+        f"[ACCEPT DEBUG] order={order.id} status={order.status} driver_id={order.driver_id}"
+    )
+
+    db.session.commit()    
     
     order = db.session.execute(
         db.select(Order)
