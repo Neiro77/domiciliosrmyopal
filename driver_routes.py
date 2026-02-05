@@ -66,7 +66,10 @@ def dashboard():
     """
     Muestra el dashboard principal del conductor con sus pedidos activos.
     """
-    form = EmptyForm()
+    # form = EmptyForm()
+    form = AcceptOrderForm()
+    if not form.validate_on_submit():
+        abort(400)
 
     # 1️⃣ Obtener perfil del conductor (PRIMERO)
     driver_profile = db.session.execute(
@@ -126,7 +129,8 @@ def dashboard():
         'driver/dashboard.html',
         driver_profile=driver_profile,
         orders=orders,
-        form=form,
+        # form=form,
+        accept_form=form,
         OrderStatus=OrderStatus,
         available_orders=available_orders,
         active_order=active_order
@@ -199,21 +203,7 @@ def accept_order(order_id):
         abort(400, "Ya tienes un domicilio en curso")
 
     # 3. Asignar
-    order.driver_id = driver.id
-    order.status = OrderStatus.ACCEPTED.value
-    
-    # if driver_profile.saldo_cuenta <= 0:
-        # flash(
-            # 'No tienes saldo disponible para aceptar domicilios.',
-            # 'danger'
-        # )
-        # return redirect(url_for('driver.dashboard'))
-        
-    current_app.logger.warning(
-        f"[ACCEPT DEBUG] order={order.id} status={order.status} driver_id={order.driver_id}"
-    )
-
-    db.session.commit()    
+    ## 
     
     order = db.session.execute(
         db.select(Order)
@@ -226,10 +216,11 @@ def accept_order(order_id):
         flash('Pedido no disponible para ser aceptado.', 'danger')
         return redirect(url_for('driver.dashboard'))
 
-    try:
+    try:        
         order.driver_id = driver_profile.id
-        order.status = OrderStatus.OUT_FOR_DELIVERY.value # Se asume que al aceptar, ya está en camino a recoger/entregar
+        order.status = OrderStatus.OUT_FOR_DELIVERY.value
         order.fecha_asignacion = datetime.utcnow()
+        db.session.commit()
         
         # REGISTRO DEL ESTADO DE ACEPTACIÓN EN EL HISTORIAL
         # Asumiendo que HistorialEstadoPedido es una clase de modelo válida

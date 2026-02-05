@@ -221,3 +221,6 @@ class EmptyForm(FlaskForm):
 
 class ToggleAvailabilityForm(FlaskForm):
     submit = SubmitField('Cambiar estado')
+    
+class AcceptOrderForm(FlaskForm):
+    pass
