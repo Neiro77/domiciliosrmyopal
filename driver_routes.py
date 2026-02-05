@@ -398,6 +398,7 @@ def update_delivery_status(order_id):
 
 # 1. RUTA PARA VER PEDIDOS ASIGNADOS (CON RESTRICCIÓN DE SALDO)
 @driver_bp.route('/my_orders')
+@login_required
 @driver_required
 def my_orders():
     driver_profile = current_user.driver_profile
@@ -422,16 +423,18 @@ def my_orders():
     # Restricción: Sin saldo, no hay pedidos
     if driver_profile.saldo_cuenta <= 0:
         flash('No tienes saldo suficiente en tu cuenta para aceptar pedidos. Por favor, recarga.', 'warning')
-        return render_template('driver/my_orders.html', orders=[], driver=driver_profile, form=form)
+        #return render_template('driver/my_orders.html', orders=[], driver=driver_profile, form=form)
 
     # Alerta de saldo bajo
     if driver_profile.saldo_cuenta <= 500:
         flash('Alerta: Tu saldo es bajo. Recárgalo pronto para no dejar de recibir pedidos.', 'info')
 
     # Muestra solo los pedidos asignados a este conductor
-    orders = db.session.execute(
-        db.select(Order).filter_by(driver_id=driver_profile.id).order_by(Order.order_date.desc())
-    ).scalars().all()
+    # orders = db.session.execute(
+        # db.select(Order).filter_by(driver_id=driver_profile.id).order_by(Order.order_date.desc())
+    # ).scalars().all()
+    
+    orders = Order.query.filter_by(status='pending').all()
     
     return render_template('driver/my_orders.html', orders=orders, driver=driver_profile, form=form)
 
