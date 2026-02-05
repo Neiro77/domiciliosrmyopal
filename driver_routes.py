@@ -10,7 +10,7 @@ from datetime import datetime # <--- ¡IMPORTA DATETIME AQUÍ!
 from sqlalchemy.sql import func # Para usar funciones de SQL como now()
 from decimal import Decimal # Importar Decimal para manejar valores monetarios
 from utils.notifications import notify
-from flask_wtf.csrf import csrf_exempt
+from app import csrf
 
 driver_bp = Blueprint('driver', __name__, url_prefix='/driver')
 
@@ -63,7 +63,7 @@ def driver_has_active_order(driver_id):
 @driver_bp.route('/dashboard')
 @login_required
 @driver_required
-@csrf_exempt
+@csrf.exempt
 def dashboard():
     """
     Muestra el dashboard principal del conductor con sus pedidos activos.
