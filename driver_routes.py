@@ -206,10 +206,9 @@ def accept_order(order_id):
 
     form = EmptyForm()
     if not form.validate_on_submit():
-        flash('Error de seguridad. Recargue la página e intente de nuevo.', 'danger')
+        flash('Error de seguridad. Recargue la página.', 'danger')
         return redirect(url_for('driver.dashboard'))
 
-    # 🔹 Driver consistente (UNA sola fuente)
     driver = db.session.execute(
         db.select(Driver).filter_by(user_id=current_user.id)
     ).scalar_one_or_none()
@@ -219,63 +218,61 @@ def accept_order(order_id):
         return redirect(url_for('driver.dashboard'))
 
     try:
-        # 🔒 Transacción atómica
-        with db.session.begin():
-
-            # 🔒 Bloqueo del pedido
-            order = (
-                db.session.execute(
-                    db.select(Order)
-                    .where(Order.id == order_id)
-                    .with_for_update()
-                    .options(
-                        joinedload(Order.user),
-                        joinedload(Order.business)
-                    )
-                )
-                .scalar_one_or_none()
-            )
-
-            if not order:
-                flash('Pedido no encontrado.', 'danger')
-                return redirect(url_for('driver.dashboard'))
-
-            if order.driver_id is not None:
-                flash("Este pedido ya fue tomado por otro conductor", "warning")
-                return redirect(url_for('driver.dashboard'))
-
-            if order.status in [
-                OrderStatus.DELIVERED.value,
-                OrderStatus.CANCELLED.value
-            ]:
-                flash("Este domicilio ya no está disponible", "warning")
-                return redirect(url_for('driver.dashboard'))
-
-            # 🔒 Verificar que el driver no tenga pedido activo
-            active_order = db.session.execute(
+        # 🔒 Bloqueo del pedido (SIN begin())
+        order = (
+            db.session.execute(
                 db.select(Order)
-                .where(
-                    Order.driver_id == driver.id,
-                    Order.status.in_([
-                        OrderStatus.ACCEPTED.value,
-                        OrderStatus.OUT_FOR_DELIVERY.value
-                    ])
+                .where(Order.id == order_id)
+                .with_for_update()
+                .options(
+                    joinedload(Order.user),
+                    joinedload(Order.business)
                 )
-            ).scalar_one_or_none()
+            )
+            .scalar_one_or_none()
+        )
 
-            if active_order:
-                flash("Ya tienes un domicilio en curso", "warning")
-                return redirect(url_for('driver.dashboard'))
+        if not order:
+            flash('Pedido no encontrado.', 'danger')
+            return redirect(url_for('driver.dashboard'))
 
-            # ✅ Asignación segura
-            order.driver_id = driver.id
-            order.status = OrderStatus.ACCEPTED.value
-            order.fecha_asignacion = datetime.utcnow()
+        if order.driver_id is not None:
+            flash('Este pedido ya fue tomado por otro conductor.', 'warning')
+            return redirect(url_for('driver.dashboard'))
 
-        # 🔔 Mensaje inmediato (la transacción ya cerró)
+        if order.status in [
+            OrderStatus.DELIVERED.value,
+            OrderStatus.CANCELLED.value
+        ]:
+            flash('Este domicilio ya no está disponible.', 'warning')
+            return redirect(url_for('driver.dashboard'))
+
+        # 🔒 Validar pedido activo
+        active_order = db.session.execute(
+            db.select(Order)
+            .where(
+                Order.driver_id == driver.id,
+                Order.status.in_([
+                    OrderStatus.ACCEPTED.value,
+                    OrderStatus.OUT_FOR_DELIVERY.value
+                ])
+            )
+        ).scalar_one_or_none()
+
+        if active_order:
+            flash('Ya tienes un domicilio en curso.', 'warning')
+            return redirect(url_for('driver.dashboard'))
+
+        # ✅ Asignar pedido
+        order.driver_id = driver.id
+        order.status = OrderStatus.ACCEPTED.value
+        order.fecha_asignacion = datetime.utcnow()
+
+        db.session.commit()  # 👈 commit explícito
+
         flash(f'Has aceptado el pedido #{order.id}.', 'success')
 
-        # --- Emails (FUERA de la transacción) ---
+        # 📧 Emails FUERA de la transacción
         if order.user and order.user.email:
             try:
                 send_email(
@@ -292,7 +289,7 @@ def accept_order(order_id):
             try:
                 send_email(
                     order.business.user.email,
-                    f'¡Tu pedido #{order.id} fue asignado a un motorizado! 🚴‍♂️',
+                    f'¡Tu pedido #{order.id} fue asignado!',
                     'business_order_driver_assigned',
                     order=order,
                     driver=driver
@@ -307,7 +304,6 @@ def accept_order(order_id):
         current_app.logger.exception("Error crítico al aceptar pedido")
         flash("Error al aceptar el pedido.", "danger")
         return redirect(url_for('driver.dashboard'))
-
 
 @driver_bp.route('/order/<int:order_id>/update_delivery_status', methods=['POST'])
 @driver_required
