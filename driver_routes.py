@@ -105,12 +105,13 @@ def dashboard():
     orders = result.unique().scalars().all()
     
     # Todos los pedidos para el motorizado
-    driver = current_user.driver
+    # driver = current_user.driver
 
-    active_order = driver_has_active_order(driver.id)
+    active_order = driver_has_active_order(driver_profile.id)
 
     available_orders = []
-    if driver.saldo > 0 and not active_order:
+    #if driver.saldo > 0 and not active_order:
+    if driver_profile.saldo > 0 and not active_order:
         available_orders = Order.query.filter(
             Order.driver_id.is_(None),
             Order.status.in_(["pending", "created"])
