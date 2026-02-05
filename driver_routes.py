@@ -193,11 +193,11 @@ def accept_order(order_id):
         return redirect(url_for('driver.dashboard'))    
 
     if driver_profile.saldo <= 0:
-    flash(
-        'No tienes saldo disponible para aceptar domicilios.',
-        'danger'
-    )
-    return redirect(url_for('driver.dashboard'))
+        flash(
+            'No tienes saldo disponible para aceptar domicilios.',
+            'danger'
+        )
+        return redirect(url_for('driver.dashboard'))
     
     order = db.session.execute(
         db.select(Order)
