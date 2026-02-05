@@ -46,8 +46,12 @@ def driver_required(f):
         print(f"DEBUG AUTH: Usuario {current_user.email} intentando acceder con rol: {current_user.role}")
         
         if current_user.role != 'driver':
+            current_app.logger.warning(
+                f"[DRIVER_REQUIRED] role={current_user.role}"
+            )
             print(f"DEBUG AUTH: Acceso denegado. Rol '{current_user.role}' no es 'driver'")
-            abort(403)
+            abort(403)  # ✅ CLAVE
+
         return f(*args, **kwargs)
     return decorated_function
 
