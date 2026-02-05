@@ -53,7 +53,10 @@ def driver_required(f):
 def driver_has_active_order(driver_id):
     return Order.query.filter(
         Order.driver_id == driver_id,
-        Order.status.notin_(["delivered", "cancelled"])
+        Order.status.notin_([
+            OrderStatus.DELIVERED.value,
+            OrderStatus.CANCELLED.value
+        ])
     ).first() is not None
 
 @driver_bp.route('/dashboard')
@@ -109,16 +112,14 @@ def dashboard():
 
     active_order = driver_has_active_order(driver_profile.id)
 
-    available_orders = []
-    #if driver.saldo > 0 and not active_order:
-    if driver_profile.saldo_cuenta > 0 and not active_order:    
+    if driver_profile.saldo_cuenta > 0 and not active_order:
         available_orders = Order.query.filter(
-        Order.status == OrderStatus.PENDING.value,
-        Order.driver_id.is_(None)
-    ).order_by(Order.created_at.asc()).all()
+            Order.status == OrderStatus.PENDING.value,
+            Order.driver_id.is_(None)
+        ).all()
 
-    current_app.logger.debug(
-        f"[DRIVER DASHBOARD] available_orders={len(available_orders)}"
+    current_app.logger.warning(
+        f"[DEBUG] driver={driver_profile.id} active_order={active_order}"
     )
 
     return render_template(
