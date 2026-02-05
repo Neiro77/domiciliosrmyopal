@@ -113,11 +113,12 @@ def dashboard():
     #if driver.saldo > 0 and not active_order:
     if driver_profile.saldo_cuenta > 0 and not active_order:    
         available_orders = Order.query.filter(
-        Order.status == OrderStatus.PENDING.value
+        Order.status == OrderStatus.PENDING.value,
+        Order.driver_id.is_(None)
     ).order_by(Order.created_at.asc()).all()
 
     current_app.logger.debug(
-        f"[DRIVER DASHBOARD] pedidos PENDIENTES encontrados: {len(available_orders)}"
+        f"[DRIVER DASHBOARD] available_orders={len(available_orders)}"
     )
 
     return render_template(
