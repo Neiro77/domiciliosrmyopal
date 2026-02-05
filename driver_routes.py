@@ -69,9 +69,9 @@ def dashboard():
     Muestra el dashboard principal del conductor con sus pedidos activos.
     """
     form = EmptyForm()
-    #form = AcceptOrderForm()
     if not form.validate_on_submit():
-        abort(400)
+        flash('Error de seguridad.', 'danger')
+        return redirect(url_for('driver.dashboard'))
 
     # 1️⃣ Obtener perfil del conductor (PRIMERO)
     driver_profile = db.session.execute(
@@ -117,6 +117,7 @@ def dashboard():
 
     active_order = driver_has_active_order(driver_profile.id)
 
+    available_orders = []
     if driver_profile.saldo_cuenta > 0 and not active_order:
         available_orders = Order.query.filter(
             Order.status == OrderStatus.PENDING.value,
