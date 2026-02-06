@@ -63,6 +63,21 @@ def driver_has_active_order(driver_id):
             OrderStatus.CANCELLED.value
         ])
     ).first() #is not None
+    
+def can_transition(current_status, new_status):
+    allowed = {
+        OrderStatus.PENDING.value: [
+            OrderStatus.ACCEPTED.value
+        ],
+        OrderStatus.ACCEPTED.value: [
+            OrderStatus.OUT_FOR_DELIVERY.value
+        ],
+        OrderStatus.OUT_FOR_DELIVERY.value: [
+            OrderStatus.DELIVERED.value
+        ]
+    }
+    return new_status in allowed.get(current_status, [])
+    
 
 @driver_bp.route('/dashboard')
 @login_required
@@ -248,6 +263,10 @@ def accept_order(order_id):
         if active_order:
             flash('Ya tienes un domicilio en curso.', 'warning')
             return redirect(url_for('driver.dashboard'))
+            
+        if not can_transition(order.status, OrderStatus.ACCEPTED.value):
+            flash("Este pedido no puede ser aceptado en su estado actual.", "warning")
+            return redirect(url_for("driver.dashboard"))
 
         # ✅ Asignar
         order.driver_id = driver.id

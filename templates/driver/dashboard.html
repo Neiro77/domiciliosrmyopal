@@ -105,10 +105,22 @@
 						  class="flex-grow w-full sm:w-auto border px-3 py-2 rounded-md shadow-sm"
 						>
 							{% if order.status == OrderStatus.ACCEPTED.value %}
-								<option value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">En Camino</option>
+							  <form method="POST"
+									action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
+								{{ csrf_token() }}
+								<input type="hidden" name="new_status" value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
+								<button class="btn btn-primary">Marcar en camino</button>
+							  </form>
+							{% elif order.status == OrderStatus.OUT_FOR_DELIVERY.value %}
+							  <form method="POST"
+									action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
+								{{ csrf_token() }}
+								<input type="hidden" name="new_status" value="{{ OrderStatus.DELIVERED.value }}">
+								<button class="btn btn-success">Marcar entregado</button>
+							  </form>
 							{% endif %}
-							<option value="{{ OrderStatus.DELIVERED.value }}">Entregado</option>
-							<option value="{{ OrderStatus.CANCELLED.value }}">Cancelar</option>
+
+							<!-- <option value="{{ OrderStatus.CANCELLED.value }}">Cancelar</option>  -->
 						</select>
 
 						<button
@@ -133,27 +145,37 @@
         </div>
     {% endif %}
 	
-	{% if available_orders and not active_order %}
-	<div class="card mt-4">
-	  <div class="card-header">
-		<strong>Domicilios disponibles</strong>
+	{% if active_order %}
+	  <div class="alert alert-info">
+		Tienes un pedido en curso. Completa este domicilio para aceptar otro.
 	  </div>
-	  <div class="card-body">
-		{% for order in available_orders %}
-		  <div class="border rounded p-2 mb-2">
-			<p><strong>Pedido #{{ order.id }}</strong></p>
-			<p>Dirección: {{ order.address }}</p>
-
-			<form method="POST" action="{{ url_for('driver.accept_order', order_id=order.id) }}">
-				<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-				<button class="btn btn-success btn-sm">
-					Aceptar domicilio
-				</button>
-			</form>
+	{% else %}	
+		{% if available_orders and not active_order %}
+		<div class="card mt-4">
+		  <div class="card-header">
+			<strong>Domicilios disponibles</strong>
 		  </div>
-		{% endfor %}
-	  </div>
-	</div>
+		  <div class="card-body">
+			{% for order in available_orders %}
+			  <div class="border rounded p-2 mb-2">
+				<p><strong>Pedido #{{ order.id }}</strong></p>
+				<p>Dirección: {{ order.address }}</p>
+
+				<form method="POST"
+					  action="{{ url_for('driver.accept_order', order_id=order.id) }}"
+					  onsubmit="this.querySelector('button').disabled=true;
+								this.querySelector('button').innerText='Asignando…';">
+				  {{ csrf_token() }}
+				  <button type="submit" class="btn btn-success">
+					Aceptar pedido
+				  </button>
+				</form>
+			  </div>
+			{% endfor %}
+		  </div>
+		</div>
+		{% endif %}
+	
 	{% endif %}
 
 </div>
