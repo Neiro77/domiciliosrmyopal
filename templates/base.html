@@ -155,6 +155,11 @@
 								<span class="badge">{{ unread_notifications_count }}</span>
 							{% endif %}
 						</a>
+						<div class="notification-wrapper">
+						  🔔 <span id="notifCount">0</span>
+						</div>
+
+						<audio id="notifSound" src="{{ url_for('static', filename='sounds/notification.mp3') }}"></audio>
                     {% elif current_user.role == 'driver' %}
                         <a href="{{ url_for('driver.dashboard') }}" class="hover:text-blue-200">Mis Entregas</a>
 						<a href="{{ url_for('driver.my_orders') }}" class="hover:text-blue-200">Historial</a>
@@ -249,8 +254,37 @@
     <script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/es.min.js"></script>
-    <script>
-        moment.locale('es');
-    </script>
+          
+	{% if current_user.is_authenticated and current_user.role == 'customer' %}
+	<script>
+	  moment.locale('es');
+	  let lastCount = 0;
+
+	  async function checkNotifications() {
+		try {
+		  const res = await fetch('/notifications');
+		  if (!res.ok) return;
+
+		  const data = await res.json();
+		  const countSpan = document.getElementById('notifCount');
+		  if (!countSpan) return;
+
+		  countSpan.innerText = data.length;
+
+		  if (data.length > lastCount) {
+			const sound = document.getElementById('notifSound');
+			if (sound) sound.play().catch(() => {});
+		  }
+
+		  lastCount = data.length;
+		} catch (e) {
+		  console.error('Error checking notifications', e);
+		}
+	  }
+
+	  setInterval(checkNotifications, 10000);
+	</script>
+	{% endif %}
+	
 </body>
 </html>

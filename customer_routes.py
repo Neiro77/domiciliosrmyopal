@@ -728,19 +728,17 @@ def cancel_order(order_id):
 @customer_required
 def notifications():
     notifications = Notification.query.filter_by(
-        user_id=current_user.id
+        user_id=current_user.id,
+        is_read=False
     ).order_by(Notification.created_at.desc()).all()
 
-    for n in notifications:
-        if not n.is_read:
-            n.is_read = True
-
-    db.session.commit()
-
-    return render_template(
-        'customer/notifications.html',
-        notifications=notifications
-    )    
+    return jsonify([
+        {
+            "id": n.id,
+            "message": n.message,
+            "created_at": n.created_at.isoformat()
+        } for n in notifications
+    ])    
     
 
 
