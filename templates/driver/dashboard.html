@@ -3,13 +3,6 @@
 {% block title %}Dashboard de Conductor{% endblock %}
 
 {% block content %}
-<div id="notification-bell" style="display:none;">
-  🔔 Nuevo pedido disponible
-</div>
-
-<audio id="notification-sound" preload="auto">
-  <source src="{{ url_for('static', filename='sounds/alerta_virus.mp3') }}" type="audio/mpeg">
-</audio>
 
 <div class="container mx-auto px-4 py-8">
 
@@ -170,6 +163,17 @@
 	{% endif %}
 
 </div>
+
+{% if not active_order %}
+  <div id="notification-bell" style="display:none;">
+    🔔 Nuevo pedido disponible
+  </div>
+
+  <audio id="notification-sound" preload="auto">
+    <source src="{{ url_for('static', filename='sounds/alerta_virus.mp3') }}" type="audio/mpeg">
+  </audio>
+{% endif %}
+
 
 <script>
   let hadAvailableOrders = false;
