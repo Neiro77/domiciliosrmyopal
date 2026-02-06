@@ -149,17 +149,20 @@
                                   :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                             </span>
                         </a>
-						<!-- a href="{{ url_for('customer.notifications') }}" class="notification-bell">
-							🔔
-							{% if unread_notifications_count > 0 %}
-								<span class="badge">{{ unread_notifications_count }}</span>
-							{% endif %}
-						</a -->
-						<div class="notification-wrapper" onclick="toggleNotifications()">
-						  🔔 <span id="notifCount">0</span>
+						
+						<div id="notificationBell"
+							 class="relative cursor-pointer select-none"
+							 onclick="toggleNotifications()">
+
+						  🔔
+						  <span id="notifCount"
+								class="absolute -top-2 -right-2 bg-red-600 text-white
+									   text-xs font-bold px-2 py-0.5 rounded-full">
+							0
+						  </span>
 						</div>
 
-						<audio id="notifSound" src="{{ url_for('static', filename='sounds/notification.mp3') }}"></audio>
+						
                     {% elif current_user.role == 'driver' %}
                         <a href="{{ url_for('driver.dashboard') }}" class="hover:text-blue-200">Mis Entregas</a>
 						<a href="{{ url_for('driver.my_orders') }}" class="hover:text-blue-200">Historial</a>
@@ -209,12 +212,17 @@
                                 :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                         </span>
                     </a>
-					<a href="{{ url_for('customer.notifications') }}" class="notification-bell">
-						🔔
-						{% if unread_notifications_count > 0 %}
-							<span class="badge">{{ unread_notifications_count }}</span>
-						{% endif %}
-					</a>
+					<div id="notificationBell"
+						 class="relative cursor-pointer select-none"
+						 onclick="toggleNotifications()">
+
+					  🔔
+					  <span id="notifCount"
+							class="absolute -top-2 -right-2 bg-red-600 text-white
+								   text-xs font-bold px-2 py-0.5 rounded-full">
+						0
+					  </span>
+					</div>
                 {% elif current_user.role == 'driver' %}
                     <a href="{{ url_for('driver.dashboard') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Mis Entregas</a>
 					<a href="{{ url_for('driver.my_orders') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Historial</a>
@@ -289,24 +297,29 @@
 	{% endif %}
 	
 	<script>
-  let audioUnlocked = false;
+	  let audioUnlocked = false;
 
-  function unlockAudio() {
-    if (audioUnlocked) return;
+	  function unlockAudio() {
+		if (audioUnlocked) return;
 
-    const sound = document.getElementById('notifSound');
-    if (!sound) return;
+		const sound = document.getElementById('notifSound');
+		if (!sound) return;
 
-    sound.play().then(() => {
-      sound.pause();
-      sound.currentTime = 0;
-      audioUnlocked = true;
-      console.log('🔓 Audio desbloqueado');
-    }).catch(() => {});
-  }
+		sound.play().then(() => {
+		  sound.pause();
+		  sound.currentTime = 0;
+		  audioUnlocked = true;
+		  console.log('🔓 Audio desbloqueado');
+		}).catch(() => {});
+	  }
 
-  document.addEventListener('click', unlockAudio, { once: true });
-</script>
+	  document.addEventListener('click', unlockAudio, { once: true });
+	</script>
+
+<!-- base.html -->
+<audio id="notifSound" preload="auto">
+  <source src="{{ url_for('static', filename='sounds/notification.mp3') }}" type="audio/mpeg">
+</audio>
 	
 </body>
 </html>
