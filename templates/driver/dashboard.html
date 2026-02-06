@@ -145,11 +145,14 @@
 					  action="{{ url_for('driver.accept_order', order_id=order.id) }}"
 					  onsubmit="this.querySelector('button').disabled=true;
 								this.querySelector('button').innerText='Asignando…';">
-				  {{ csrf_token() }}
+
+				  {{ form.hidden_tag() }}
+
 				  <button type="submit" class="btn btn-success">
 					Aceptar pedido
 				  </button>
 				</form>
+
 			  </div>
 			{% endfor %}
 		  </div>
