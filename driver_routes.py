@@ -206,7 +206,7 @@ def accept_order(order_id):
 
     form = EmptyForm()
     if not form.validate_on_submit():
-        flash('Error de seguridad. Recargue la página.', 'danger')
+        flash('Error de seguridad.', 'danger')
         return redirect(url_for('driver.dashboard'))
 
     driver = db.session.execute(
@@ -218,7 +218,7 @@ def accept_order(order_id):
         return redirect(url_for('driver.dashboard'))
 
     try:
-        # 🔒 1️⃣ Bloqueo SOLO del pedido (sin joins)
+        # 🔒 Lock SOLO del pedido
         order = db.session.execute(
             db.select(Order)
             .where(Order.id == order_id)
@@ -230,17 +230,10 @@ def accept_order(order_id):
             return redirect(url_for('driver.dashboard'))
 
         if order.driver_id is not None:
-            flash('Este pedido ya fue tomado por otro conductor.', 'warning')
+            flash('Este pedido ya fue tomado.', 'warning')
             return redirect(url_for('driver.dashboard'))
 
-        if order.status in [
-            OrderStatus.DELIVERED.value,
-            OrderStatus.CANCELLED.value
-        ]:
-            flash('Este domicilio ya no está disponible.', 'warning')
-            return redirect(url_for('driver.dashboard'))
-
-        # 🔒 2️⃣ Validar pedido activo del driver
+        # 🔒 Validar que el driver no tenga otro activo
         active_order = db.session.execute(
             db.select(Order)
             .where(
@@ -256,47 +249,17 @@ def accept_order(order_id):
             flash('Ya tienes un domicilio en curso.', 'warning')
             return redirect(url_for('driver.dashboard'))
 
-        # ✅ 3️⃣ Asignar
+        # ✅ Asignar
         order.driver_id = driver.id
         order.status = OrderStatus.ACCEPTED.value
         order.fecha_asignacion = datetime.utcnow()
 
-        db.session.commit()
-
-        # 🔓 4️⃣ Cargar relaciones DESPUÉS
-        order.user
-        order.business
+        db.session.commit()   # ← UN SOLO COMMIT
 
         flash(f'Has aceptado el pedido #{order.id}.', 'success')
-
-        # 📧 Emails (fuera de la transacción)
-        if order.user and order.user.email:
-            try:
-                send_email(
-                    order.user.email,
-                    f'¡Tu pedido #{order.id} ha sido aceptado!',
-                    'customer_order_accepted',
-                    order=order,
-                    driver=driver
-                )
-            except Exception as e:
-                current_app.logger.warning(f"Email cliente falló: {e}")
-
-        if order.business and order.business.user and order.business.user.email:
-            try:
-                send_email(
-                    order.business.user.email,
-                    f'¡Tu pedido #{order.id} fue asignado!',
-                    'business_order_driver_assigned',
-                    order=order,
-                    driver=driver
-                )
-            except Exception as e:
-                current_app.logger.warning(f"Email negocio falló: {e}")
-
         return redirect(url_for('driver.my_orders'))
 
-    except Exception:
+    except Exception as e:
         db.session.rollback()
         current_app.logger.exception("Error crítico al aceptar pedido")
         flash("Error al aceptar el pedido.", "danger")
@@ -457,7 +420,11 @@ def my_orders():
         # db.select(Order).filter_by(driver_id=driver_profile.id).order_by(Order.order_date.desc())
     # ).scalars().all()
     
-    orders = Order.query.filter_by(status='pending').all()
+    orders = Order.query.filter(
+        Order.status == OrderStatus.PENDING.value,
+        Order.driver_id.is_(None)
+    ).all()
+
     
     return render_template('driver/my_orders.html', orders=orders, driver=driver_profile, form=form)
 
