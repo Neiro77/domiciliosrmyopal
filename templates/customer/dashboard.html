@@ -90,4 +90,46 @@
     </div>
 </section>
 </div>
+<audio id="notifSound" preload="auto">
+  <source src="{{ url_for('static', filename='sounds/notification.mp3') }}" type="audio/mpeg">
+</audio>
+{% if current_user.is_authenticated and current_user.role == 'customer' %}
+	<script>
+	  let lastCount = {{ unread_notifications | default(0) }};
+	  let audioUnlocked = false;
+
+	  async function checkNotifications() {
+		try {
+		  const res = await fetch('/customer/customer/notifications');
+		  if (!res.ok) return;
+
+		  const data = await res.json();
+		  const badge = document.getElementById('notifCount');
+		  if (!badge) return;
+
+		  badge.innerText = data.length;
+
+		  if (data.length > lastCount && audioUnlocked) {
+			document.getElementById('notifSound')?.play().catch(()=>{});
+		  }
+
+		  lastCount = data.length;
+		} catch {}
+	  }
+
+	  document.addEventListener('click', () => {
+		const s = document.getElementById('notifSound');
+		if (!audioUnlocked && s) {
+		  s.play().then(() => {
+			s.pause();
+			s.currentTime = 0;
+			audioUnlocked = true;
+		  }).catch(()=>{});
+		}
+	  }, { once: true });
+
+	  setInterval(checkNotifications, 10000);
+	</script>
+
+	{% endif %}
 {% endblock %}

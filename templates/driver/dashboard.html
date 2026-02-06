@@ -177,32 +177,25 @@
 
 {% if not active_order %}
 <script>
-  let hadAvailableOrders = {{ 'true' if available_orders else 'false' }};
+  const STORAGE_KEY = "hadAvailableOrders";
+  let hadAvailableOrders = sessionStorage.getItem(STORAGE_KEY) === "true";
 
   async function checkAvailableOrders() {
     try {
-      const response = await fetch("{{ url_for('driver.dashboard') }}", {
+      const res = await fetch("{{ url_for('driver.dashboard') }}", {
         headers: { "X-Requested-With": "XMLHttpRequest" }
       });
 
-      const text = await response.text();
-      const hasOrdersNow = text.includes('id="available-orders"');
+      const html = await res.text();
+      const hasOrdersNow = html.includes('id="available-orders"');
 
       if (hasOrdersNow && !hadAvailableOrders) {
-        const bell = document.getElementById("notification-bell");
-        const audio = document.getElementById("notification-sound");
-
-        if (bell) bell.style.display = "block";
-        if (audio) {
-          audio.currentTime = 0;
-          audio.play().catch(() => {});
-        }
+        document.getElementById("notification-sound")?.play().catch(()=>{});
       }
 
+      sessionStorage.setItem(STORAGE_KEY, hasOrdersNow);
       hadAvailableOrders = hasOrdersNow;
-    } catch (err) {
-      console.error("Polling error:", err);
-    }
+    } catch {}
   }
 
   setInterval(checkAvailableOrders, 10000);

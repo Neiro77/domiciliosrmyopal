@@ -263,38 +263,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/es.min.js"></script>
           
-	{% if current_user.is_authenticated and current_user.role == 'customer' %}
-	<script>
-	  let lastCount = 0;
-
-	  async function checkNotifications() {
-		try {
-		  const res = await fetch('/customer/customer/notifications');
-		  if (!res.ok) return;
-
-		  const data = await res.json();
-		  const badge = document.getElementById('notifCount');
-		  if (!badge) return;
-
-		  badge.innerText = data.length;
-
-		  if (data.length > lastCount) {
-			const sound = document.getElementById('notifSound');
-			if (sound && audioUnlocked) {
-			  sound.play().catch(() => {});
-			}
-		  }
-
-		  lastCount = data.length;
-		} catch (err) {
-		  console.error('❌ Error polling notifications', err);
-		}
-	  }
-
-	  setInterval(checkNotifications, 10000);
-	</script>
-	{% endif %}
-
+	
 	
 	<script>
 	  let audioUnlocked = false;
@@ -315,11 +284,6 @@
 
 	  document.addEventListener('click', unlockAudio, { once: true });
 	</script>
-
-<!-- base.html -->
-<audio id="notifSound" preload="auto">
-  <source src="{{ url_for('static', filename='sounds/notification.mp3') }}" type="audio/mpeg">
-</audio>
 	
 </body>
 </html>
