@@ -175,41 +175,38 @@
 {% endif %}
 
 
+{% if not active_order %}
 <script>
-  let hadAvailableOrders = false;
+  let hadAvailableOrders = {{ 'true' if available_orders else 'false' }};
 
   async function checkAvailableOrders() {
     try {
-      const response = await fetch(window.location.href, {
+      const response = await fetch("{{ url_for('driver.dashboard') }}", {
         headers: { "X-Requested-With": "XMLHttpRequest" }
       });
 
       const text = await response.text();
-
-      // Detecta si el contenedor aparece
       const hasOrdersNow = text.includes('id="available-orders"');
 
       if (hasOrdersNow && !hadAvailableOrders) {
-        // 🔔 Mostrar campana
-        document.getElementById("notification-bell").style.display = "block";
-
-        // 🔊 Reproducir sonido
+        const bell = document.getElementById("notification-bell");
         const audio = document.getElementById("notification-sound");
-        audio.currentTime = 0;
-        audio.play().catch(() => {
-          console.warn("El navegador bloqueó el autoplay hasta interacción.");
-        });
+
+        if (bell) bell.style.display = "block";
+        if (audio) {
+          audio.currentTime = 0;
+          audio.play().catch(() => {});
+        }
       }
 
       hadAvailableOrders = hasOrdersNow;
-
-    } catch (e) {
-      console.error("Error verificando pedidos:", e);
+    } catch (err) {
+      console.error("Polling error:", err);
     }
   }
 
-  // cada 10 segundos (NO agresivo)
   setInterval(checkAvailableOrders, 10000);
 </script>
+{% endif %}
 
 {% endblock %}
