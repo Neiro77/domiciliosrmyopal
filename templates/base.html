@@ -265,7 +265,6 @@
           
 	{% if current_user.is_authenticated and current_user.role == 'customer' %}
 	<script>
-	
 	  let lastCount = 0;
 
 	  async function checkNotifications() {
@@ -274,10 +273,10 @@
 		  if (!res.ok) return;
 
 		  const data = await res.json();
-		  const countSpan = document.getElementById('notifCount');
-		  if (!countSpan) return;
+		  const badge = document.getElementById('notifCount');
+		  if (!badge) return;
 
-		  countSpan.innerText = data.length;
+		  badge.innerText = data.length;
 
 		  if (data.length > lastCount) {
 			const sound = document.getElementById('notifSound');
@@ -287,14 +286,15 @@
 		  }
 
 		  lastCount = data.length;
-		} catch (e) {
-		  console.error('Error notifications', e);
+		} catch (err) {
+		  console.error('❌ Error polling notifications', err);
 		}
 	  }
 
 	  setInterval(checkNotifications, 10000);
 	</script>
 	{% endif %}
+
 	
 	<script>
 	  let audioUnlocked = false;

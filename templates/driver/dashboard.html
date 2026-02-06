@@ -3,6 +3,14 @@
 {% block title %}Dashboard de Conductor{% endblock %}
 
 {% block content %}
+<div id="notification-bell" style="display:none;">
+  🔔 Nuevo pedido disponible
+</div>
+
+<audio id="notification-sound" preload="auto">
+  <source src="{{ url_for('static', filename='sounds/alerta_virus.mp3') }}" type="audio/mpeg">
+</audio>
+
 <div class="container mx-auto px-4 py-8">
 
     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -131,7 +139,7 @@
 	  </div>
 	{% else %}	
 		{% if available_orders and not active_order %}
-		<div class="card mt-4">
+		<div id="available-orders" class="card mt-4">
 		  <div class="card-header">
 			<strong>Domicilios disponibles</strong>
 		  </div>
@@ -162,4 +170,42 @@
 	{% endif %}
 
 </div>
+
+<script>
+  let hadAvailableOrders = false;
+
+  async function checkAvailableOrders() {
+    try {
+      const response = await fetch(window.location.href, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      });
+
+      const text = await response.text();
+
+      // Detecta si el contenedor aparece
+      const hasOrdersNow = text.includes('id="available-orders"');
+
+      if (hasOrdersNow && !hadAvailableOrders) {
+        // 🔔 Mostrar campana
+        document.getElementById("notification-bell").style.display = "block";
+
+        // 🔊 Reproducir sonido
+        const audio = document.getElementById("notification-sound");
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          console.warn("El navegador bloqueó el autoplay hasta interacción.");
+        });
+      }
+
+      hadAvailableOrders = hasOrdersNow;
+
+    } catch (e) {
+      console.error("Error verificando pedidos:", e);
+    }
+  }
+
+  // cada 10 segundos (NO agresivo)
+  setInterval(checkAvailableOrders, 10000);
+</script>
+
 {% endblock %}
