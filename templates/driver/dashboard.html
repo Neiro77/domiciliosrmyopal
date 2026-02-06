@@ -88,50 +88,30 @@
                 </div>
 					
 				<div class="mt-6 flex flex-col sm:flex-row items-center gap-4">
-					<form
-					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}"
-					  method="POST"
-					  class="flex flex-col sm:flex-row items-center gap-4 w-full"
-					>
-						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-						<label for="new_status-{{ order.id }}" class="font-semibold text-gray-700">
-							Actualizar estado:
-						</label>
-
-						<select
-						  name="new_status"
-						  id="new_status-{{ order.id }}"
-						  class="flex-grow w-full sm:w-auto border px-3 py-2 rounded-md shadow-sm"
-						>
-							{% if order.status == OrderStatus.ACCEPTED.value %}
-							  <form method="POST"
-									action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
-								{{ csrf_token() }}
-								<input type="hidden" name="new_status" value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
-								<button class="btn btn-primary">Marcar en camino</button>
-							  </form>
-							{% elif order.status == OrderStatus.OUT_FOR_DELIVERY.value %}
-							  <form method="POST"
-									action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
-								{{ csrf_token() }}
-								<input type="hidden" name="new_status" value="{{ OrderStatus.DELIVERED.value }}">
-								<button class="btn btn-success">Marcar entregado</button>
-							  </form>
-							{% endif %}
-
-							<!-- <option value="{{ OrderStatus.CANCELLED.value }}">Cancelar</option>  -->
-						</select>
-
-						<button
-						  type="submit"
-						  class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"
-						>
-							Actualizar
-						</button>
+				  {% if order.status == OrderStatus.ACCEPTED.value %}
+					<form method="POST"
+						  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
+					  {{ csrf_token() }}
+					  <input type="hidden" name="new_status" value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
+					  <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+						Marcar en camino
+					  </button>
 					</form>
 
+				  {% elif order.status == OrderStatus.OUT_FOR_DELIVERY.value %}
+					<form method="POST"
+						  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
+					  {{ csrf_token() }}
+					  <input type="hidden" name="new_status" value="{{ OrderStatus.DELIVERED.value }}">
+					  <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
+						Marcar entregado
+					  </button>
+					</form>
+				  {% endif %}
+
 				</div>
+
 				
                 <!-- </div> -->
             </div>
