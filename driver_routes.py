@@ -343,6 +343,21 @@ def update_delivery_status(order_id):
         db.session.commit()
         flash(f'Estado del pedido #{order.id} actualizado a "{new_status}"', 'success')
         
+        status_messages = {
+            "Aceptado": "Tu pedido fue aceptado por el conductor 🚴‍♂️",
+            "En Camino": "Tu pedido está en camino 🛵",
+            "Entregado": "Tu pedido fue entregado con éxito 📦"
+        }
+
+        if new_status in status_messages:
+            notification = Notification(
+                user_id=order.user_id,
+                message=status_messages[new_status],
+                is_read=False
+            )
+            db.session.add(notification)
+            db.session.commit()
+        
         notify(
             order.user_id,
             f"Tu pedido #{order.id} ahora está en estado: {new_status}"
