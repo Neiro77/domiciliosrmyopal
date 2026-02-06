@@ -218,19 +218,12 @@ def accept_order(order_id):
         return redirect(url_for('driver.dashboard'))
 
     try:
-        # 🔒 Bloqueo del pedido (SIN begin())
-        order = (
-            db.session.execute(
-                db.select(Order)
-                .where(Order.id == order_id)
-                .with_for_update()
-                .options(
-                    joinedload(Order.user),
-                    joinedload(Order.business)
-                )
-            )
-            .scalar_one_or_none()
-        )
+        # 🔒 1️⃣ Bloqueo SOLO del pedido (sin joins)
+        order = db.session.execute(
+            db.select(Order)
+            .where(Order.id == order_id)
+            .with_for_update()
+        ).scalar_one_or_none()
 
         if not order:
             flash('Pedido no encontrado.', 'danger')
@@ -247,7 +240,7 @@ def accept_order(order_id):
             flash('Este domicilio ya no está disponible.', 'warning')
             return redirect(url_for('driver.dashboard'))
 
-        # 🔒 Validar pedido activo
+        # 🔒 2️⃣ Validar pedido activo del driver
         active_order = db.session.execute(
             db.select(Order)
             .where(
@@ -263,16 +256,20 @@ def accept_order(order_id):
             flash('Ya tienes un domicilio en curso.', 'warning')
             return redirect(url_for('driver.dashboard'))
 
-        # ✅ Asignar pedido
+        # ✅ 3️⃣ Asignar
         order.driver_id = driver.id
         order.status = OrderStatus.ACCEPTED.value
         order.fecha_asignacion = datetime.utcnow()
 
-        db.session.commit()  # 👈 commit explícito
+        db.session.commit()
+
+        # 🔓 4️⃣ Cargar relaciones DESPUÉS
+        order.user
+        order.business
 
         flash(f'Has aceptado el pedido #{order.id}.', 'success')
 
-        # 📧 Emails FUERA de la transacción
+        # 📧 Emails (fuera de la transacción)
         if order.user and order.user.email:
             try:
                 send_email(
@@ -299,11 +296,12 @@ def accept_order(order_id):
 
         return redirect(url_for('driver.my_orders'))
 
-    except Exception as e:
+    except Exception:
         db.session.rollback()
         current_app.logger.exception("Error crítico al aceptar pedido")
         flash("Error al aceptar el pedido.", "danger")
         return redirect(url_for('driver.dashboard'))
+
 
 @driver_bp.route('/order/<int:order_id>/update_delivery_status', methods=['POST'])
 @driver_required
