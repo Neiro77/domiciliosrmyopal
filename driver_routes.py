@@ -87,7 +87,7 @@ def dashboard():
     """
     Muestra el dashboard principal del conductor con sus pedidos activos.
     """
-    # form = EmptyForm()
+    form = EmptyForm()
     # if not form.validate_on_submit():
         # flash('Error de seguridad.', 'danger')
         # return redirect(url_for('driver.dashboard'))
