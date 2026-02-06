@@ -149,13 +149,13 @@
                                   :class="{'hidden': Alpine.store('cart').itemCount() === 0}">
                             </span>
                         </a>
-						<a href="{{ url_for('customer.notifications') }}" class="notification-bell">
+						<!-- a href="{{ url_for('customer.notifications') }}" class="notification-bell">
 							🔔
 							{% if unread_notifications_count > 0 %}
 								<span class="badge">{{ unread_notifications_count }}</span>
 							{% endif %}
-						</a>
-						<div class="notification-wrapper">
+						</a -->
+						<div class="notification-wrapper" onclick="toggleNotifications()">
 						  🔔 <span id="notifCount">0</span>
 						</div>
 
@@ -257,12 +257,12 @@
           
 	{% if current_user.is_authenticated and current_user.role == 'customer' %}
 	<script>
-	  moment.locale('es');
+	
 	  let lastCount = 0;
 
 	  async function checkNotifications() {
 		try {
-		  const res = await fetch('/notifications');
+		  const res = await fetch('/customer/customer/notifications');
 		  if (!res.ok) return;
 
 		  const data = await res.json();
@@ -273,18 +273,40 @@
 
 		  if (data.length > lastCount) {
 			const sound = document.getElementById('notifSound');
-			if (sound) sound.play().catch(() => {});
+			if (sound && audioUnlocked) {
+			  sound.play().catch(() => {});
+			}
 		  }
 
 		  lastCount = data.length;
 		} catch (e) {
-		  console.error('Error checking notifications', e);
+		  console.error('Error notifications', e);
 		}
 	  }
 
 	  setInterval(checkNotifications, 10000);
 	</script>
 	{% endif %}
+	
+	<script>
+  let audioUnlocked = false;
+
+  function unlockAudio() {
+    if (audioUnlocked) return;
+
+    const sound = document.getElementById('notifSound');
+    if (!sound) return;
+
+    sound.play().then(() => {
+      sound.pause();
+      sound.currentTime = 0;
+      audioUnlocked = true;
+      console.log('🔓 Audio desbloqueado');
+    }).catch(() => {});
+  }
+
+  document.addEventListener('click', unlockAudio, { once: true });
+</script>
 	
 </body>
 </html>
