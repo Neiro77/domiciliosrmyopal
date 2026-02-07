@@ -1,175 +1,162 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard de Conductor{% endblock %}
-
 {% block content %}
-<div class="container mx-auto px-4 py-8">
 
-<!-- 🔔 CAMPANA -->
-<div id="driverBell" class="fixed top-20 right-4 z-50 hidden">
-  <div class="relative bg-yellow-400 p-3 rounded-full shadow-lg animate-bounce">
+<div class="container mx-auto px-4 py-8 relative">
+
+  <!-- 🔔 CAMPANA -->
+  <div id="driverBell"
+       class="hidden fixed top-24 right-6 text-3xl cursor-pointer">
     🔔
     <span id="driverBellCount"
-          class="absolute -top-2 -right-2 bg-red-600 text-white
-                 text-xs font-bold px-2 py-0.5 rounded-full">
+          class="hidden absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
       1
     </span>
   </div>
-</div>
 
-<!-- 🔊 SONIDO -->
-<audio id="driverSound" preload="auto">
-  <source src="{{ url_for('static', filename='sounds/alerta_virus.mp3') }}" type="audio/mpeg">
-</audio>
+  <audio id="driverSound" preload="auto">
+    <source src="{{ url_for('static', filename='sounds/alerta_virus.mp3') }}" type="audio/mpeg">
+  </audio>
 
-<!-- HEADER -->
-<div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-  <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-    <div>
-      <h1 class="text-3xl font-extrabold text-gray-800">
-        Hola, {{ driver_profile.first_name }}
-      </h1>
-      <p class="text-gray-600">Aquí están tus entregas asignadas.</p>
-    </div>
+  <!-- HEADER -->
+  <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
 
-    <div class="text-center">
-      <p class="text-sm text-gray-500">Saldo Actual</p>
-      <p class="text-2xl font-bold text-green-600">
-        ${{ "%.2f"|format(driver_profile.saldo_cuenta) }}
-      </p>
-      <a href="{{ url_for('driver.recharge_balance') }}"
-         class="text-sm text-blue-600 hover:underline">Recargar</a>
-    </div>
+      <div>
+        <h1 class="text-3xl font-extrabold text-gray-800">
+          Hola, {{ driver_profile.first_name }}
+        </h1>
+        <p class="text-gray-600">Aquí están tus entregas asignadas.</p>
+      </div>
 
-    <!-- ESTADO -->
-    <div class="flex items-center gap-4 p-4 border rounded-lg">
-      <p class="font-semibold">Mi estado:</p>
+      <div class="text-center">
+        <p class="text-sm text-gray-500">Saldo Actual</p>
+        <p class="text-2xl font-bold text-green-600">
+          ${{ "%.2f"|format(driver_profile.saldo_cuenta) }}
+        </p>
+        <a href="{{ url_for('driver.recharge_balance') }}"
+           class="text-sm text-blue-600 hover:underline">Recargar</a>
+      </div>
 
-      {% if driver_profile.is_available %}
-        <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full font-semibold">
-          Disponible
-        </span>
-      {% else %}
-        <span class="px-3 py-1 bg-gray-200 text-gray-800 rounded-full font-semibold">
-          No disponible
-        </span>
-      {% endif %}
+      <!-- DISPONIBILIDAD -->
+      <div class="flex items-center gap-4 p-4 border rounded-lg">
+        <p class="font-semibold">Mi estado:</p>
 
-      <form action="{{ url_for('driver.toggle_availability') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit"
-                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-sm">
-          Cambiar
-        </button>
-      </form>
+        {% if driver_profile.is_available %}
+          <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full">
+            Disponible
+          </span>
+        {% else %}
+          <span class="px-3 py-1 bg-gray-200 text-gray-800 rounded-full">
+            No Disponible
+          </span>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('driver.toggle_availability') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="bg-blue-500 text-white px-3 py-2 rounded">
+            Cambiar
+          </button>
+        </form>
+      </div>
+
     </div>
   </div>
-</div>
 
-<!-- ENTREGAS ACTIVAS -->
-<h2 class="text-2xl font-bold text-gray-700 mb-6">Mis Entregas Activas</h2>
+  <!-- PEDIDOS ACTIVOS -->
+  <h2 class="text-2xl font-bold text-gray-700 mb-6">Mis Entregas Activas</h2>
 
-{% if orders %}
-<div class="space-y-6">
-{% for order in orders %}
-<div class="bg-white rounded-lg shadow-xl overflow-hidden" x-data="{ detailsOpen: false }">
+  {% if orders %}
+    {% for order in orders %}
+      <div class="bg-white rounded-lg shadow-xl mb-6">
 
-  <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
-    <div>
-      <h3 class="text-xl font-bold">
-        Pedido #{{ order.id }} - {{ order.service.name|capitalize }}
-      </h3>
-      <p class="text-sm text-gray-500">
-        Cliente: {{ order.user.customer_profile.first_name }}
-      </p>
-    </div>
-    <span class="px-3 py-1 rounded-full text-sm font-semibold bg-blue-200">
-      {{ order.status }}
-    </span>
-  </div>
+        <div class="p-4 border-b flex justify-between">
+          <div>
+            <h3 class="text-xl font-bold">
+              Pedido #{{ order.id }} — {{ order.service.name }}
+            </h3>
+            <p class="text-sm text-gray-500">
+              Cliente: {{ order.user.customer_profile.first_name }}
+            </p>
+          </div>
 
-  <div class="p-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <div class="bg-gray-100 p-4 rounded">
-        <strong>Recoger en:</strong>
-        <p>{{ order.pickup_address }}</p>
-      </div>
-      <div class="bg-green-50 p-4 rounded">
-        <strong>Entregar a:</strong>
-        <p>{{ order.delivery_address }}</p>
-      </div>
-    </div>
+          <span class="px-3 py-1 rounded-full text-sm
+            {% if order.status == 'Aceptado' %} bg-blue-200
+            {% elif order.status == 'En Camino' %} bg-orange-200
+            {% else %} bg-gray-200 {% endif %}">
+            {{ order.status }}
+          </span>
+        </div>
 
-    <button @click="detailsOpen = !detailsOpen"
-            class="text-blue-600 font-semibold">
-      Ver detalles
-    </button>
+        <div class="p-6">
+          <p><strong>Recoger:</strong> {{ order.pickup_address }}</p>
+          <p><strong>Entregar:</strong> {{ order.delivery_address }}</p>
+        </div>
 
-    <div x-show="detailsOpen" class="mt-4">
-      <ul class="list-disc ml-4">
-        {% for item in order.items %}
-          {% if item.paquete_envio %}
-            <li>
-              Paquete: {{ item.paquete_envio.tipo_paquete }}
-              ({{ item.paquete_envio.peso_kg }}kg)
-            </li>
+        <!-- 🔘 BOTONES DE ESTADO (RESTAURADOS) -->
+        <div class="p-4 flex gap-4">
+
+          {% if order.status == OrderStatus.ACCEPTED.value %}
+            <form method="POST"
+                  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
+              {{ form.hidden_tag() }}
+              <input type="hidden" name="new_status"
+                     value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
+              <button class="bg-blue-600 text-white px-4 py-2 rounded">
+                Marcar en camino
+              </button>
+            </form>
+
+          {% elif order.status == OrderStatus.OUT_FOR_DELIVERY.value %}
+            <form method="POST"
+                  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
+              {{ form.hidden_tag() }}
+              <input type="hidden" name="new_status"
+                     value="{{ OrderStatus.DELIVERED.value }}">
+              <button class="bg-green-600 text-white px-4 py-2 rounded">
+                Marcar entregado
+              </button>
+            </form>
           {% endif %}
-        {% endfor %}
-      </ul>
+
+        </div>
+
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-center text-gray-500 py-16">
+      No tienes pedidos activos.
     </div>
-  </div>
-
-</div>
-{% endfor %}
-</div>
-{% else %}
-<p class="text-gray-500">No tienes entregas activas.</p>
-{% endif %}
-
-<!-- DISPONIBLES -->
-{% if available_orders and not active_order %}
-<div id="available-orders" class="mt-8 bg-white p-6 rounded shadow">
-  <h3 class="font-bold mb-4">Domicilios disponibles</h3>
-
-  {% for order in available_orders %}
-  <div class="border p-4 mb-3 rounded">
-    <p><strong>Pedido #{{ order.id }}</strong></p>
-    <p>{{ order.address }}</p>
-
-    <form method="POST"
-          action="{{ url_for('driver.accept_order', order_id=order.id) }}"
-          onsubmit="this.querySelector('button').disabled=true;">
-      {{ form.hidden_tag() }}
-      <button class="bg-green-600 text-white px-4 py-2 rounded">
-        Aceptar pedido
-      </button>
-    </form>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
+  {% endif %}
 
 </div>
 
-<!-- 🔔 SCRIPT ÚNICO -->
+<!-- 🔔 SCRIPT ÚNICO Y LIMPIO -->
 <script>
 let lastOrderId = null;
 
 async function checkDriverNotifications() {
-  try {
-    const res = await fetch("/driver/notifications");
-    const data = await res.json();
+  const res = await fetch("/driver/notifications");
+  const data = await res.json();
 
-    if (!data.driver_available) return;
-    if (!data.has_new) return;
+  const bell = document.getElementById("driverBell");
+  const badge = document.getElementById("driverBellCount");
+  const sound = document.getElementById("driverSound");
 
-    if (data.order_id !== lastOrderId) {
-      document.getElementById("driverBell").classList.remove("hidden");
-      const audio = document.getElementById("driverSound");
-      audio.currentTime = 0;
-      audio.play().catch(()=>{});
-      lastOrderId = data.order_id;
-    }
-  } catch {}
+  if (!data.driver_available || !data.has_new) {
+    bell.classList.add("hidden");
+    badge.classList.add("hidden");
+    return;
+  }
+
+  if (data.order_id !== lastOrderId) {
+    bell.classList.remove("hidden");
+    badge.classList.remove("hidden");
+    badge.textContent = "1";
+    sound.currentTime = 0;
+    sound.play().catch(()=>{});
+    lastOrderId = data.order_id;
+  }
 }
 
 setInterval(checkDriverNotifications, 10000);
