@@ -2913,3 +2913,60 @@ footer {
     animation: ring 1s ease-in-out 2;
   }
 }
+
+
+/* === SOLO DRIVER DASHBOARD === */
+.driver-bell-wrapper {
+  position: relative;
+}
+
+.driver-bell-wrapper .bell {
+  font-size: 22px;
+  cursor: pointer;
+  position: relative;
+}
+
+.driver-bell-wrapper .bell-count {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: red;
+  color: white;
+  font-size: 11px;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+
+/* ===============================
+   🔔 DRIVER NOTIFICATION BELL
+   =============================== */
+
+#driverBell {
+  cursor: pointer;
+  z-index: 9999;
+}
+
+/* Animación suave (no mareo) */
+@keyframes bellPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+#driverBell:not(.hidden) {
+  animation: bellPulse 1.5s infinite;
+}
+
+/* Badge */
+#driverBellCount {
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Mobile ajustes */
+@media (max-width: 640px) {
+  #driverBell {
+    top: 90px;
+    right: 12px;
+  }
+}

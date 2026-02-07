@@ -482,18 +482,16 @@ def my_orders():
 
 # 2. RUTA PARA CAMBIAR DISPONIBILIDAD (EL TOGGLE)
 @driver_bp.route('/toggle_availability', methods=['POST'])
+@login_required
 @driver_required
 def toggle_availability():
     driver_profile = current_user.driver_profile
     driver_profile.is_available = not driver_profile.is_available
     db.session.commit()
     
-    if not driver_profile.is_available:
-        return jsonify({"has_new": False})
-    
     status_text = "Disponible" if driver_profile.is_available else "No Disponible"
     flash(f'Tu estado ha cambiado a: {status_text}', 'success')
-    return redirect(url_for('driver.my_orders')) # O a un dashboard de conductor
+    return redirect(url_for('driver.dashboard')) # O a un dashboard de conductor
 
 # 3. RUTA PARA RECARGAR SALDO (EJEMPLO SIMPLE)
 @driver_bp.route('/recharge', methods=['GET', 'POST'])
