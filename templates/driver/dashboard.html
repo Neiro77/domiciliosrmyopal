@@ -6,10 +6,11 @@
 
   <!-- 🔔 CAMPANA -->
   <div id="driverBell"
-       class="hidden fixed top-24 right-6 text-3xl cursor-pointer">
+       class="hidden fixed top-24 right-6 text-3xl cursor-pointer z-50">
     🔔
     <span id="driverBellCount"
-          class="hidden absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+          class="hidden absolute -top-2 -right-2 bg-red-600 text-white
+                 text-xs font-bold px-2 py-0.5 rounded-full">
       1
     </span>
   </div>
@@ -26,21 +27,19 @@
         <h1 class="text-3xl font-extrabold text-gray-800">
           Hola, {{ driver_profile.first_name }}
         </h1>
-        <p class="text-gray-600">Aquí están tus entregas asignadas.</p>
+        <p class="text-gray-600">Aquí están tus entregas.</p>
       </div>
 
       <div class="text-center">
-        <p class="text-sm text-gray-500">Saldo Actual</p>
+        <p class="text-sm text-gray-500">Saldo</p>
         <p class="text-2xl font-bold text-green-600">
           ${{ "%.2f"|format(driver_profile.saldo_cuenta) }}
         </p>
-        <a href="{{ url_for('driver.recharge_balance') }}"
-           class="text-sm text-blue-600 hover:underline">Recargar</a>
       </div>
 
       <!-- DISPONIBILIDAD -->
       <div class="flex items-center gap-4 p-4 border rounded-lg">
-        <p class="font-semibold">Mi estado:</p>
+        <p class="font-semibold">Estado:</p>
 
         {% if driver_profile.is_available %}
           <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full">
@@ -48,7 +47,7 @@
           </span>
         {% else %}
           <span class="px-3 py-1 bg-gray-200 text-gray-800 rounded-full">
-            No Disponible
+            No disponible
           </span>
         {% endif %}
 
@@ -63,23 +62,20 @@
     </div>
   </div>
 
-  <!-- PEDIDOS ACTIVOS -->
-  <h2 class="text-2xl font-bold text-gray-700 mb-6">Mis Entregas Activas</h2>
+  <!-- ====================== -->
+  <!-- 🚚 PEDIDOS ACTIVOS -->
+  <!-- ====================== -->
+  <h2 class="text-2xl font-bold mb-4">Mis entregas activas</h2>
 
   {% if orders %}
     {% for order in orders %}
-      <div class="bg-white rounded-lg shadow-xl mb-6">
+      <div class="bg-white shadow rounded mb-6 p-4">
 
-        <div class="p-4 border-b flex justify-between">
+        <div class="flex justify-between items-center mb-2">
           <div>
-            <h3 class="text-xl font-bold">
-              Pedido #{{ order.id }} — {{ order.service.name }}
-            </h3>
-            <p class="text-sm text-gray-500">
-              Cliente: {{ order.user.customer_profile.first_name }}
-            </p>
+            <strong>Pedido #{{ order.id }}</strong><br>
+            Cliente: {{ order.user.customer_profile.first_name }}
           </div>
-
           <span class="px-3 py-1 rounded-full text-sm
             {% if order.status == 'Aceptado' %} bg-blue-200
             {% elif order.status == 'En Camino' %} bg-orange-200
@@ -88,13 +84,11 @@
           </span>
         </div>
 
-        <div class="p-6">
-          <p><strong>Recoger:</strong> {{ order.pickup_address }}</p>
-          <p><strong>Entregar:</strong> {{ order.delivery_address }}</p>
-        </div>
+        <p><strong>Recoger:</strong> {{ order.pickup_address }}</p>
+        <p><strong>Entregar:</strong> {{ order.delivery_address }}</p>
 
-        <!-- 🔘 BOTONES DE ESTADO (RESTAURADOS) -->
-        <div class="p-4 flex gap-4">
+        <!-- BOTONES DE ESTADO -->
+        <div class="mt-4 flex gap-3">
 
           {% if order.status == OrderStatus.ACCEPTED.value %}
             <form method="POST"
@@ -120,18 +114,41 @@
           {% endif %}
 
         </div>
-
       </div>
     {% endfor %}
   {% else %}
-    <div class="text-center text-gray-500 py-16">
-      No tienes pedidos activos.
+    <p class="text-gray-500 mb-6">No tienes entregas activas.</p>
+  {% endif %}
+
+  <!-- ====================== -->
+  <!-- 🟢 PEDIDOS DISPONIBLES -->
+  <!-- ====================== -->
+  {% if available_orders and not active_order %}
+    <div id="available-orders" class="bg-white shadow rounded p-4">
+      <h3 class="text-xl font-bold mb-3">Domicilios disponibles</h3>
+
+      {% for order in available_orders %}
+        <div class="border rounded p-3 mb-3">
+          <p><strong>Pedido #{{ order.id }}</strong></p>
+          <p>{{ order.pickup_address }} → {{ order.delivery_address }}</p>
+
+          <form method="POST"
+                action="{{ url_for('driver.accept_order', order_id=order.id) }}"
+                onsubmit="this.querySelector('button').disabled=true;
+                          this.querySelector('button').innerText='Asignando…';">
+            {{ form.hidden_tag() }}
+            <button class="bg-green-600 text-white px-4 py-2 rounded mt-2">
+              Aceptar pedido
+            </button>
+          </form>
+        </div>
+      {% endfor %}
     </div>
   {% endif %}
 
 </div>
 
-<!-- 🔔 SCRIPT ÚNICO Y LIMPIO -->
+<!-- 🔔 NOTIFICACIONES -->
 <script>
 let lastOrderId = null;
 
