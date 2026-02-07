@@ -190,8 +190,8 @@ def driver_notifications():
     driver_id = current_user.id
 
     pending_orders = Order.query.filter(
-        Order.status == "Pendiente",
-        Order.driver_id == None
+        Order.status == OrderStatus.PENDING.value,
+        Order.driver_id.is_(None)
     ).count()
 
     return jsonify({

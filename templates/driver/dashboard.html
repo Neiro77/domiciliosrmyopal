@@ -171,6 +171,7 @@
 {% if not active_order %}
   <div id="notification-bell" style="display:none;">
     🔔 Nuevo pedido disponible
+	<span id="notif-count" class="badge hidden">0</span>
   </div>
 
   <audio id="notification-sound" preload="auto">
@@ -219,26 +220,37 @@ function triggerBell() {
 {% endif %}
 
 <script>
-let lastCount = 0;
+  const audio = new Audio("/static/sounds/alerta_virus.mp3");
+  
+  let lastPendingCount = Number(localStorage.getItem("lastPendingCount")) || 0;
 
-async function checkNotifications() {
-    try {
-        const res = await fetch("/driver/notifications");
-        const data = await res.json();
+  function checkNotifications() {
+    fetch("/driver/notifications")
+      .then(res => res.json())
+      .then(data => {
+        const badge = document.getElementById("notif-count");
 
-        if (data.pending_orders > lastCount) {
-            triggerBell();
-            playSound();
-        }
+		if (currentCount > 0) {
+		  badge.textContent = currentCount;
+		  badge.classList.remove("hidden");
+		} else {
+		  badge.classList.add("hidden");
+		}
 
-        lastCount = data.pending_orders;
-    } catch (e) {
-        console.error("Error checking notifications", e);
-    }
-}
+      })
+      .catch(err => console.error("Notif error:", err));
+  }
 
-setInterval(checkNotifications, 10000); // cada 10 segundos
+  // primera ejecución
+  checkNotifications();
+
+  // polling cada 10s
+  setInterval(checkNotifications, 15000);
+
+  localStorage.setItem("lastPendingCount", currentCount);
 </script>
+
+
 
 
 
