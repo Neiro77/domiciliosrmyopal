@@ -2879,3 +2879,37 @@ footer {
 .hidden {
     display: flex;
 }
+
+.bell {
+  font-size: 22px;
+  margin-left: 12px;
+  cursor: pointer;
+}
+
+.bell.active {
+  animation: ring 1s ease-in-out infinite;
+}
+
+@keyframes ring {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(15deg); }
+  30% { transform: rotate(-10deg); }
+  45% { transform: rotate(8deg); }
+  60% { transform: rotate(-6deg); }
+  75% { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+
+@media (max-width: 768px) {
+  .bell {
+    font-size: 18px;
+    margin-left: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bell.active {
+    animation: ring 1s ease-in-out 2;
+  }
+}

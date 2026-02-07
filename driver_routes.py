@@ -488,6 +488,9 @@ def toggle_availability():
     driver_profile.is_available = not driver_profile.is_available
     db.session.commit()
     
+    if not driver_profile.is_available:
+        return jsonify({"has_new": False})
+    
     status_text = "Disponible" if driver_profile.is_available else "No Disponible"
     flash(f'Tu estado ha cambiado a: {status_text}', 'success')
     return redirect(url_for('driver.my_orders')) # O a un dashboard de conductor

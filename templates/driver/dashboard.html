@@ -7,6 +7,7 @@
 <div class="container mx-auto px-4 py-8">
 	<div id="bell" class="notification-bell hidden">
 		🔔 Pedido nuevo
+		<span id="bell" class="bell">🔔</span>
 	</div>
 
 
@@ -250,6 +251,24 @@ function triggerBell() {
   localStorage.setItem("lastPendingCount", currentCount);
 </script>
 
+<script>
+let lastNotification = null;
+
+setInterval(async () => {
+  const res = await fetch('/driver/notifications');
+  const data = await res.json();
+
+  if (data.has_new && data.order_id !== lastNotification) {
+    document.getElementById('bell').classList.add('active');
+    document.getElementById('alertSound').play();
+    lastNotification = data.order_id;
+  }
+}, 8000);
+
+if (data.driver_available === false) {
+  return; // no sonido, no campana
+}
+</script>
 
 
 
