@@ -227,8 +227,8 @@ async function checkDriverNotifications() {
 
     // 🔒 Driver NO disponible → ocultar todo
     if (!data.is_available) {
-      bell.classList.add('hidden');
-      count.classList.add('hidden');
+      bell.classList.add('bell-active');
+      count.classList.remove('hidden');
       lastHasNew = false;
       return;
     }
