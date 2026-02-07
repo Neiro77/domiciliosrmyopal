@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request, abort, jsonify
 from flask_login import login_required, current_user
 from models import User, Driver, Order, Business, OrderStatus, Customer, Product, OrderItem, DetallesPaqueteEnvio, Service, TransactionType, create_transaction, Notification # <-- Importa lo nuevo # Importa modelos necesarios y OrderStatus Enum
 from functools import wraps # <--- ¡IMPORTA ESTO!
