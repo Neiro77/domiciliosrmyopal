@@ -285,22 +285,13 @@ def create_package():
         try:
             
             # Crear y guardar el objeto del paquete
+            PRECIO_ENVIO_RAPIDO = 7000.0
+
             new_package_detail = DetallesPaqueteEnvio(
                 descripcion=form.descripcion.data,
                 nombre_quien_recibe=form.nombre_quien_recibe.data,
                 telefono_quien_recibe=form.telefono_quien_recibe.data,
-                precio_calculado=0.0
-            
-                # tipo_paquete=form.tipo_paquete.data,
-                # descripcion=form.descripcion.data,
-                # tamano_paquete=form.tamano_paquete.data,
-                # peso_kg=form.peso_kg.data,
-                # dimensiones_cm=form.dimensiones_cm.data,
-                # valor_declarado=form.valor_declarado.data,
-                # instrucciones_especiales=form.instrucciones_especiales.data,
-                # #direccion_recogida=form.direccion_recogida.data,
-                # #direccion_entrega=form.direccion_entrega.data,
-                # precio_calculado=float(base_price) # Guardar como float
+                precio_calculado=PRECIO_ENVIO_RAPIDO
             )
             db.session.add(new_package_detail)
             db.session.commit() # Hacemos commit para obtener el ID final

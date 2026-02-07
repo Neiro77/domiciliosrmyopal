@@ -140,7 +140,7 @@
                     {% if current_user.role == 'customer' %}
                         
 						<a href="{{ url_for('customer.list_businesses') }}" class="hover:text-blue-200">Negocios</a>
-						<a href="{{ url_for('customer.create_package') }}" class="text-white hover:text-blue-200">Enviar Paquete</a> {# Nuevo enlace #}
+						<a href="{{ url_for('customer.create_package') }}" class="text-white hover:text-blue-200">Envío rápido</a> {# Nuevo enlace #}
                         <a href="{{ url_for('customer.my_orders') }}" class="hover:text-blue-200">Mis Pedidos</a>
                         <a href="{{ url_for('customer.view_cart') }}" class="bg-white text-blue-600 px-3 py-1 rounded-full flex items-center hover:bg-gray-100 transition relative">
                             <i class="fas fa-shopping-cart mr-2"></i> Carrito
