@@ -190,26 +190,6 @@
 </div>
 
 <!-- 🔔 Polling -->
-<script>
-let lastOrderId = null;
-
-async function checkDriverNotifications() {
-  const res = await fetch("/driver/notifications");
-  const data = await res.json();
-
-  if (!data.driver_available || !data.has_new) return;
-
-  if (data.order_id !== lastOrderId) {
-    document.getElementById("driverBell").classList.remove("hidden");
-    const audio = document.getElementById("driverSound");
-    audio.currentTime = 0;
-    audio.play().catch(()=>{});
-    lastOrderId = data.order_id;
-  }
-}
-
-setInterval(checkDriverNotifications, 10000);
-</script>
 
 <script>
 let lastHasNew = false;
@@ -256,8 +236,57 @@ async function checkDriverNotifications() {
 }
 
 // polling cada 10s
-setInterval(checkDriverNotifications, 10000);
+
 checkDriverNotifications();
+</script>
+<script>
+let lastHasNew = false;
+
+async function checkDriverNotifications() {
+  try {
+    const res = await fetch('/driver/notifications');
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    const bell = document.getElementById('driverBell');
+    const count = document.getElementById('driverNotifCount');
+    const sound = document.getElementById('notifSound');
+
+    // 🔒 Driver NO disponible → ocultar campana
+    if (!data.is_available) {
+      bell.classList.add('hidden');
+      count.classList.add('hidden');
+      lastHasNew = false;
+      return;
+    }
+
+    // Driver disponible
+    bell.classList.remove('hidden');
+
+    if (data.has_new) {
+      count.textContent = data.count || 1;
+      count.classList.remove('hidden');
+
+      // 🔔 sonar SOLO cuando aparece uno nuevo
+      if (!lastHasNew) {
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+      }
+      lastHasNew = true;
+    } else {
+      count.classList.add('hidden');
+      lastHasNew = false;
+    }
+
+  } catch (e) {
+    console.warn('Error notifications', e);
+  }
+}
+
+// ⏱️ polling único
+checkDriverNotifications();
+setInterval(checkDriverNotifications, 8000);
 </script>
 
 {% endblock %}
