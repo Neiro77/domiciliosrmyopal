@@ -184,7 +184,8 @@ def dashboard():
 
 @driver_bp.route("/notifications")
 @login_required
-@role_required("driver")
+@driver_required
+#@role_required("driver")
 def driver_notifications():
     driver_id = current_user.id
 
