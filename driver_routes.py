@@ -182,6 +182,23 @@ def dashboard():
         active_order=active_order
     )
 
+@driver_bp.route("/notifications")
+@login_required
+@role_required("driver")
+def driver_notifications():
+    driver_id = current_user.id
+
+    pending_orders = Order.query.filter(
+        Order.status == "Pendiente",
+        Order.driver_id == None
+    ).count()
+
+    return jsonify({
+        "pending_orders": pending_orders
+    })
+
+
+
 @driver_bp.route('/profile/setup', methods=['GET', 'POST'])
 @driver_required
 def profile_setup():

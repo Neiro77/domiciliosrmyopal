@@ -2864,3 +2864,18 @@ footer {
 .form-label {
   font-size: 0.9rem;
 }
+
+.notification-bell {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #dc2626;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-weight: bold;
+    z-index: 9999;
+}
+.hidden {
+    display: none;
+}
