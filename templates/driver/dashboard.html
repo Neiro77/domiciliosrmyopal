@@ -5,18 +5,20 @@
 <div class="container mx-auto px-4 py-8">
 
   <!-- 🔔 Campana de notificación -->
-  <div id="driverBell" class="relative hidden mb-4">
-    🔔
-    <span id="driverBellCount"
-          class="absolute -top-2 -right-2 bg-red-600 text-white
-                 text-xs font-bold px-2 py-0.5 rounded-full">
-      1
-    </span>
+  <div id="driverBell"
+     class="relative cursor-pointer select-none hidden">
+  🔔
+	<span id="driverNotifCount"
+        class="absolute -top-2 -right-2 bg-red-600 text-white
+               text-xs font-bold px-2 py-0.5 rounded-full hidden">
+		0
+	</span>
   </div>
 
-  <audio id="driverSound" preload="auto">
-    <source src="{{ url_for('static', filename='sounds/alerta_virus.mp3') }}" type="audio/mpeg">
+  <audio id="notifSound" preload="auto">
+	<source src="{{ url_for('static', filename='sounds/alerta_virus.mp3') }}" type="audio/mpeg">
   </audio>
+
 
   <!-- Header -->
   <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -207,6 +209,55 @@ async function checkDriverNotifications() {
 }
 
 setInterval(checkDriverNotifications, 10000);
+</script>
+
+<script>
+let lastHasNew = false;
+
+async function checkDriverNotifications() {
+  try {
+    const res = await fetch('/driver/notifications');
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    const bell = document.getElementById('driverBell');
+    const count = document.getElementById('driverNotifCount');
+    const sound = document.getElementById('notifSound');
+
+    // 🔒 Driver NO disponible → ocultar todo
+    if (!data.is_available) {
+      bell.classList.add('hidden');
+      count.classList.add('hidden');
+      lastHasNew = false;
+      return;
+    }
+
+    // Driver disponible → mostrar campana
+    bell.classList.remove('hidden');
+
+    if (data.has_new) {
+      count.textContent = data.count || 1;
+      count.classList.remove('hidden');
+
+      // 🔔 sonar SOLO si es nuevo
+      if (!lastHasNew) {
+        sound.play().catch(() => {});
+      }
+      lastHasNew = true;
+    } else {
+      count.classList.add('hidden');
+      lastHasNew = false;
+    }
+
+  } catch (e) {
+    console.warn('Error notifications', e);
+  }
+}
+
+// polling cada 10s
+setInterval(checkDriverNotifications, 10000);
+checkDriverNotifications();
 </script>
 
 {% endblock %}

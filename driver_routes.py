@@ -187,17 +187,25 @@ def dashboard():
 @driver_required
 #@role_required("driver")
 def driver_notifications():
-    driver_id = current_user.id
+  
+    driver = current_user.driver_profile
 
-    pending_orders = Order.query.filter(
+    if not driver or not driver.is_available:
+        return jsonify({
+            "has_new": False,
+            "is_available": False
+        })
+
+    pending = Order.query.filter(
         Order.status == OrderStatus.PENDING.value,
         Order.driver_id.is_(None)
     ).count()
 
     return jsonify({
-        "pending_orders": pending_orders
+        "has_new": pending > 0,
+        "count": pending,
+        "is_available": True
     })
-
 
 
 @driver_bp.route('/profile/setup', methods=['GET', 'POST'])
@@ -489,8 +497,14 @@ def toggle_availability():
     driver_profile.is_available = not driver_profile.is_available
     db.session.commit()
     
-    status_text = "Disponible" if driver_profile.is_available else "No Disponible"
-    flash(f'Tu estado ha cambiado a: {status_text}', 'success')
+    if request.headers.get('X-Requested-With')== 'XMLHttpRequest':
+        return jsonify({"is_available": driver_profile.is_available})
+        
+    flash (
+        f"Estado cambiado a {'Disponible' if driver_profile.is_available else 'No disponible'}",
+        "success"
+    )
+    
     return redirect(url_for('driver.dashboard')) # O a un dashboard de conductor
 
 # 3. RUTA PARA RECARGAR SALDO (EJEMPLO SIMPLE)
