@@ -2865,138 +2865,43 @@ footer {
   font-size: 0.9rem;
 }
 
-.notification-bell {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #dc2626;
+/* ================================
+   MOBILE MENU FIX (Alpine x-show)
+   ================================ */
+
+/* Evita que CSS rompa x-show */
+[x-cloak] {
+  display: none !important;
+}
+
+/* Menú móvil base */
+.mobile-menu {
+  display: none;
+}
+
+/* Alpine controla visibilidad */
+.mobile-menu[x-show="openMenu"] {
+  display: block;
+}
+
+/* Ajustes visuales seguros */
+@media (max-width: 768px) {
+  header nav {
+    position: relative;
+  }
+
+  .mobile-menu {
+    width: 100%;
+    background-color: #1d4ed8; /* blue-700 */
+  }
+
+  .mobile-menu a {
+    display: block;
+    padding: 0.75rem 1rem;
     color: white;
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-weight: bold;
-    z-index: 9999;
-}
-.hidden {
-    display: flex;
-}
-
-.bell {
-  font-size: 22px;
-  margin-left: 12px;
-  cursor: pointer;
-}
-
-.bell.active {
-  animation: ring 1s ease-in-out infinite;
-}
-
-@keyframes ring {
-  0% { transform: rotate(0deg); }
-  15% { transform: rotate(15deg); }
-  30% { transform: rotate(-10deg); }
-  45% { transform: rotate(8deg); }
-  60% { transform: rotate(-6deg); }
-  75% { transform: rotate(4deg); }
-  100% { transform: rotate(0deg); }
-}
-
-
-@media (max-width: 768px) {
-  .bell {
-    font-size: 18px;
-    margin-left: 6px;
-  }
-}
-
-@media (max-width: 768px) {
-  .bell.active {
-    animation: ring 1s ease-in-out 2;
-  }
-}
-
-
-/* === SOLO DRIVER DASHBOARD === */
-.driver-bell-wrapper {
-  position: relative;
-}
-
-.driver-bell-wrapper .bell {
-  font-size: 22px;
-  cursor: pointer;
-  position: relative;
-}
-
-.driver-bell-wrapper .bell-count {
-  position: absolute;
-  top: -6px;
-  right: -8px;
-  background: red;
-  color: white;
-  font-size: 11px;
-  border-radius: 50%;
-  padding: 2px 6px;
-}
-
-/* ================================
-   DRIVER NOTIFICATION BELL
-   ================================ */
-
-#driverBell {
-  position: relative;
-  font-size: 1.8rem;
-}
-
-/* animación SOLO para la campana */
-#driverBell.bell-active {
-  animation: bell-shake 0.8s ease-in-out infinite;
-}
-
-@keyframes bell-shake {
-  0%   { transform: rotate(0); }
-  20%  { transform: rotate(-10deg); }
-  40%  { transform: rotate(10deg); }
-  60%  { transform: rotate(-10deg); }
-  80%  { transform: rotate(10deg); }
-  100% { transform: rotate(0); }
-}
-
-/* contador quieto */
-#driverNotifCount {
-  animation: none !important;
-}
-
-
-/* ================================
-   FIX MENU MOBILE (TAILWIND SAFE)
-   ================================ */
-
-@media (max-width: 768px) {
-  nav ul {
-    display: none;
   }
 
-  nav ul.mobile-open {
-    display: flex !important;
-    flex-direction: column;
-  }
-}
-
-
-/* ================================
-   FIX MENU MOBILE (TAILWIND SAFE)
-   NO rompe desktop
-   ================================ */
-
-/* En mobile, Tailwind manda */
-@media (max-width: 768px) {
-
-  /* El menú desktop debe ocultarse */
-  nav > .hidden.md\:flex {
-    display: none !important;
-  }
-
-  /* El menú móvil SOLO se muestra con x-show */
-  header > div.md\:hidden {
-    display: block !important;
+  .mobile-menu a:hover {
+    background-color: #2563eb; /* blue-600 */
   }
 }

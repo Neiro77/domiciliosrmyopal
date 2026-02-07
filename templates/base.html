@@ -188,14 +188,18 @@
             </div>
         </nav>
         <!-- Mobile Menu -->
-        <div x-show="openMenu" @click.away="openMenu = false" class="md:hidden bg-blue-700 py-2 transition-all duration-300 ease-in-out" x-cloak>
+        <div
+		  x-cloak
+		  :style="openMenu ? 'display:block' : 'display:none'"
+		  class="md:hidden bg-blue-700 py-2 transition-all duration-300 ease-in-out"
+		>
             {% if not current_user.is_authenticated or current_user.role == 'customer' %}
 				<a href="{% if current_user.is_authenticated %}
-							{{ url_for('customer.dashboard') }}
+							{{ url_for('customer.dashboard') }} 
 						 {% else %}
 							{{ url_for('public.index') }}
 						 {% endif %}"
-				   class="block px-4 py-2 text-white hover:bg-blue-600">
+				   class="block px-4 py-2 text-white hover:bg-blue-600" @click="openMenu = false">
 					Inicio
 				</a>
 			{% endif %}
