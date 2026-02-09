@@ -318,11 +318,20 @@ def assign_driver(order_id):
     form = EmptyForm() 
 
     if form.validate_on_submit():
+
+        # 🔒 NO permitir cambios si ya terminó
+        if order.status in [OrderStatus.DELIVERED.value, OrderStatus.CANCELLED.value]:
+            flash(
+                f'No se puede modificar el costo. El pedido ya está {order.status}.',
+                'warning'
+            )
+            return redirect(url_for('admin.order_management'))
+
         driver_id = request.form.get('driver_id')
         costo_domicilio_str = request.form.get('costo_domicilio')
 
         if not driver_id or not costo_domicilio_str:
-            flash('Debes seleccionar un conductor y especificar el costo del domicilio.', 'danger')
+            flash('Debes seleccionar un conductor y especificar el costo.', 'danger')
             return redirect(url_for('admin.assign_driver', order_id=order_id))
 
         try:
@@ -331,10 +340,11 @@ def assign_driver(order_id):
             order.status = OrderStatus.ACCEPTED.value
 
             db.session.commit()
-            flash(f'Pedido #{order.id} asignado exitosamente.', 'success')
+            flash(f'Pedido #{order.id} asignado correctamente.', 'success')
             return redirect(url_for('admin.order_management'))
+
         except (ValueError, TypeError):
-            flash('El costo del domicilio debe ser un número válido.', 'danger')
+            flash('El costo debe ser un número válido.', 'danger')
             return redirect(url_for('admin.assign_driver', order_id=order_id))
 
     available_drivers = db.session.execute(
