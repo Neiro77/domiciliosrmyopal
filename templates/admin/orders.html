@@ -82,12 +82,20 @@
                             <p class="text-gray-900 whitespace-no-wrap">{{ moment(order.order_date).format('LLL') }}</p>
                         </td>
                         <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                            {% if not order.driver %}
-                                <a href="{{ url_for('admin.assign_driver', order_id=order.id) }}" class="btn btn-sm btn-primary">Asignar</a>
-                            {% else %}
-                                <span class="text-gray-500">Asignado</span>
-                            {% endif %}
-                            </td>
+                            {% if order.status not in ['Entregado', 'Cancelado'] %}
+								<a href="{{ url_for('admin.assign_driver', order_id=order.id) }}"
+								   class="btn btn-sm btn-warning">
+									{% if order.driver_id %}
+										Editar asignación / costo
+									{% else %}
+										Asignar conductor
+									{% endif %}
+								</a>
+							{% else %}
+								<span class="badge bg-secondary">Cerrado</span>
+							{% endif %}
+
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
