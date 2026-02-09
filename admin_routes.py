@@ -304,96 +304,86 @@ def assign_driver(order_id):
             joinedload(Order.business),
             joinedload(Order.user).joinedload(User.customer_profile),
             joinedload(Order.items).joinedload(OrderItem.product),
-            # --- >>> LÍNEA CLAVE AÑADIDA <<< ---
-            # Carga también los detalles del paquete si el item es de ese tipo.
-            joinedload(Order.items).joinedload(OrderItem.paquete_envio)
+            joinedload(Order.items).joinedload(OrderItem.paquete_envio),
         )
-    # ).scalar_one_or_none()
-    ).scalars().unique().one_or_none() # <--- CAMBIO CLAVE AQUÍ: .scalars().unique().one_or_none()
+    ).scalars().unique().one_or_none()
 
     if not order:
         flash('Pedido no encontrado.', 'danger')
         return redirect(url_for('admin.order_management'))
 
-    form = EmptyForm() 
+    form = EmptyForm()
 
+    # =========================
+    # POST
+    # =========================
     if form.validate_on_submit():
 
-        # 🔒 NO permitir cambios si ya terminó
-        if order.status in [OrderStatus.DELIVERED.value, OrderStatus.CANCELLED.value]:
+        # 🔒 Estados bloqueados
+        if order.status in [
+            OrderStatus.DELIVERED.value,
+            OrderStatus.CANCELLED.value
+        ]:
             flash(
-                f'No se puede modificar el costo. El pedido ya está {order.status}.',
+                f'No se puede modificar el pedido. Estado: {order.status}.',
                 'warning'
             )
             return redirect(url_for('admin.order_management'))
 
-        driver_id = request.form.get('driver_id')
+        # ---------- COSTO ----------
         costo_domicilio_str = request.form.get('costo_domicilio')
 
-        if not driver_id or not costo_domicilio_str:
-            flash('Debes seleccionar un conductor y especificar el costo.', 'danger')
+        if not costo_domicilio_str:
+            flash('Debes especificar el costo del domicilio.', 'danger')
             return redirect(url_for('admin.assign_driver', order_id=order_id))
 
         try:
-            order.driver_id = int(driver_id)
-            order.costo_domicilio = Decimal(costo_domicilio_str)
-            order.status = OrderStatus.ACCEPTED.value
+            nuevo_costo = Decimal(costo_domicilio_str)
+            order.costo_domicilio = nuevo_costo
 
-            db.session.commit()
-            flash(f'Pedido #{order.id} asignado correctamente.', 'success')
-            return redirect(url_for('admin.order_management'))
+            # 🧮 Ajustar total SOLO para paquetes / envío rápido
+            if order.service and order.service.name in ['Paquetes', 'Envío rápido']:
+                order.total_amount = float(nuevo_costo)
 
         except (ValueError, TypeError):
             flash('El costo debe ser un número válido.', 'danger')
             return redirect(url_for('admin.assign_driver', order_id=order_id))
 
+        # ---------- DRIVER ----------
+        driver_id = request.form.get('driver_id')
+
+        if driver_id:
+            order.driver_id = int(driver_id)
+
+            # Solo mover a Aceptado si aún estaba Pendiente
+            if order.status == OrderStatus.PENDING.value:
+                order.status = OrderStatus.ACCEPTED.value
+
+        db.session.commit()
+
+        flash(f'Pedido #{order.id} actualizado correctamente.', 'success')
+        return redirect(url_for('admin.order_management'))
+
+    # =========================
+    # GET
+    # =========================
     available_drivers = db.session.execute(
-        db.select(Driver).filter(Driver.is_available == True, Driver.saldo_cuenta > 0)
+        db.select(Driver).filter(
+            Driver.is_available == True,
+            Driver.saldo_cuenta > 0
+        )
     ).scalars().all()
 
-    # Estados donde NO se puede editar el costo
     LOCKED_STATUSES = ['Entregado', 'Cancelado']
-
     can_edit_cost = order.status not in LOCKED_STATUSES
+
     print(f"[ADMIN] Order {order.id} status={order.status} can_edit_cost={can_edit_cost}")
-    
-    if order.status in ['Entregado', 'Cancelado']:
-        flash('No se puede modificar el costo en este estado.', 'danger')
-        return redirect(url_for('admin.assign_driver', order_id=order.id))
 
-
-    return render_template('admin/assign_driver.html', order=order, drivers=available_drivers, form=form, OrderStatus=OrderStatus, can_edit_cost=can_edit_cost)
-
-# RUTA PARA ASIGNAR DOMICILIOS (VERSIÓN CON DETALLES DE PRODUCTOS)
-# @admin_bp.route('/order/<int:order_id>/assign', methods=['GET', 'POST'])
-# @admin_required
-# def assign_driver(order_id):
-    # # --- Consulta Optimizada para incluir los productos del pedido ---
-    # order = db.session.execute(
-        # db.select(Order)
-        # .filter_by(id=order_id)
-        # .options(
-            # joinedload(Order.business),
-            # joinedload(Order.user).joinedload(User.customer_profile),
-            # # --- >>> LÍNEA CLAVE AÑADIDA <<< ---
-            # # Carga los items del pedido y, para cada item, carga el producto asociado.
-            # joinedload(Order.items).joinedload(OrderItem.product)
-        # )
-    # ).scalar_one_or_none()
-
-    # if not order:
-        # flash('Pedido no encontrado.', 'danger')
-        # return redirect(url_for('admin.order_management'))
-
-    # # ... (el resto de la función, con la lógica del form y el POST, no cambia) ...
-    # form = EmptyForm() 
-
-    # if form.validate_on_submit():
-        # # ... (lógica del POST sin cambios) ...
-        # pass
-
-    # available_drivers = db.session.execute(
-        # db.select(Driver).filter(Driver.is_available == True, Driver.saldo_cuenta > 0)
-    # ).scalars().all()
-    
-    # return render_template('admin/assign_driver.html', order=order, drivers=available_drivers, form=form)
+    return render_template(
+        'admin/assign_driver.html',
+        order=order,
+        drivers=available_drivers,
+        form=form,
+        OrderStatus=OrderStatus,
+        can_edit_cost=can_edit_cost
+    )
