@@ -278,57 +278,65 @@ def clear_cart():
 @customer_bp.route('/create_package', methods=['GET', 'POST'])
 @customer_required
 def create_package():
+
     form = PackageForm()
-    # Aquí puedes añadir lógica para pre-llenar direcciones como en el checkout si lo deseas
-    
+
     if form.validate_on_submit():
         try:
-            
-            # Crear y guardar el objeto del paquete
+            # 🧠 VALOR FIJO DEL SERVICIO (NO ES PRECIO DE PRODUCTO)
             PRECIO_ENVIO_RAPIDO = 7000.0
 
+            # 📦 Crear y guardar el detalle del paquete (SIN COBRAR AQUÍ)
             new_package_detail = DetallesPaqueteEnvio(
                 descripcion=form.descripcion.data,
                 nombre_quien_recibe=form.nombre_quien_recibe.data,
                 telefono_quien_recibe=form.telefono_quien_recibe.data,
-                precio_calculado=PRECIO_ENVIO_RAPIDO
+                precio_calculado=0  # 🔑 IMPORTANTE: NO es el costo del servicio
             )
-            db.session.add(new_package_detail)
-            db.session.commit() # Hacemos commit para obtener el ID final
 
-            flash('Paquete listo para envío. Revisa los detalles y confirma tu pedido.', 'success')
-            
-            # --- CAMBIO CLAVE EN LA LÓGICA DEL CARRITO ---
-            # Limpiamos cualquier carrito anterior y creamos uno nuevo para el paquete.
-            # Esto asegura que solo se procese o un pedido de comida o un paquete a la vez.
+            db.session.add(new_package_detail)
+            db.session.commit()  # Necesario para obtener el ID
+
+            flash(
+                'Paquete listo para envío. Revisa los detalles y confirma tu pedido.',
+                'success'
+            )
+
+            # --- 🛒 LÓGICA CORRECTA DEL CARRITO ---
+            # El paquete NO tiene precio (subtotal = 0)
             session['cart_items'] = [{
                 'type': 'package',
                 'id': new_package_detail.id,
-                'name': f"Envío de Paquete: {new_package_detail.descripcion}",
-                'price': new_package_detail.precio_calculado,
+                'name': 'Envío rápido de paquete',
+                'price': 0,          # ✅ Subtotal = 0
                 'quantity': 1
             }]
-            # Datos del "negocio" para un paquete es nulo o genérico
+
+            # El domicilio se maneja como SERVICIO, no como producto
+            session['shipping_cost'] = PRECIO_ENVIO_RAPIDO  # 👈 clave
             session['cart_business_id'] = None
             session['cart_business_name'] = 'Servicio de Paquetería'
+            session['service_type'] = 'envio_rapido'
+
             session.modified = True
 
             return redirect(url_for('customer.checkout'))
-            print(form._fields.keys())
-            
+
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error al crear paquete: {e}")
-            flash(f'Ocurrió un error al crear el paquete: {str(e)}', 'danger')
+            flash(
+                f'Ocurrió un error al crear el paquete: {str(e)}',
+                'danger'
+            )
 
-    return render_template('customer/create_package.html', form=form)
-    
     if not form.validate_on_submit():
         flash('Por favor completa todos los campos requeridos.', 'danger')
-        return render_template(
-            'customer/create_package.html',
-            form=form
-        )
+
+    return render_template(
+        'customer/create_package.html',
+        form=form
+    )
 
 @customer_bp.route('/update_session_cart', methods=['POST'])
 @customer_required
