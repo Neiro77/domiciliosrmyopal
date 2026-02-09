@@ -351,7 +351,7 @@ def assign_driver(order_id):
         db.select(Driver).filter(Driver.is_available == True, Driver.saldo_cuenta > 0)
     ).scalars().all()
 
-    return render_template('admin/assign_driver.html', order=order, drivers=available_drivers, form=form)
+    return render_template('admin/assign_driver.html', order=order, drivers=available_drivers, form=form, OrderStatus=OrderStatus)
 
 # RUTA PARA ASIGNAR DOMICILIOS (VERSIÓN CON DETALLES DE PRODUCTOS)
 # @admin_bp.route('/order/<int:order_id>/assign', methods=['GET', 'POST'])
