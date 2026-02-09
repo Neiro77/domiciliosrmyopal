@@ -355,6 +355,7 @@ def assign_driver(order_id):
     LOCKED_STATUSES = ['Entregado', 'Cancelado']
 
     can_edit_cost = order.status not in LOCKED_STATUSES
+    print(f"[ADMIN] Order {order.id} status={order.status} can_edit_cost={can_edit_cost}")
     
     if order.status in ['Entregado', 'Cancelado']:
         flash('No se puede modificar el costo en este estado.', 'danger')
