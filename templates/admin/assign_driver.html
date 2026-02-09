@@ -55,22 +55,25 @@
                     <form method="POST" action="{{ url_for('admin.assign_driver', order_id=order.id) }}">
                         {{ form.hidden_tag() }}
 						<div class="mb-3">
-							<label for="costo_domicilio" class="form-label">Costo del Domicilio (COP)</label>								   
-						{% if order.status in [OrderStatus.DELIVERED.value, OrderStatus.CANCELLED.value] %}
-						  <p class="font-semibold text-gray-700">
-							${{ order.costo_domicilio }}
-						  </p>
-						{% else %}
-						  <input type="number"
-								 id="costo_domicilio"
-								 name="costo_domicilio"
-								 value="{{ order.costo_domicilio }}"
-								 step="0.01"
-								 required
-								 class="border rounded px-3 py-2 w-full">
-						{% endif %}
-	
+							<label for="costo_domicilio" class="form-label">
+								Costo del Domicilio (COP)
+							</label>
+
+							{% if can_edit_cost %}
+								<input type="number"
+									   id="costo_domicilio"
+									   name="costo_domicilio"
+									   value="{{ order.costo_domicilio }}"
+									   step="0.01"
+									   required
+									   class="form-control">
+							{% else %}
+								<p class="fw-bold text-muted">
+									${{ order.costo_domicilio }}
+								</p>
+							{% endif %}
 						</div>
+
                         <div class="mb-3">
                             <label for="driver_id" class="form-label">Conductores Disponibles (con saldo)</label>
                             {% if drivers %}

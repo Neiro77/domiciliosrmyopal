@@ -351,7 +351,17 @@ def assign_driver(order_id):
         db.select(Driver).filter(Driver.is_available == True, Driver.saldo_cuenta > 0)
     ).scalars().all()
 
-    return render_template('admin/assign_driver.html', order=order, drivers=available_drivers, form=form, OrderStatus=OrderStatus)
+    # Estados donde NO se puede editar el costo
+    LOCKED_STATUSES = ['Entregado', 'Cancelado']
+
+    can_edit_cost = order.status not in LOCKED_STATUSES
+    
+    if order.status in ['Entregado', 'Cancelado']:
+        flash('No se puede modificar el costo en este estado.', 'danger')
+        return redirect(url_for('admin.assign_driver', order_id=order.id))
+
+
+    return render_template('admin/assign_driver.html', order=order, drivers=available_drivers, form=form, OrderStatus=OrderStatus, can_edit_cost=can_edit_cost)
 
 # RUTA PARA ASIGNAR DOMICILIOS (VERSIÓN CON DETALLES DE PRODUCTOS)
 # @admin_bp.route('/order/<int:order_id>/assign', methods=['GET', 'POST'])
