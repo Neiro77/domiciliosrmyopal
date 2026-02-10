@@ -307,8 +307,9 @@ def create_package():
             session['cart_items'] = [{
                 'type': 'package',
                 'id': new_package_detail.id,
-                'name': 'Envío rápido de paquete',
-                'price': 0,          # ✅ Subtotal = 0
+                'name': f"Envío de Paquete: {new_package_detail.descripcion}",
+                'price': 0,
+                'productPrice': None,  # 🔒 evita fallback visual
                 'quantity': 1
             }]
 

@@ -24,7 +24,9 @@
                                 <span>${{ "%.2f"|format(item.productPrice * item.quantity) }}</span>
                             </div>
                         {% elif item.type == 'package' %}
-                            <div class="text-blue-700 text-sm">
+							<div class="italic text-gray-500 mb-1">
+								Servicio de Envío (no incluye productos)
+							</div>
                                 <div class="font-semibold">{{ item.tipo_paquete }}</div>
                                 <div>Recoger: <span class="text-gray-700">{{ item.direccion_recogida }}</span></div>
                                 <div>Entregar: <span class="text-gray-700">{{ item.direccion_entrega }}</span></div>
@@ -37,9 +39,13 @@
 
             <div class="border-t pt-4 flex flex-col space-y-2">
                 <div class="flex justify-between font-semibold text-gray-700">
-                    <span>Subtotal:</span>
-                    <span>${{ "%.2f"|format(cart_total) }}</span>
-                </div>
+					<span>Subtotal:</span>
+					{% if item_type == 'package' %}
+						<span>$0.00</span>
+					{% else %}
+						<span>${{ "%.2f"|format(cart_total) }}</span>
+					{% endif %}
+				</div>
                 <div class="flex justify-between font-semibold text-gray-700">
                     <span>Costo de Envío:</span>
                     <span>${{ "%.2f"|format(costo_domicilio) }}</span>
