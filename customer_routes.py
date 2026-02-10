@@ -431,9 +431,12 @@ def checkout():
                 pickup_address_obj = db.session.get(Address, int(form.pickup_address_id.data))
                 new_order.pickup_address = pickup_address_obj.full_address
                 new_order.direccion_recogida_id = pickup_address_obj.id
-                # Para paquetes, el costo del domicilio lo pone el admin, así que se queda en 0 por ahora.
-                new_order.costo_domicilio = 0.00
-                new_order.total_amount = float(cart_total) # El total es solo el valor del servicio
+
+                # --- ENVÍO RÁPIDO: COSTO FIJO ---
+                COSTO_ENVIO_RAPIDO = Decimal('7000.00')
+
+                new_order.costo_domicilio = float(COSTO_ENVIO_RAPIDO)
+                new_order.total_amount = float(COSTO_ENVIO_RAPIDO)
             
             db.session.add(new_order)
             db.session.flush()
@@ -474,7 +477,11 @@ def checkout():
             
     # Lógica para la solicitud GET
     cart_total = sum(Decimal(str(item.get('price', item.get('productPrice', 0)))) * int(item.get('quantity', 1)) for item in cart_items_data)
-    costo_domicilio = Decimal(str(business.delivery_fee)) if business and item_type == 'product' else Decimal('0.00')
+    if item_type == 'package':
+        costo_domicilio = Decimal('7000.00')
+    else:
+        costo_domicilio = Decimal(str(business.delivery_fee)) if business and business.delivery_fee else Decimal('0.00')
+
     total_final = cart_total + costo_domicilio
     
     return render_template('customer/checkout.html', 
