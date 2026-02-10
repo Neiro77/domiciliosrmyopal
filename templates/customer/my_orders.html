@@ -61,7 +61,14 @@
                         {% else %}
                             <li class="list-group-item">No se encontraron ítems para este pedido.</li>
                         {% endfor %}
-						{% if order.servicio.name == 'paquetes' %}
+						{% set es_paquete = false %}
+						{% for item in order.items %}
+							{% if item.tipo_item == 'paquete_envio' %}
+								{% set es_paquete = true %}
+							{% endif %}
+						{% endfor %}
+
+						{% if es_paquete %}
 							<p class="text-lg font-semibold text-gray-600 mt-1">
 								Subtotal productos: $0.00
 							</p>
@@ -75,7 +82,7 @@
 							</p>
 						{% else %}
 							<p class="text-lg font-semibold text-gray-600 mt-1">
-								Subtotal productos: ${{ "%.2f"|format(order.subtotal) }}
+								Subtotal productos: ${{ "%.2f"|format(order.subtotal or 0) }}
 							</p>
 
 							<p class="text-lg font-semibold text-gray-700 mt-1">
