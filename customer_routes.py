@@ -406,11 +406,16 @@ def checkout():
             delivery_address_obj = db.session.get(Address, int(form.address_id.data))
             
             # ... (código para calcular totales y obtener el servicio) ...
-            # Esta parte debe estar completa en tu código
-            cart_total = sum(
-                Decimal(str(item.get('price', 0))) * int(item.get('quantity', 1))
-                for item in cart_items_data
-            )
+            # Esta parte debe estar completa en tu código POST
+            # 🔒 Subtotal: SOLO productos (los paquetes NO suman)
+            cart_total = Decimal('0.00')
+
+            if item_type == 'product':
+                cart_total = sum(
+                    Decimal(str(item.get('price', 0))) * int(item.get('quantity', 1))
+                    for item in cart_items_data
+                    if item.get('type') == 'product'
+                )
 
             # 🔑 COSTO DOMICILIO UNIFICADO
             if item_type == 'package':
