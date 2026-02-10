@@ -406,8 +406,17 @@ def checkout():
             
             # ... (código para calcular totales y obtener el servicio) ...
             # Esta parte debe estar completa en tu código
-            cart_total = sum(Decimal(str(item.get('price', item.get('productPrice', 0)))) * int(item.get('quantity', 1)) for item in cart_items_data)
-            costo_domicilio = Decimal(str(business.delivery_fee)) if business and business.delivery_fee else Decimal('0.00')
+            cart_total = sum(
+                Decimal(str(item.get('price', 0))) * int(item.get('quantity', 1))
+                for item in cart_items_data
+            )
+
+            # 🔑 COSTO DOMICILIO UNIFICADO
+            if item_type == 'package':
+                costo_domicilio = Decimal(str(session.get('shipping_cost', 0)))
+            else:
+                costo_domicilio = Decimal(str(business.delivery_fee)) if business and business.delivery_fee else Decimal('0.00')
+
             total_final = cart_total + costo_domicilio
             service_name = 'comidas' if item_type == 'product' else 'paquetes'
             service_obj = db.session.execute(db.select(Service).filter_by(name=service_name)).scalar_one_or_none()
@@ -432,11 +441,10 @@ def checkout():
                 new_order.pickup_address = pickup_address_obj.full_address
                 new_order.direccion_recogida_id = pickup_address_obj.id
 
-                # --- ENVÍO RÁPIDO: COSTO FIJO ---
-                COSTO_ENVIO_RAPIDO = Decimal('7000.00')
+                shipping_cost = Decimal(str(session.get('shipping_cost', 0)))
 
-                new_order.costo_domicilio = float(COSTO_ENVIO_RAPIDO)
-                new_order.total_amount = float(COSTO_ENVIO_RAPIDO)
+                new_order.costo_domicilio = float(shipping_cost)
+                new_order.total_amount = float(shipping_cost)
             
             db.session.add(new_order)
             db.session.flush()
@@ -478,7 +486,7 @@ def checkout():
     # Lógica para la solicitud GET
     cart_total = sum(Decimal(str(item.get('price', item.get('productPrice', 0)))) * int(item.get('quantity', 1)) for item in cart_items_data)
     if item_type == 'package':
-        costo_domicilio = Decimal('7000.00')
+        costo_domicilio = Decimal(str(session.get('shipping_cost', 0)))
     else:
         costo_domicilio = Decimal(str(business.delivery_fee)) if business and business.delivery_fee else Decimal('0.00')
 
