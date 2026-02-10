@@ -61,13 +61,34 @@
                         {% else %}
                             <li class="list-group-item">No se encontraron ítems para este pedido.</li>
                         {% endfor %}
-						<p class="text-lg font-semibold text-gray-600 mt-1">Subtotal productos: ${{ "%.2f"|format(order.total_amount) }}</p>
-						<p class="text-lg font-semibold text-gray-700 mt-1">
-							Costo de domicilio: ${{ "%.2f"|format(order.costo_domicilio) }}
-						</p>
+						{% if order.servicio.name == 'paquetes' %}
+							<p class="text-lg font-semibold text-gray-600 mt-1">
+								Subtotal productos: $0.00
+							</p>
+
+							<p class="text-lg font-semibold text-gray-700 mt-1">
+								Costo de domicilio: ${{ "%.2f"|format(order.costo_domicilio) }}
+							</p>
+
+							<p class="text-lg font-semibold text-blue-600 mt-1">
+								Total a pagar: ${{ "%.2f"|format(order.total_amount) }}
+							</p>
+						{% else %}
+							<p class="text-lg font-semibold text-gray-600 mt-1">
+								Subtotal productos: ${{ "%.2f"|format(order.subtotal) }}
+							</p>
+
+							<p class="text-lg font-semibold text-gray-700 mt-1">
+								Costo de domicilio: ${{ "%.2f"|format(order.costo_domicilio) }}
+							</p>
+
+							<p class="text-lg font-semibold text-blue-600 mt-1">
+								Total a pagar: ${{ "%.2f"|format(order.total_amount) }}
+							</p>
+						{% endif %}
                     </ul>
 					<span>
-					<p class="text-lg font-semibold text-blue-600 mt-1">Total a pagar: ${{ "%.2f"|format(order.total_amount + order.costo_domicilio) }} </p>
+					
 					{{ order.payment_method.description }}
 					</span>
                     <span class="text-sm font-semibold px-3 py-1 rounded-full
