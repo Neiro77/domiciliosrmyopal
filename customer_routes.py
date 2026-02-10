@@ -441,10 +441,12 @@ def checkout():
                 new_order.pickup_address = pickup_address_obj.full_address
                 new_order.direccion_recogida_id = pickup_address_obj.id
 
-                shipping_cost = Decimal(str(session.get('shipping_cost', 0)))
+                # 🔒 PRECIO BASE FIJO DEL SERVICIO
+                SHIPPING_COST = Decimal('7000.00')
 
-                new_order.costo_domicilio = float(shipping_cost)
-                new_order.total_amount = float(shipping_cost)
+                new_order.subtotal = 0
+                new_order.costo_domicilio = float(SHIPPING_COST)
+                new_order.total_amount = float(SHIPPING_COST)
             
             db.session.add(new_order)
             db.session.flush()

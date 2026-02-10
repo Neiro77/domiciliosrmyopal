@@ -340,6 +340,8 @@ def assign_driver(order_id):
         try:
             nuevo_costo = Decimal(costo_domicilio_str)
             order.costo_domicilio = nuevo_costo
+            # 🔁 Recalcular total (paquetes no tienen subtotal)
+            order.total_amount = float(order.costo_domicilio)
 
             # 🧮 Ajustar total SOLO para paquetes / envío rápido
             if order.service and order.service.name in ['Paquetes', 'Envío rápido']:
