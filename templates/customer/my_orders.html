@@ -81,21 +81,15 @@
 								Total a pagar: ${{ "%.2f"|format(order.total_amount) }}
 							</p>
 						{% else %}
-							<p class="text-lg font-semibold text-gray-600 mt-1">
-								Subtotal productos: ${{ "%.2f"|format(order.subtotal or 0) }}
-							</p>
-
-							<p class="text-lg font-semibold text-gray-700 mt-1">
-								Costo de domicilio: ${{ "%.2f"|format(order.costo_domicilio) }}
-							</p>
-
 							<p class="text-lg font-semibold text-blue-600 mt-1">
-								Total a pagar: ${{ "%.2f"|format(order.total_amount) }}
-							</p>
+								Subtotal productos: ${{ "%.2f"|format(order.subtotal or 0) }}
+							</p>							
 						{% endif %}
                     </ul>
 					<span>
-					
+					<p class="text-lg font-semibold text-blue-600 mt-1">
+								Total a pagar: ${{ "%.2f"|format(order.total_amount) }}
+					</p>
 					{{ order.payment_method.description }}
 					</span>
                     <span class="text-sm font-semibold px-3 py-1 rounded-full
