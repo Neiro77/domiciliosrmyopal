@@ -486,11 +486,20 @@ def checkout():
             return redirect(url_for('customer.checkout'))
             
     # Lógica para la solicitud GET
-    cart_total = sum(Decimal(str(item.get('price', item.get('productPrice', 0)))) * int(item.get('quantity', 1)) for item in cart_items_data)
-    if item_type == 'package':
-        costo_domicilio = Decimal(str(session.get('shipping_cost', 0)))
-    else:
-        costo_domicilio = Decimal(str(business.delivery_fee)) if business and business.delivery_fee else Decimal('0.00')
+    cart_total = Decimal('0.00')
+
+    if item_type == 'product':
+        cart_total = sum(
+            Decimal(str(item.get('price', item.get('productPrice', 0))))
+            * int(item.get('quantity', 1))
+            for item in cart_items_data
+        )
+
+    costo_domicilio = (
+        Decimal('7000.00') if item_type == 'package'
+        else Decimal(str(business.delivery_fee)) if business
+        else Decimal('0.00')
+    )
 
     total_final = cart_total + costo_domicilio
     
