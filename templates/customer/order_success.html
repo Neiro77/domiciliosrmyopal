@@ -13,7 +13,18 @@
             <p class="text-gray-700 mb-2"><strong>ID de Pedido:</strong> {{ order.id }}</p>
             <p class="text-gray-700 mb-2"><strong>Fecha:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</p>
             <p class="text-gray-700 mb-2"><strong>Estado:</strong> {{ order.status }}</p>
-            <p class="text-gray-700 mb-2"><strong>Total:</strong> ${{ '%.2f' | format(order.total_amount) }}</p>
+            <p><strong>Subtotal productos:</strong>
+			   ${{ '%.2f' | format(order.total_amount) }}
+			</p>
+
+			<p><strong>Costo de domicilio:</strong>
+			   ${{ '%.2f' | format(order.costo_domicilio) }}
+			</p>
+
+			<p class="font-bold text-green-700">
+			   <strong>Total pagado:</strong>
+			   ${{ '%.2f' | format(order.total_amount + order.costo_domicilio) }}
+			</p>
         </div>
 
         <div class="border-t border-gray-200 pt-4">

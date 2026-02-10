@@ -61,7 +61,10 @@
                         {% else %}
                             <li class="list-group-item">No se encontraron ítems para este pedido.</li>
                         {% endfor %}
-						<p class="text-lg font-semibold text-blue-600 mt-1">Costo producto: ${{ "%.2f"|format(order.total_amount) }}</p>
+						<p class="text-lg font-semibold text-gray-600 mt-1">Subtotal productos: ${{ "%.2f"|format(order.total_amount) }}</p>
+						<p class="text-lg font-semibold text-gray-700 mt-1">
+							Costo de domicilio: ${{ "%.2f"|format(order.costo_domicilio) }}
+						</p>
                     </ul>
 					<span>
 					<p class="text-lg font-semibold text-blue-600 mt-1">Total a pagar: ${{ "%.2f"|format(order.total_amount + order.costo_domicilio) }} </p>
