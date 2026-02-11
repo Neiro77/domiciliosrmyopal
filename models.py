@@ -275,7 +275,13 @@ class Order(db.Model):
 
     def __repr__(self):
         return f"<Order {self.id} Status: {self.status}>"
-           
+    
+    @property
+    def es_paquete(self):
+        return any(
+            item.tipo_item == 'paquete_envio'
+            for item in self.items
+        )    
 
 # Tabla de Ítems del Pedido
 class OrderItem(db.Model):

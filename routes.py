@@ -159,6 +159,11 @@ def register():
         return redirect(url_for('public.index'))
 
     form = RegistrationForm()
+    
+    role = request.form.get('role')
+    if role not in ['business', 'driver']:
+        flash('Registro no permitido desde esta página.', 'danger')
+        return redirect(url_for('public.index'))
 
     if form.validate_on_submit():
         current_app.logger.info("VALID FORM — CREATING USER")
