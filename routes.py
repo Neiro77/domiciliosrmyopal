@@ -160,7 +160,19 @@ def register():
 
     form = RegistrationForm()
     
-    role = request.form.get('role')
+    # --- VALIDACIÓN SEGURA DE ROL ---
+
+    if request.method == 'GET':
+        role = request.args.get('role')
+    else:
+        role = request.form.get('role')
+
+    # Mapear los valores que vienen del index
+    if role == 'restaurant':
+        role = 'business'
+    elif role == 'motorizado':
+        role = 'driver'
+
     if role not in ['business', 'driver']:
         flash('Registro no permitido desde esta página.', 'danger')
         return redirect(url_for('public.index'))
