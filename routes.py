@@ -242,8 +242,13 @@ def register():
     else:
         if request.method == 'POST':
             current_app.logger.error(f"FORM ERRORS: {form.errors}")
+            
+    return render_template(
+        'public/register.html',
+        form=form,
+        selected_role=role  # 👈 enviamos el rol al template
+    )
 
-    return render_template('public/register.html', form=form)
 
 @public_bp.route("/logout")
 @login_required
