@@ -177,8 +177,8 @@
                     {% endif %}
                     <a href="{{ url_for('public.logout') }}" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg shadow-md transition">Cerrar Sesión</a>
                 {% else %}
-                    <a href="{{ url_for('public.login') }}" class="hover:text-blue-200">Iniciar Sesión</a>
-                    <a href="{{ url_for('public.register') }}" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg shadow-md transition">Registrarse</a>
+                    <a href="{{ url_for('public.login') }}" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg shadow-md transition">Iniciar Sesión</a>
+      
                 {% endif %}
             </div>
             <div class="md:hidden">
@@ -242,7 +242,7 @@
                 <a href="{{ url_for('public.logout') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Cerrar Sesión</a>
             {% else %}
                 <a href="{{ url_for('public.login') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Iniciar Sesión</a>
-                <a href="{{ url_for('public.register') }}" class="block px-4 py-2 text-white hover:bg-blue-600">Registrarse</a>
+
             {% endif %}
         </div>
     </header>
