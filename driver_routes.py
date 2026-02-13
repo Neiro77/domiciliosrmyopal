@@ -491,7 +491,7 @@ def my_orders():
     total_ganado = sum(o.total_amount for o in orders if o.status == OrderStatus.DELIVERED.value)    
 
     
-    return render_template('driver/my_orders.html', orders=orders, driver_profile=driver_profile, OrderStatus=OrderStatus, entregados_count=entregados_count, cancelados_count=cancelados_count,  form=form)
+    return render_template('driver/my_orders.html', orders=orders, driver_profile=driver_profile, OrderStatus=OrderStatus, entregados_count=entregados_count, cancelados_count=cancelados_count, total_ganado=total_ganado, form=form)
 
 # 2. RUTA PARA CAMBIAR DISPONIBILIDAD (EL TOGGLE)
 @driver_bp.route('/toggle_availability', methods=['POST'])
