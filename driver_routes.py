@@ -450,21 +450,29 @@ def my_orders():
     driver_profile = current_user.driver_profile
     form = ToggleAvailabilityForm()
     
-    # --- >>> AÑADIDO: Crear instancia del formulario <<< ---
-    # Se necesita para el token CSRF en la plantilla.
-    #form = EmptyForm()
+    # Estados que consideramos cerrados
+    estados_cerrados = ['entregado', 'cancelado', 'finalizado']
 
-    # if form.validate_on_submit(): # Usar el formulario para validar en el POST
-        # driver_id = request.form.get('driver_id')
-        # if driver_id:
-            # order.driver_id = int(driver_id)
-            # order.status = OrderStatus.ACCEPTED.value # Buen momento para actualizar el estado
-            # db.session.commit()
-            # flash(f'Pedido #{order.id} asignado exitosamente.', 'success')
-            # return redirect(url_for('admin.order_management')) # Redirigir a la lista de pedidos
-        # else:
-            # flash('Debes seleccionar un conductor.', 'warning')
-    
+    query = Order.query.filter(
+        Order.driver_id == driver_profile.id,
+        Order.status.in_(estados_cerrados)
+    )
+
+    # Filtros opcionales
+    status = request.args.get('status')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    if status:
+        query = query.filter(Order.status == status)
+
+    if start_date:
+        query = query.filter(Order.order_date >= start_date)
+
+    if end_date:
+        query = query.filter(Order.order_date <= end_date)
+
+    orders = query.order_by(Order.order_date.desc()).all()
     
     # Restricción: Sin saldo, no hay pedidos
     if driver_profile.saldo_cuenta <= 0:
@@ -474,11 +482,6 @@ def my_orders():
     # Alerta de saldo bajo
     if driver_profile.saldo_cuenta <= 500:
         flash('Alerta: Tu saldo es bajo. Recárgalo pronto para no dejar de recibir pedidos.', 'info')
-
-    # Muestra solo los pedidos asignados a este conductor
-    # orders = db.session.execute(
-        # db.select(Order).filter_by(driver_id=driver_profile.id).order_by(Order.order_date.desc())
-    # ).scalars().all()
     
     orders = Order.query.filter(
         Order.status == OrderStatus.PENDING.value,
