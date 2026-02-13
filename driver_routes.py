@@ -449,28 +449,31 @@ def update_delivery_status(order_id):
 def my_orders():
     driver_profile = current_user.driver_profile
     form = ToggleAvailabilityForm()
-    
-    # Estados que consideramos cerrados
-    estados_cerrados = ['entregado', 'cancelado', 'finalizado']
+
+    # SOLO estados cerrados reales (usando el value del Enum)
+    estados_cerrados = [
+        OrderStatus.DELIVERED.value,   # 'Entregado'
+        OrderStatus.CANCELLED.value    # 'Cancelado'
+    ]
 
     query = Order.query.filter(
         Order.driver_id == driver_profile.id,
         Order.status.in_(estados_cerrados)
     )
 
-    # Filtros opcionales
+    # -------- FILTROS --------
     status = request.args.get('status')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    if status:
+    if status in estados_cerrados:
         query = query.filter(Order.status == status)
 
     if start_date:
-        query = query.filter(Order.order_date >= start_date)
+        query = query.filter(Order.order_date >= datetime.strptime(start_date, "%Y-%m-%d"))
 
     if end_date:
-        query = query.filter(Order.order_date <= end_date)
+        query = query.filter(Order.order_date <= datetime.strptime(end_date, "%Y-%m-%d"))
 
     orders = query.order_by(Order.order_date.desc()).all()
     
@@ -482,14 +485,9 @@ def my_orders():
     # Alerta de saldo bajo
     if driver_profile.saldo_cuenta <= 500:
         flash('Alerta: Tu saldo es bajo. Recárgalo pronto para no dejar de recibir pedidos.', 'info')
-    
-    orders = Order.query.filter(
-        Order.status == OrderStatus.PENDING.value,
-        Order.driver_id.is_(None)
-    ).all()
 
     
-    return render_template('driver/my_orders.html', orders=orders, driver=driver_profile, form=form)
+    return render_template('driver/my_orders.html', orders=orders, driver_profile=driver_profile, OrderStatus=OrderStatus, form=form)
 
 # 2. RUTA PARA CAMBIAR DISPONIBILIDAD (EL TOGGLE)
 @driver_bp.route('/toggle_availability', methods=['POST'])
