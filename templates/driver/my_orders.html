@@ -1,84 +1,131 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Mi Historial - Domicilios RM{% endblock %}
+{% block title %}Historial de Domicilios{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
+<div class="container mt-4">
 
-    <!-- Header -->
-    <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-800">Historial de Domicilios</h2>
-        <p class="text-gray-600 mt-2">
-            Aquí puedes consultar todos los servicios finalizados.
-        </p>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="mb-1">📦 Historial de Domicilios</h1>
+            <small class="text-muted">Aquí puedes consultar tus pedidos finalizados</small>
+        </div>
     </div>
 
+    <!-- FILTROS -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">Estado</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="entregado" {% if request.args.get('status') == 'entregado' %}selected{% endif %}>Entregado</option>
+                        <option value="cancelado" {% if request.args.get('status') == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Desde</label>
+                    <input type="date" name="start_date" class="form-control"
+                           value="{{ request.args.get('start_date','') }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Hasta</label>
+                    <input type="date" name="end_date" class="form-control"
+                           value="{{ request.args.get('end_date','') }}">
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-dark w-100">
+                        <i class="fas fa-filter me-1"></i> Filtrar
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- LISTADO -->
+    <h3 class="mb-3">
+        <i class="fas fa-history me-1"></i> Resultados
+    </h3>
+
     {% if orders %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
+        <div class="row">
             {% for order in orders %}
-            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-start border-success border-4">
+                    <div class="card-body d-flex flex-column">
 
-                <!-- Encabezado -->
-                <div class="flex justify-between items-center mb-3">
-                    <span class="text-sm text-gray-500">
-                        Pedido #{{ order.id }}
-                    </span>
+                        <!-- Encabezado -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">Pedido #{{ order.id }}</span>
 
-                    {% if order.status == 'entregado' %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">
-                            Entregado
-                        </span>
-                    {% elif order.status == 'cancelado' %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">
-                            Cancelado
-                        </span>
-                    {% endif %}
+                            {% if order.status == 'entregado' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i> Entregado
+                                </span>
+                            {% elif order.status == 'cancelado' %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times-circle me-1"></i> Cancelado
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    {{ order.status }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="mb-2 text-muted small">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ order.order_date.strftime('%d %b %Y %I:%M %p') }}
+                        </div>
+
+                        <!-- Tipo de servicio -->
+                        <p class="mb-1">
+                            <i class="fas fa-layer-group me-1"></i>
+                            <b>Tipo:</b>
+                            <span class="badge bg-primary">
+                                {{ order.service.name }}
+                            </span>
+                        </p>
+
+                        <!-- Cliente -->
+                        <p class="mb-1">
+                            <i class="fas fa-user me-1"></i>
+                            <b>Cliente:</b>
+                            {{ order.user.customer_profile.first_name }}
+                        </p>
+
+                        <!-- Dirección -->
+                        <p class="mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            <b>Dirección:</b>
+                            {{ order.delivery_address }}
+                        </p>
+
+                        <!-- Total -->
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-success">
+                                ${{ "%.2f"|format(order.total_amount) }}
+                            </span>
+                            <span class="small text-muted">Total</span>
+                        </div>
+
+                    </div>
                 </div>
-
-                <!-- Información -->
-                <div class="space-y-2 text-sm text-gray-700">
-
-                    <p>
-                        <span class="font-semibold">Cliente:</span>
-                        {{ order.user.first_name }} {{ order.user.last_name }}
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">Dirección:</span>
-                        {{ order.delivery_address }}
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">Fecha:</span>
-                        {{ order.created_at.strftime('%d/%m/%Y %I:%M %p') }}
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">Total:</span>
-                        ${{ "{:,.0f}".format(order.total_amount) }}
-                    </p>
-
-                </div>
-
-                <!-- Footer -->
-                <div class="mt-4 border-t pt-3 text-xs text-gray-500">
-                    {% if order.status == 'entregado' %}
-                        Servicio completado correctamente.
-                    {% elif order.status == 'cancelado' %}
-                        Pedido cancelado.
-                    {% endif %}
-                </div>
-
             </div>
             {% endfor %}
-
         </div>
     {% else %}
-        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-8 text-center">
-            <p class="text-gray-600 text-lg">
-                Aún no tienes domicilios finalizados.
-            </p>
+        <div class="alert alert-info text-center py-4">
+            <h5>📭 No hay resultados</h5>
+            <p>No se encontraron pedidos con los filtros aplicados.</p>
         </div>
     {% endif %}
 
