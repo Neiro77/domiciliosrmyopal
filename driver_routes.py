@@ -485,9 +485,13 @@ def my_orders():
     # Alerta de saldo bajo
     if driver_profile.saldo_cuenta <= 500:
         flash('Alerta: Tu saldo es bajo. Recárgalo pronto para no dejar de recibir pedidos.', 'info')
+        
+    entregados_count = sum(1 for o in orders if o.status == OrderStatus.DELIVERED.value)
+    cancelados_count = sum(1 for o in orders if o.status == OrderStatus.CANCELLED.value)
+    total_ganado = sum(o.total_amount for o in orders if o.status == OrderStatus.DELIVERED.value)    
 
     
-    return render_template('driver/my_orders.html', orders=orders, driver_profile=driver_profile, OrderStatus=OrderStatus, form=form)
+    return render_template('driver/my_orders.html', orders=orders, driver_profile=driver_profile, OrderStatus=OrderStatus, entregados_count=entregados_count, cancelados_count=cancelados_count,  form=form)
 
 # 2. RUTA PARA CAMBIAR DISPONIBILIDAD (EL TOGGLE)
 @driver_bp.route('/toggle_availability', methods=['POST'])
