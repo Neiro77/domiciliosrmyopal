@@ -181,9 +181,17 @@ class Category(db.Model):
     name = db.Column(db.String(80), unique=True, nullable=False)
     description = db.Column(db.Text, nullable=True)
     image_url = db.Column(db.String(255), nullable=True)
+    
+    business_id = db.Column(
+        db.Integer,
+        db.ForeignKey('businesses.id'),
+        nullable=False
+    )
+    business = db.relationship('Business', backref='categories')
 
     def __repr__(self):
         return f"<Category {self.name}>"
+
 
 # Tabla de Servicios (Generaliza los tipos de servicio como 'Comida', 'Paquetes', 'Compras')
 class Service(db.Model): # Nueva tabla 'services'
