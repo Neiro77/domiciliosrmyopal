@@ -534,15 +534,31 @@ def toggle_item_availability(item_id):
     return redirect(url_for('business.menu_management'))
 
 # # Gestión de información del negocio
-# @business_bp.route('/business-info', methods=['GET', 'POST'])
-# # @login_required
-# def business_info():
-    # if request.method == 'POST':
-        # # Lógica para actualizar la información del negocio
-        # flash('Información del negocio actualizada (simulado).', 'success')
-        # return redirect(url_for('business.business_info'))
-    
-    # return render_template('business/business_info.html', business=MOCK_BUSINESS_INFO)
+@business_bp.route('/info', methods=['GET', 'POST'])
+@business_required
+def business_info():
+    business = Business.query.filter_by(user_id=current_user.id).first_or_404()
+
+    if request.method == 'POST':
+        business.name = request.form.get('business_name')
+        business.phone = request.form.get('business_phone')
+        business.address = request.form.get('business_address')
+        business.description = request.form.get('business_description')
+        business.min_order_value = request.form.get('min_order_value') or 0
+        business.delivery_fee = request.form.get('delivery_fee') or 0
+
+        # Métodos de pago
+        payment_methods = request.form.getlist('payment_method')
+        business.payment_methods = payment_methods
+
+        db.session.commit()
+        flash('Información actualizada correctamente', 'success')
+        return redirect(url_for('business.business_info'))
+
+    return render_template(
+        'business/business_info.html',
+        business=business
+    )    
 
 # # Historial de ventas
 # @business_bp.route('/sales-history')
