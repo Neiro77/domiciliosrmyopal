@@ -540,20 +540,24 @@ def business_info():
     business = Business.query.filter_by(user_id=current_user.id).first_or_404()
 
     if request.method == 'POST':
+
+    # Solo actualizar si el campo existe en el form enviado
+    if 'business_name' in request.form:
         business.name = request.form.get('business_name')
         business.phone = request.form.get('business_phone')
         business.address = request.form.get('business_address')
         business.description = request.form.get('business_description')
+
+    if 'min_order_value' in request.form:
         business.min_order_value = request.form.get('min_order_value') or 0
         business.delivery_fee = request.form.get('delivery_fee') or 0
 
-        # Métodos de pago
-        payment_methods = request.form.getlist('payment_method')
-        business.payment_methods = payment_methods
+    if 'payment_method' in request.form:
+        business.payment_methods = request.form.getlist('payment_method')
 
-        db.session.commit()
-        flash('Información actualizada correctamente', 'success')
-        return redirect(url_for('business.business_info'))
+    db.session.commit()
+    flash('Información actualizada correctamente', 'success')
+    return redirect(url_for('business.business_info'))
 
     return render_template(
         'business/business_info.html',
