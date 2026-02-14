@@ -2,12 +2,13 @@ from flask import Blueprint, render_template, redirect, url_for,  flash, request
 from flask_login import login_required, current_user
 from functools import wraps
 from extensions import db # Importa db para futuras interacciones con la DB
-from models import User, Business, Order, OrderItem, Product, OrderStatus # Importa los modelos necesarios y OrderStatus Enum
+from models import User, Business, Order, OrderItem, Product, OrderStatus, Category # Importa los modelos necesarios y OrderStatus Enum
 from functools import wraps # <--- ¡IMPORTA ESTO!
 import re # Para slugify
 from sqlalchemy.orm import joinedload # Importa joinedload si se utiliza en alguna parte
 from forms import EmptyForm # <--- Importa el nuevo EmptyForm
 from sqlalchemy.sql import func # Para usar funciones de SQL como now()
+
 
 business_bp = Blueprint('business', __name__, url_prefix='/business')
 
@@ -475,29 +476,62 @@ def profile_setup():
     # # flash(f'Estado del pedido #{order_id} actualizado a: {new_status}', 'success')
     # # return redirect(url_for('business.order_details', order_id=order_id))
 
-# # Gestión de menú/productos
-# @business_bp.route('/menu-management', methods=['GET', 'POST'])
-# # @login_required
-# def menu_management():
-    # if request.method == 'POST':
-        # # Lógica para añadir/editar/eliminar productos
-        # flash('Producto actualizado/añadido (simulado).', 'success')
-        # return redirect(url_for('business.menu_management'))
-    
-    # return render_template('business/menu_management.html', menu_items=MOCK_MENU_ITEMS)
+# Gestión de menú/productos
+@business_bp.route('/menu', methods=['GET', 'POST'])
+@business_required
+def menu_management():
+    business = Business.query.filter_by(user_id=current_user.id).first_or_404()
 
-# # Toggle disponibilidad de un producto (simulado)
-# @business_bp.route('/menu-management/<int:item_id>/toggle_availability', methods=['POST'])
-# # @login_required
-# def toggle_item_availability(item_id):
-    # item = next((i for i in MOCK_MENU_ITEMS if i['id'] == item_id), None)
-    # if item:
-        # item['available'] = not item['available']
-        # flash(f"Disponibilidad de '{item['name']}' actualizada a: {'Disponible' if item['available'] else 'No Disponible'}", 'success')
-    # else:
-        # flash('Producto no encontrado.', 'danger')
-    # return redirect(url_for('business.menu_management'))
+    if request.method == 'POST':
+        name = request.form.get('item_name')
+        price = request.form.get('item_price')
+        description = request.form.get('item_description')
+        category_name = request.form.get('item_category')
+        is_available = True if request.form.get('item_available') else False
 
+        # Manejo categoría
+        category = None
+        if category_name:
+            category = Category.query.filter_by(name=category_name, business_id=business.id).first()
+            if not category:
+                category = Category(name=category_name, business_id=business.id)
+                db.session.add(category)
+
+        new_product = Product(
+            name=name,
+            description=description,
+            price=float(price),
+            business_id=business.id,
+            is_available=is_available,
+            category=category
+        )
+
+        db.session.add(new_product)
+        db.session.commit()
+
+        flash('Producto creado correctamente', 'success')
+        return redirect(url_for('business.menu_management'))
+
+    menu_items = Product.query.filter_by(business_id=business.id).all()
+
+    return render_template(
+        'business/menu_management.html',
+        business=business,
+        menu_items=menu_items
+    )
+
+# Toggle disponibilidad de un producto (simulado)
+@business_bp.route('/menu/<int:item_id>/toggle', methods=['POST'])
+@business_required
+def toggle_item_availability(item_id):
+    business = Business.query.filter_by(user_id=current_user.id).first_or_404()
+
+    product = Product.query.filter_by(id=item_id, business_id=business.id).first_or_404()
+
+    product.is_available = not product.is_available
+    db.session.commit()
+
+    return redirect(url_for('business.menu_management'))
 
 # # Gestión de información del negocio
 # @business_bp.route('/business-info', methods=['GET', 'POST'])
