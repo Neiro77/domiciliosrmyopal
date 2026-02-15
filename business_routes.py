@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for,  flash, request
 from flask_login import login_required, current_user
 from functools import wraps
 from extensions import db # Importa db para futuras interacciones con la DB
-from models import User, Business, Order, OrderItem, Product, OrderStatus, Category # Importa los modelos necesarios y OrderStatus Enum
+from models import User, Business, Order, OrderItem, Product, OrderStatus, Category, HistorialEstadoPedido # Importa los modelos necesarios y OrderStatus Enum
 from functools import wraps # <--- ¡IMPORTA ESTO!
 import re # Para slugify
 from sqlalchemy.orm import joinedload # Importa joinedload si se utiliza en alguna parte
