@@ -142,7 +142,7 @@
                   </button>
                 </form>
 				
-			  {% if active_order.status == OrderStatus.PREPARING.value %}
+			  {% if order.status == OrderStatus.PREPARING.value %}
 				<form method="POST" 
 					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
 					{{ form.hidden_tag() }}					  
