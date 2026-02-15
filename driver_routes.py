@@ -111,7 +111,8 @@ def dashboard():
     # 2️⃣ Estados activos
     active_statuses = [
         OrderStatus.ACCEPTED.value,
-        OrderStatus.OUT_FOR_DELIVERY.value
+        OrderStatus.OUT_FOR_DELIVERY.value,
+        OrderStatus.PREPARING.value
     ]
 
     # 3️⃣ Consulta de pedidos asignados

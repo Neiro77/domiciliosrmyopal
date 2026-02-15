@@ -411,11 +411,11 @@ def checkout():
             cart_total = Decimal('0.00')
 
             if item_type == 'product':
-                cart_total = sum(
-                    Decimal(str(item.get('price', 0))) * int(item.get('quantity', 1))
-                    for item in cart_items_data
-                    if item.get('type') == 'product'
-                )
+                for item in cart_items_data:
+                    if item.get('type') == 'product':
+                        price = item.get('price') or item.get('productPrice') or 0
+                        quantity = int(item.get('quantity', 1))
+                        cart_total += Decimal(str(price)) * quantity
 
             # 🔑 COSTO DOMICILIO UNIFICADO
             if item_type == 'package':
@@ -441,6 +441,7 @@ def checkout():
                 direccion_entrega_id=delivery_address_obj.id,
                 notes=form.notes.data
             )
+            new_order.subtotal = float(cart_total)
 
             if item_type == 'package':
                 pickup_address_obj = db.session.get(Address, int(form.pickup_address_id.data))
