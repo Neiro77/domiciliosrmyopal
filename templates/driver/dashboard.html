@@ -141,6 +141,17 @@
                     Marcar en camino
                   </button>
                 </form>
+				
+			  {% if active_order.status == OrderStatus.PREPARING.value %}
+				<form method="POST" 
+					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
+					{{ form.hidden_tag() }}					  
+					<input type="hidden" name="new_status" 
+							value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
+					<button class="bg-green-600 text-white px-4 py-2 rounded">
+					En Camino
+					</button>
+				</form>
 
               {% elif order.status == OrderStatus.OUT_FOR_DELIVERY.value %}
                 <form method="POST"
