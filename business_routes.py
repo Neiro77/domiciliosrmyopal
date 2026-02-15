@@ -102,6 +102,18 @@ def update_order_status(order_id):
     try:
         order.status = new_status
         
+        allowed_status_for_business = [
+            OrderStatus.PREPARING.value,
+            OrderStatus.CANCELLED.value
+        ]
+
+        if new_status not in allowed_status_for_business:
+            flash("No autorizado para cambiar a ese estado", "danger")
+            return redirect(url_for('business.dashboard'))
+
+        order.status = new_status
+        db.session.commit()
+        
         # REGISTRO DEL ESTADO EN EL HISTORIAL
         history_entry = HistorialEstadoPedido(
             pedido_id=order.id,
