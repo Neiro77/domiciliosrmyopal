@@ -100,8 +100,7 @@ def update_order_status(order_id):
     
     # Lógica para cambiar el estado
     try:
-        order.status = new_status
-        
+               
         allowed_status_for_business = [
             OrderStatus.PREPARING.value,
             OrderStatus.CANCELLED.value

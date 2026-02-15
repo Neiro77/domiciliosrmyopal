@@ -164,7 +164,10 @@ def dashboard():
     available_orders = []
     if driver_profile.saldo_cuenta > 0 and not active_order:
         available_orders = Order.query.filter(
-            Order.status == OrderStatus.PENDING.value,
+            Order.status.in_([
+                OrderStatus.PENDING.value,
+                OrderStatus.PREPARING.value
+            ]),
             Order.driver_id.is_(None)
         ).all()
 
