@@ -250,6 +250,10 @@ def profile_setup():
 def accept_order(order_id):
 
     form = EmptyForm()
+    
+    # Obtener driver profile
+    driver_profile = DriverProfile.query.filter_by(user_id=current_user.id).first()
+    
     if not form.validate_on_submit():
         flash('Error de seguridad.', 'danger')
         return redirect(url_for('driver.dashboard'))
@@ -294,9 +298,25 @@ def accept_order(order_id):
             flash('Ya tienes un domicilio en curso.', 'warning')
             return redirect(url_for('driver.dashboard'))
             
-        if not can_transition(order.status, OrderStatus.ACCEPTED.value):
-            flash("Este pedido no puede ser aceptado en su estado actual.", "warning")
-            return redirect(url_for("driver.dashboard"))
+        # Buscar pedido
+        order = Order.query.get_or_404(order_id)
+
+        # ===============================
+        # VALIDAR ESTADO PERMITIDO
+        # ===============================
+        if order.status not in [
+            OrderStatus.PENDING.value,
+            OrderStatus.PREPARING.value
+        ]:
+            flash("Este pedido no puede ser aceptado en su estado actual.", "danger")
+            return redirect(url_for('driver.dashboard'))
+
+        # ===============================
+        # VALIDAR QUE NO TENGA DRIVER
+        # ===============================
+        if order.driver_id is not None:
+            flash("Este pedido ya fue tomado por otro conductor.", "warning")
+            return redirect(url_for('driver.dashboard'))
 
         # ✅ Asignar
         order.driver_id = driver.id
