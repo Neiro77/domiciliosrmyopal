@@ -250,10 +250,7 @@ def profile_setup():
 def accept_order(order_id):
 
     form = EmptyForm()
-    
-    # Obtener driver profile
-    driver_profile = DriverProfile.query.filter_by(user_id=current_user.id).first()
-    
+
     if not form.validate_on_submit():
         flash('Error de seguridad.', 'danger')
         return redirect(url_for('driver.dashboard'))
@@ -267,7 +264,7 @@ def accept_order(order_id):
         return redirect(url_for('driver.dashboard'))
 
     try:
-        # 🔒 Lock SOLO del pedido
+        # 🔒 BLOQUEAR PEDIDO (una sola vez)
         order = db.session.execute(
             db.select(Order)
             .where(Order.id == order_id)
@@ -278,11 +275,20 @@ def accept_order(order_id):
             flash('Pedido no encontrado.', 'danger')
             return redirect(url_for('driver.dashboard'))
 
+        # 🔎 VALIDAR ESTADO
+        if order.status not in [
+            OrderStatus.PENDING.value,
+            OrderStatus.PREPARING.value
+        ]:
+            flash("Este pedido no puede ser aceptado en su estado actual.", "danger")
+            return redirect(url_for('driver.dashboard'))
+
+        # 🔎 VALIDAR QUE NO TENGA DRIVER
         if order.driver_id is not None:
             flash('Este pedido ya fue tomado.', 'warning')
             return redirect(url_for('driver.dashboard'))
 
-        # 🔒 Validar que el driver no tenga otro activo
+        # 🔎 VALIDAR QUE DRIVER NO TENGA ACTIVO
         active_order = db.session.execute(
             db.select(Order)
             .where(
@@ -297,43 +303,22 @@ def accept_order(order_id):
         if active_order:
             flash('Ya tienes un domicilio en curso.', 'warning')
             return redirect(url_for('driver.dashboard'))
-            
-        # Buscar pedido
-        order = Order.query.get_or_404(order_id)
 
-        # ===============================
-        # VALIDAR ESTADO PERMITIDO
-        # ===============================
-        if order.status not in [
-            OrderStatus.PENDING.value,
-            OrderStatus.PREPARING.value
-        ]:
-            flash("Este pedido no puede ser aceptado en su estado actual.", "danger")
-            return redirect(url_for('driver.dashboard'))
-
-        # ===============================
-        # VALIDAR QUE NO TENGA DRIVER
-        # ===============================
-        if order.driver_id is not None:
-            flash("Este pedido ya fue tomado por otro conductor.", "warning")
-            return redirect(url_for('driver.dashboard'))
-
-        # ✅ Asignar
+        # ✅ ASIGNAR
         order.driver_id = driver.id
         order.status = OrderStatus.ACCEPTED.value
         order.fecha_asignacion = datetime.utcnow()
 
-        db.session.commit()   # ← UN SOLO COMMIT
+        db.session.commit()
 
         flash(f'Has aceptado el pedido #{order.id}.', 'success')
         return redirect(url_for('driver.my_orders'))
 
-    except Exception as e:
+    except Exception:
         db.session.rollback()
         current_app.logger.exception("Error crítico al aceptar pedido")
         flash("Error al aceptar el pedido.", "danger")
         return redirect(url_for('driver.dashboard'))
-
 
 @driver_bp.route('/order/<int:order_id>/update_delivery_status', methods=['POST'])
 @driver_required
