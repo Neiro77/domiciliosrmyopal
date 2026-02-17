@@ -11,6 +11,7 @@ from sqlalchemy.sql import func # Para usar funciones de SQL como now()
 from decimal import Decimal # Importar Decimal para manejar valores monetarios
 from utils.notifications import notify
 from app import csrf
+from utils.email_async import send_async_email
 
 driver_bp = Blueprint('driver', __name__, url_prefix='/driver')
 
@@ -27,7 +28,8 @@ def send_email(to_email, subject, template_name, **kwargs):
         # Renderiza la plantilla HTML para el cuerpo del email
         # Necesitarás crear estas plantillas en templates/emails/
         msg.html = render_template(f'emails/{template_name}.html', **kwargs)
-        mail.send(msg)
+        # mail.send(msg)
+        send_async_email(msg)
         current_app.logger.info(f"Email enviado a {to_email} con asunto: {subject}")
     except Exception as e:
         current_app.logger.error(f"Error al enviar email a {to_email}: {e}")
@@ -323,22 +325,24 @@ def accept_order(order_id):
 @driver_bp.route('/order/<int:order_id>/update_delivery_status', methods=['POST'])
 @driver_required
 def update_delivery_status(order_id):
-    # Validar el token CSRF antes de procesar
+
     form = EmptyForm()
     if not form.validate_on_submit():
         flash('Error de seguridad. Recargue la página e intente de nuevo.', 'danger')
         return redirect(url_for('driver.dashboard'))
 
-    driver_profile = db.session.execute(db.select(Driver).filter_by(user_id=current_user.id)).scalar_one_or_none()
-    
+    driver_profile = db.session.execute(
+        db.select(Driver).filter_by(user_id=current_user.id)
+    ).scalar_one_or_none()
+
     if not driver_profile:
         flash('Perfil de motorizado no encontrado.', 'danger')
         return redirect(url_for('driver.dashboard'))
 
     order = db.session.execute(
         db.select(Order)
-        .filter_by(id=order_id, driver_id=driver_profile.id) # Asegura que el pedido le pertenece al motorizado
-        .options(joinedload(Order.user), joinedload(Order.business)) # CORREGIDO AQUÍ: Usamos order.business
+        .filter_by(id=order_id, driver_id=driver_profile.id)
+        .options(joinedload(Order.user), joinedload(Order.business))
     ).scalar_one_or_none()
 
     if not order:
@@ -346,42 +350,36 @@ def update_delivery_status(order_id):
         return redirect(url_for('driver.dashboard'))
 
     new_status = request.form.get('new_status')
-    special_message = request.form.get('special_message', '').strip() # Para mensajes especiales
+    special_message = request.form.get('special_message', '').strip()
 
-    # Validar que el nuevo estado sea uno permitido para el motorizado
-    if new_status not in [OrderStatus.OUT_FOR_DELIVERY.value, OrderStatus.DELIVERED.value, OrderStatus.CANCELLED.value]:
+    if new_status not in [
+        OrderStatus.OUT_FOR_DELIVERY.value,
+        OrderStatus.DELIVERED.value,
+        OrderStatus.CANCELLED.value
+    ]:
         flash('Estado de pedido no válido para motorizado.', 'danger')
         return redirect(url_for('driver.dashboard'))
 
-    # Lógica de estados para el motorizado:
-    # Solo puede cambiar a 'En Camino', 'Entregado', o 'Cancelado'
-    if new_status == OrderStatus.DELIVERED.value:
-        order.fecha_entrega = datetime.utcnow()
-        cobrar_comision_domicilio(order.id)
-    
-    if new_status == OrderStatus.CANCELLED.value:
-        order.fecha_entrega = datetime.utcnow() # Registra la hora de cancelación
-        # Aquí puedes añadir lógica para penalizaciones o reembolsos
-        
     try:
+        # ===============================
+        # CAMBIO DE ESTADO
+        # ===============================
         order.status = new_status
-        
-        # REGISTRO DEL CAMBIO DE ESTADO EN EL HISTORIAL
-        # Asumiendo que HistorialEstadoPedido es una clase de modelo válida
-        # history_entry = HistorialEstadoPedido(
-        #     pedido_id=order.id,
-        #     estado=new_status,
-        #     usuario_cambio_id=current_user.id # El motorizado (usuario) que realizó el cambio
-        # )
-        # db.session.add(history_entry)
 
-        db.session.commit()
-        flash(f'Estado del pedido #{order.id} actualizado a "{new_status}"', 'success')
-        
+        if new_status == OrderStatus.DELIVERED.value:
+            order.fecha_entrega = datetime.utcnow()
+            cobrar_comision_domicilio(order.id)
+
+        if new_status == OrderStatus.CANCELLED.value:
+            order.fecha_entrega = datetime.utcnow()
+
+        # ===============================
+        # CREAR NOTIFICACIÓN EN BD
+        # ===============================
         status_messages = {
-            "Aceptado": "Tu pedido fue aceptado por el conductor 🚴‍♂️",
-            "En Camino": "Tu pedido está en camino 🛵",
-            "Entregado": "Tu pedido fue entregado con éxito 📦"
+            OrderStatus.ACCEPTED.value: "Tu pedido fue aceptado por el conductor 🚴‍♂️",
+            OrderStatus.OUT_FOR_DELIVERY.value: "Tu pedido está en camino 🛵",
+            OrderStatus.DELIVERED.value: "Tu pedido fue entregado con éxito 📦"
         }
 
         if new_status in status_messages:
@@ -391,64 +389,63 @@ def update_delivery_status(order_id):
                 is_read=False
             )
             db.session.add(notification)
-            db.session.commit()
-        
+
+        # 🔒 UN SOLO COMMIT
+        db.session.commit()
+
+        flash(f'Estado del pedido #{order.id} actualizado a "{new_status}"', 'success')
+
+        # ===============================
+        # NOTIFICACIÓN EN TIEMPO REAL
+        # ===============================
         notify(
             order.user_id,
             f"Tu pedido #{order.id} ahora está en estado: {new_status}"
         )
 
-        # --- Notificaciones Email ---
-        # Notificar al cliente sobre el cambio de estado
-        if order.user and order.user.email:
-            email_subject = f'Actualización de tu pedido #{order.id}: {new_status}'
-            template_to_render = 'customer_order_status_update'
-            
-            # Si hay un mensaje especial, usarlo
-            if special_message:
-                email_subject = f'¡Importante! Actualización de tu pedido #{order.id}'
-                template_to_render = 'customer_order_special_message' # Nueva plantilla para mensajes especiales
-                try:
-                    send_email(
-                        order.user.email,
-                        email_subject,
-                        template_to_render,
-                        order=order,
-                        driver=driver_profile,
-                        special_message=special_message
-                    )
-                    notification = Notification(
-                        user_id=order.customer_id,
-                        title="Actualización de tu pedido",
-                        message=f"Tu pedido #{order.id} cambió de estado a: {order.delivery_status}",
-                        is_read=False
-                    )
+        # ===============================
+        # ENVÍO DE EMAIL (ASYNC)
+        # ===============================
 
-                    db.session.add(notification)
-                    db.session.commit()
-                except Exception as e:
-                    current_app.logger.warning(
-                        f"Email no enviado (bloqueado o timeout): {e}"
-                    )    
-        
-        # Notificar al negocio sobre el cambio de estado
-        if order.business and order.business.user and order.business.user.email: # Usamos order.business
+        # Cliente
+        if order.user and order.user.email:
+
+            if special_message:
+                send_email(
+                    order.user.email,
+                    f'¡Importante! Actualización de tu pedido #{order.id}',
+                    'customer_order_special_message',
+                    order=order,
+                    driver=driver_profile,
+                    special_message=special_message
+                )
+            else:
+                send_email(
+                    order.user.email,
+                    f'Actualización de tu pedido #{order.id}: {new_status}',
+                    'customer_order_status_update',
+                    order=order,
+                    driver=driver_profile
+                )
+
+        # Negocio
+        if order.business and order.business.user and order.business.user.email:
             send_email(
-                order.business.user.email, # Usamos order.business
+                order.business.user.email,
                 f'Actualización de pedido #{order.id}: {new_status} (Por Motorizado)',
                 'business_order_status_update',
                 order=order,
                 driver=driver_profile
             )
-        # ---------------------------
 
     except Exception as e:
         db.session.rollback()
-        flash(f'Error al actualizar el estado del pedido: {str(e)}', 'danger')
-        current_app.logger.error(f"Error al actualizar estado de pedido {order.id} por motorizado: {e}")
+        current_app.logger.error(
+            f"Error al actualizar estado de pedido {order.id} por motorizado: {e}"
+        )
+        flash('Error al actualizar el estado del pedido.', 'danger')
 
     return redirect(url_for('driver.dashboard'))
-
 
 
 # 1. RUTA PARA VER PEDIDOS ASIGNADOS (CON RESTRICCIÓN DE SALDO)
