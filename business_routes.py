@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for,  flash, request
 from flask_login import login_required, current_user
 from functools import wraps
 from extensions import db # Importa db para futuras interacciones con la DB
-from models import User, Business, Order, OrderItem, Product, OrderStatus, Category, HistorialEstadoPedido # Importa los modelos necesarios y OrderStatus Enum
+from models import User, Business, Order, OrderItem, Product, OrderStatus, Category, HistorialEstadoPedido, Driver # Importa los modelos necesarios y OrderStatus Enum
 from functools import wraps # <--- ¡IMPORTA ESTO!
 import re # Para slugify
 from sqlalchemy.orm import joinedload # Importa joinedload si se utiliza en alguna parte
@@ -85,6 +85,14 @@ def update_order_status(order_id):
         return redirect(url_for('business.dashboard'))
 
     order = db.session.get(Order, order_id)
+    
+    # 🔒 SI YA TIENE DRIVER, BUSINESS NO PUEDE CAMBIAR ESTADO
+    if order.driver_id is not None:
+        flash(
+            "Este pedido ya fue tomado por un motorizado. No puedes modificar su estado.",
+            "warning"
+        )
+        return redirect(url_for('business.dashboard'))
 
     # Validar que el pedido pertenezca al negocio actual
     if not order or order.business_id != business_profile.id:

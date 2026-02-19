@@ -88,8 +88,15 @@
               </p>
             </div>
 
-            <span class="px-3 py-1 rounded-full text-sm font-semibold
-              {% if order.status == 'Aceptado' %} bg-blue-200 text-blue-800
+            <span class="px-3 py-1 rounded-full text-sm font-semibold			  
+			  {% if order.status in [
+				'Aceptado',
+				'En Preparacion',
+				'En Camino'
+			  ] %} bg-blue-200 text-blue-800
+				<!-- BOTÓN CAMBIAR ESTADO -->
+			  {% endif %}
+			  
               {% elif order.status == 'En Camino' %} bg-orange-200 text-orange-800
               {% else %} bg-gray-200 text-gray-800 {% endif %}">
               {{ order.status }}
@@ -169,6 +176,9 @@
 				  </button>
 				</form>
 
+			  {% endif %}
+			  {% if driver_can_update(order) %}
+					<!-- Botón cambiar estado -->
 			  {% endif %}
 
 			</div>

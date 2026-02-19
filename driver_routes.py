@@ -591,3 +591,13 @@ def cobrar_comision_domicilio(order_id):
     # Aquí podrías registrar la transacción en otra tabla para llevar un historial
     print(f"Se descontó una comisión de {comision:,.2f} al conductor {driver.first_name} por el pedido {order.id}.")
     #db.session.commit()
+    
+    
+def driver_can_update(order):
+    return (
+        order.driver_id is not None and
+        order.status not in [
+            OrderStatus.DELIVERED.value,
+            OrderStatus.CANCELLED.value
+        ]
+    )
