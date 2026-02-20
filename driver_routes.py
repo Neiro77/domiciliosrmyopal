@@ -185,7 +185,8 @@ def dashboard():
         #accept_form=form,
         OrderStatus=OrderStatus,
         available_orders=available_orders,
-        active_order=active_order
+        active_order=active_order,
+        driver_can_update=driver_can_update
     )
 
 @driver_bp.route("/notifications")

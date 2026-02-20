@@ -88,19 +88,19 @@
               </p>
             </div>
 
-            <span class="px-3 py-1 rounded-full text-sm font-semibold			  
-			  {% if order.status in [
-				'Aceptado',
-				'En Preparacion',
-				'En Camino'
-			  ] %} bg-blue-200 text-blue-800
-				<!-- BOTÓN CAMBIAR ESTADO -->
-			  {% endif %}
-			  
-              {% elif order.status == 'En Camino' %} bg-orange-200 text-orange-800
-              {% else %} bg-gray-200 text-gray-800 {% endif %}">
-              {{ order.status }}
-            </span>
+            <span class="px-3 py-1 rounded-full text-sm font-semibold
+			{% if order.status == OrderStatus.ACCEPTED.value %}
+				bg-blue-200 text-blue-800
+			{% elif order.status == OrderStatus.PREPARING.value %}
+				bg-yellow-200 text-yellow-800
+			{% elif order.status == OrderStatus.OUT_FOR_DELIVERY.value %}
+				bg-orange-200 text-orange-800
+			{% else %}
+				bg-gray-200 text-gray-800
+			{% endif %}
+			">
+			  {{ order.status }}
+			</span>
           </div>
 
           <div class="p-6">
@@ -140,26 +140,17 @@
             <!-- Estados -->
 			<div class="mt-4">
 
-			  {% if order.status == OrderStatus.ACCEPTED.value %}
-			  
+			  {% if order.status in [
+				  OrderStatus.ACCEPTED.value,
+				  OrderStatus.PREPARING.value
+			  ] %}
+
 				<form method="POST"
 					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
 				  {{ form.hidden_tag() }}
 				  <input type="hidden" name="new_status"
 						 value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
 				  <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-					Marcar en camino
-				  </button>
-				</form>
-
-			  {% elif order.status == OrderStatus.PREPARING.value %}
-
-				<form method="POST"
-					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
-				  {{ form.hidden_tag() }}
-				  <input type="hidden" name="new_status"
-						 value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
-				  <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded">
 					Salir a entregar
 				  </button>
 				</form>
@@ -176,9 +167,6 @@
 				  </button>
 				</form>
 
-			  {% endif %}
-			  {% if driver_can_update(order) %}
-					<!-- Botón cambiar estado -->
 			  {% endif %}
 
 			</div>
