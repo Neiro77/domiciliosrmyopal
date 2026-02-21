@@ -307,9 +307,10 @@ def accept_order(order_id):
             flash('Ya tienes un domicilio en curso.', 'warning')
             return redirect(url_for('driver.dashboard'))
 
+        order.status = OrderStatus.ACCEPTED.value
         # ✅ ASIGNAR
         order.driver_id = driver.id
-        order.status = OrderStatus.ACCEPTED.value
+        order.driver_status="Asignado"
         order.fecha_asignacion = datetime.utcnow()
 
         db.session.commit()
@@ -365,13 +366,15 @@ def update_delivery_status(order_id):
         # ===============================
         # CAMBIO DE ESTADO
         # ===============================
-        order.status = new_status
+        if new_status == OrderStatus.OUT_FOR_DELIVERY.value:
+            order.driver_status = "En Camino"
 
-        if new_status == OrderStatus.DELIVERED.value:
+        elif new_status == OrderStatus.DELIVERED.value:
+            order.driver_status = "Entregado"
             order.fecha_entrega = datetime.utcnow()
             cobrar_comision_domicilio(order.id)
 
-        if new_status == OrderStatus.CANCELLED.value:
+        elif new_status == OrderStatus.CANCELLED.value:
             order.fecha_entrega = datetime.utcnow()
 
         # ===============================

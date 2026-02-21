@@ -168,6 +168,15 @@
 				</form>
 
 			  {% endif %}
+			  <p class="text-sm text-gray-600">
+				  Estado negocio:
+				  <strong>{{ order.status }}</strong>
+				</p>
+
+				<p class="text-sm text-gray-600">
+				  Estado entrega:
+				  <strong>{{ order.driver_status or 'Sin iniciar' }}</strong>
+				</p>
 
 			</div>
 

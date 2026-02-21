@@ -252,6 +252,7 @@ class Order(db.Model):
     
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(50), default=OrderStatus.PENDING.value, nullable=False) # Usa el valor del Enum
+    driver_status = db.Column(db.String(50), default=None)
     total_amount = db.Column(db.Float, nullable=False) # Cambiado a Float
     costo_domicilio = db.Column(db.Float, default=0.0) # Cambiado a Float
     delivery_address = db.Column(db.String(255), nullable=False) # La dirección de texto real de la entrega

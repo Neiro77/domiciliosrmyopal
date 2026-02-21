@@ -21,13 +21,11 @@
                             <p class="text-gray-600 text-sm">Fecha: {{ moment(order.order_date).format('LLL') }}</p>
                         </div>
                         <div class="text-right">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                                    {% if order.status == 'Entregado' %}bg-green-100 text-green-800
-                                    {% elif order.status == 'Pendiente' %}bg-yellow-100 text-yellow-800
-                                    {% elif order.status == 'Cancelado' %}bg-red-100 text-red-800
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium                               
+                                    {% elif order.status == 'Pendiente' %}bg-yellow-100 text-yellow-800                                    
                                     {% elif order.status == 'Aceptado' %}bg-blue-100 text-blue-800
                                     {% elif order.status == 'En Preparacion' %}bg-purple-100 text-purple-800
-                                    {% elif order.status == 'En Camino' %}bg-orange-100 text-orange-800
+									{% elif order.status == 'Cancelado' %}bg-red-100 text-red-800
                                     {% else %}bg-gray-100 text-gray-800{% endif %}">
                                 <i class="fas fa-circle text-xs mr-2"></i> {{ order.status }}
                             </span>
@@ -55,11 +53,12 @@
                         <label for="status-{{ order.id }}" class="text-gray-700 font-medium">Cambiar estado a:</label>
                         <select name="new_status" id="status-{{ order.id }}" 
                                 class="flex-grow w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            {% for status_option in order_statuses %}
-                                <option value="{{ status_option }}" {% if order.status == status_option %}selected{% endif %}>
-                                    {{ status_option }}
-                                </option>
-                            {% endfor %}
+                            {% for status_option in business_statuses %}
+							  <option value="{{ status_option }}"
+								{% if order.status == status_option %}selected{% endif %}>
+								{{ status_option }}
+							  </option>
+							{% endfor %}
                         </select>
                         <button type="submit" 
                                 class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
