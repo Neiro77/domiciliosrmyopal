@@ -88,9 +88,9 @@ def update_order_status(order_id):
     order = db.session.get(Order, order_id)
     
     # 🔒 BUSINESS NO MANDA SI YA HAY DRIVER, SI YA TIENE DRIVER, BUSINESS NO PUEDE CAMBIAR ESTADO
-    if order.driver_id is not None:
+    if order.driver_id is not None and order.status != OrderStatus.PENDING.value:
         flash(
-            "Este pedido ya fue tomado por un motorizado. No puedes cambiar su estado.",
+            "El pedido ya está en curso y no puede ser modificado.",
             "warning"
         )
         return redirect(url_for('business.dashboard'))

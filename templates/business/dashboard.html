@@ -53,7 +53,7 @@
                         <label for="status-{{ order.id }}" class="text-gray-700 font-medium">Cambiar estado a:</label>
                         <select name="new_status" id="status-{{ order.id }}" 
                                 class="flex-grow w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            {% for status_option in business_statuses %}
+                            {% for status_option in order_statuses %}
 							  <option value="{{ status_option }}"
 								{% if order.status == status_option %}selected{% endif %}>
 								{{ status_option }}

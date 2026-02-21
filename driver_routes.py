@@ -397,7 +397,7 @@ def update_delivery_status(order_id):
         # 🔒 UN SOLO COMMIT
         db.session.commit()
 
-        flash(f'Estado del pedido #{order.id} actualizado a "{new_status}"', 'success')
+        flash(f'Estado del pedido #{order.id} actualizado a "{order.driver_status}"', 'success')
 
         # ===============================
         # NOTIFICACIÓN EN TIEMPO REAL
