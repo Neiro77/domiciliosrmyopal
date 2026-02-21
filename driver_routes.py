@@ -69,6 +69,9 @@ def driver_has_active_order(driver_id):
 def can_transition(current_status, new_status):
     allowed = {
         OrderStatus.PENDING.value: [
+            OrderStatus.PREPARING.value
+        ],
+        OrderStatus.PREPARING.value: [
             OrderStatus.ACCEPTED.value
         ],
         OrderStatus.ACCEPTED.value: [
@@ -166,10 +169,7 @@ def dashboard():
     available_orders = []
     if driver_profile.saldo_cuenta > 0 and not active_order:
         available_orders = Order.query.filter(
-            Order.status.in_([
-                OrderStatus.PENDING.value,
-                OrderStatus.PREPARING.value
-            ]),
+            Order.status == OrderStatus.PREPARING.value,
             Order.driver_id.is_(None)
         ).all()
 
@@ -204,7 +204,7 @@ def driver_notifications():
         })
 
     pending = Order.query.filter(
-        Order.status == OrderStatus.PENDING.value,
+        Order.status == OrderStatus.PREPARING.value,
         Order.driver_id.is_(None)
     ).count()
 
