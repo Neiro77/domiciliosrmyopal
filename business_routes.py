@@ -59,11 +59,11 @@ def dashboard():
     # Aquí se incluyen para una visualización completa, pero la lógica de quién puede cambiar qué estado
     # debe ser más granular en una aplicación de producción.
     available_statuses = [
-        OrderStatus.PENDING.value,
-        OrderStatus.ACCEPTED.value,
+        #OrderStatus.PENDING.value,
+        #OrderStatus.ACCEPTED.value,
         OrderStatus.PREPARING.value,
-        OrderStatus.OUT_FOR_DELIVERY.value,
-        OrderStatus.DELIVERED.value,
+        #OrderStatus.OUT_FOR_DELIVERY.value,
+        #OrderStatus.DELIVERED.value,
         OrderStatus.CANCELLED.value
     ]
 
@@ -79,14 +79,6 @@ def dashboard():
 @business_required
 def update_order_status(order_id):
     
-    # 🔒 BUSINESS NO MANDA SI YA HAY DRIVER, SI YA TIENE DRIVER, BUSINESS NO PUEDE CAMBIAR ESTADO
-    if order.driver_id is not None:
-        flash(
-            "Este pedido ya fue tomado por un motorizado. No puedes cambiar su estado.",
-            "warning"
-        )
-        return redirect(url_for('business.dashboard'))
-    
     business_profile = db.session.execute(db.select(Business).filter_by(user_id=current_user.id)).scalar_one_or_none()
     
     if not business_profile:
@@ -94,6 +86,14 @@ def update_order_status(order_id):
         return redirect(url_for('business.dashboard'))
 
     order = db.session.get(Order, order_id)
+    
+    # 🔒 BUSINESS NO MANDA SI YA HAY DRIVER, SI YA TIENE DRIVER, BUSINESS NO PUEDE CAMBIAR ESTADO
+    if order.driver_id is not None:
+        flash(
+            "Este pedido ya fue tomado por un motorizado. No puedes cambiar su estado.",
+            "warning"
+        )
+        return redirect(url_for('business.dashboard'))
 
     # Validar que el pedido pertenezca al negocio actual
     if not order or order.business_id != business_profile.id:
