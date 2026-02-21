@@ -129,6 +129,10 @@ def update_order_status(order_id):
             return redirect(url_for('business.dashboard'))
 
         order.status = new_status
+
+        if new_status == OrderStatus.PREPARING.value and order.driver_id:
+            order.driver_status = "Esperando retiro"
+
         db.session.commit()
         
         # REGISTRO DEL ESTADO EN EL HISTORIAL
