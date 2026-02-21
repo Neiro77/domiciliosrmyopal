@@ -71,7 +71,8 @@ def dashboard():
                            business_profile=business_profile, 
                            orders=orders,
                            order_statuses=available_statuses,
-                           form=form) # Pass the form here as well
+                           form=form,
+                           OrderStatus=OrderStatus) # Pass the form here as well
 
                            
                            
