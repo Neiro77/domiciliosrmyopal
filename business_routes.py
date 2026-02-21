@@ -87,13 +87,22 @@ def update_order_status(order_id):
 
     order = db.session.get(Order, order_id)
     
-    # 🔒 BUSINESS NO MANDA SI YA HAY DRIVER, SI YA TIENE DRIVER, BUSINESS NO PUEDE CAMBIAR ESTADO
-    if order.driver_id is not None and order.status != OrderStatus.PENDING.value:
-        flash(
-            "El pedido ya está en curso y no puede ser modificado.",
-            "warning"
-        )
-        return redirect(url_for('business.dashboard'))
+    # 🔒 BUSINESS solo puede cambiar a PREPARING o CANCELLED
+    # incluso si ya hay driver asignado
+    if order.driver_id is not None:
+        allowed_when_driver_assigned = [
+            OrderStatus.PREPARING.value,
+            OrderStatus.CANCELLED.value
+        ]
+
+        new_status = request.form.get('new_status')
+
+        if new_status not in allowed_when_driver_assigned:
+            flash(
+                "El pedido ya está asignado a un conductor y no puede pasar a ese estado.",
+                "warning"
+            )
+            return redirect(url_for('business.dashboard'))
 
     # Validar que el pedido pertenezca al negocio actual
     if not order or order.business_id != business_profile.id:
