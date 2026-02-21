@@ -309,8 +309,8 @@ def accept_order(order_id):
 
         order.status = OrderStatus.ACCEPTED.value
         # ✅ ASIGNAR
-        order.driver_id = driver.id
-        order.driver_status="Asignado"
+        order.driver_id = current_user.id
+        order.driver_status="accepted"
         order.fecha_asignacion = datetime.utcnow()
 
         db.session.commit()

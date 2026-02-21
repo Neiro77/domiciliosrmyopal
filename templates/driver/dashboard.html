@@ -140,36 +140,35 @@
             <!-- Estados -->
 			<div class="mt-4">
 
-			  {% if order.status == OrderStatus.PREPARING.value %}
+			  {% if order.driver_status == "accepted" and order.status == "Listo" %}
 
 				<form method="POST"
 					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
 				  {{ form.hidden_tag() }}
-				  <input type="hidden" name="new_status"
-						 value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
+				  <input type="hidden" name="new_status" value="out_for_delivery">
 				  <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-					Salir a entregar
+					🚴 Salir a entregar
 				  </button>
 				</form>
 
-			  {% elif order.status == OrderStatus.ACCEPTED.value %}
+			  {% elif order.driver_status == "accepted" %}
 
 				<div class="bg-yellow-100 text-yellow-800 p-3 rounded text-sm font-semibold">
 				  ⏳ Esperando que el negocio prepare el pedido
 				</div>
 
+			  {% elif order.driver_status == "out_for_delivery" %}
+
+				<form method="POST"
+					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
+				  {{ form.hidden_tag() }}
+				  <input type="hidden" name="new_status" value="delivered">
+				  <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+					✅ Pedido entregado
+				  </button>
+				</form>
+
 			  {% endif %}
-
-			  <p class="text-sm text-gray-600 mt-2">
-				Estado negocio:
-				<strong>{{ order.status }}</strong>
-			  </p>
-
-			  <p class="text-sm text-gray-600">
-				Estado entrega:
-				<strong>{{ order.driver_status or 'Sin iniciar' }}</strong>
-			  </p>
-
 			</div>
 
           </div>

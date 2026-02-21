@@ -136,6 +136,9 @@ def update_order_status(order_id):
 
         if new_status == OrderStatus.PREPARING.value and order.driver_id:
             order.driver_status = "Esperando retiro"
+            
+        if new_status == "Listo":
+            order.status = "Listo"
 
         db.session.commit()
         
