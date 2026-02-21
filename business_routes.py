@@ -127,6 +127,9 @@ def update_order_status(order_id):
         if new_status not in allowed_status_for_business:
             flash("No autorizado para cambiar a ese estado", "danger")
             return redirect(url_for('business.dashboard'))
+            
+        if new_status not in [s.value for s in OrderStatus]:
+            abort(400)
 
         order.status = new_status
 
