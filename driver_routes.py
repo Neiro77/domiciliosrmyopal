@@ -114,7 +114,7 @@ def dashboard():
     active_statuses = [
         OrderStatus.ACCEPTED.value,
         OrderStatus.OUT_FOR_DELIVERY.value,
-        OrderStatus.PREPARING.value
+        #OrderStatus.PREPARING.value
     ]
 
     # 3️⃣ Consulta de pedidos asignados
@@ -366,10 +366,27 @@ def update_delivery_status(order_id):
         # ===============================
         # CAMBIO DE ESTADO
         # ===============================
+        # ===============================
+# CAMBIO DE ESTADO (DRIVER)
+# ===============================
         if new_status == OrderStatus.OUT_FOR_DELIVERY.value:
+            # 🔒 SOLO SI EL NEGOCIO YA PREPARÓ
+            if order.status != OrderStatus.PREPARING.value:
+                flash(
+                    "El negocio aún no ha marcado el pedido como 'En preparación'.",
+                    "warning"
+                )
+                return redirect(url_for('driver.dashboard'))
+
+            order.status = OrderStatus.OUT_FOR_DELIVERY.value
             order.driver_status = "En Camino"
 
         elif new_status == OrderStatus.DELIVERED.value:
+            if order.status != OrderStatus.OUT_FOR_DELIVERY.value:
+                flash("El pedido no está en reparto.", "warning")
+                return redirect(url_for('driver.dashboard'))
+
+            order.status = OrderStatus.DELIVERED.value
             order.driver_status = "Entregado"
             order.fecha_entrega = datetime.utcnow()
             cobrar_comision_domicilio(order.id)
