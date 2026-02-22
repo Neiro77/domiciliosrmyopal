@@ -307,15 +307,25 @@ def accept_order(order_id):
             flash('Ya tienes un domicilio en curso.', 'warning')
             return redirect(url_for('driver.dashboard'))
 
-        order.status = OrderStatus.ACCEPTED.value
-        # ✅ ASIGNAR
-        order.driver_id = current_user.id
-        order.driver_status="accepted"
+  
+        # 🔒 validar que no tenga conductor
+        if order.driver_id is not None:
+            flash("Este pedido ya fue tomado por otro conductor.", "warning")
+            return redirect(url_for('driver.dashboard'))
+
+        # 🔒 validar que no esté cancelado
+        if order.status == "Cancelado":
+            flash("Este pedido fue cancelado.", "danger")
+            return redirect(url_for('driver.dashboard'))
+
+        # ✅ asignar conductor
+        order.driver_id = driver_profile.id
+        order.driver_status = "accepted"
         order.fecha_asignacion = datetime.utcnow()
 
         db.session.commit()
 
-        flash(f'Has aceptado el pedido #{order.id}.', 'success')
+        flash(f'Pedido aceptado correctamente. #{order.id}.', 'success')
         return redirect(url_for('driver.my_orders'))
 
     except Exception:
