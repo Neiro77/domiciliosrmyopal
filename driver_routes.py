@@ -286,20 +286,12 @@ def accept_order(order_id):
             flash("Este pedido no puede ser aceptado en su estado actual.", "danger")
             return redirect(url_for('driver.dashboard'))
 
-        # 🔎 VALIDAR QUE NO TENGA DRIVER
-        if order.driver_id is not None:
-            flash('Este pedido ya fue tomado.', 'warning')
-            return redirect(url_for('driver.dashboard'))
-
         # 🔎 VALIDAR QUE DRIVER NO TENGA ACTIVO
         active_order = db.session.execute(
             db.select(Order)
             .where(
                 Order.driver_id == driver.id,
-                Order.status.in_([
-                    OrderStatus.ACCEPTED.value,
-                    OrderStatus.OUT_FOR_DELIVERY.value
-                ])
+                Order.driver_status.in_(["accepted", "out_for_delivery"])
             )
         ).scalar_one_or_none()
 
@@ -319,7 +311,7 @@ def accept_order(order_id):
             return redirect(url_for('driver.dashboard'))
 
         # ✅ asignar conductor
-        order.driver_id = driver_profile.id
+        order.driver_id = driver.id
         order.driver_status = "accepted"
         order.fecha_asignacion = datetime.utcnow()
 
