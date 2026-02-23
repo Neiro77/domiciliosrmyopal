@@ -363,7 +363,7 @@ def update_delivery_status(order_id):
                 return redirect(url_for('driver.dashboard'))
 
             order.status = OrderStatus.OUT_FOR_DELIVERY.value
-            order.driver_status = "En Camino"
+            order.driver_status = "out_for_delivery" #"En Camino"
 
         elif new_status == OrderStatus.DELIVERED.value:
             if order.status != OrderStatus.OUT_FOR_DELIVERY.value:
@@ -371,7 +371,7 @@ def update_delivery_status(order_id):
                 return redirect(url_for('driver.dashboard'))
 
             order.status = OrderStatus.DELIVERED.value
-            order.driver_status = "Entregado"
+            order.driver_status = "delivered" #"Entregado"
             order.fecha_entrega = datetime.utcnow()
             cobrar_comision_domicilio(order.id)
 
