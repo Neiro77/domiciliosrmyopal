@@ -56,15 +56,12 @@ def driver_required(f):
 
         return f(*args, **kwargs)
     return decorated_function
-
+    
 def driver_has_active_order(driver_id):
     return Order.query.filter(
         Order.driver_id == driver_id,
-        Order.status.notin_([
-            OrderStatus.DELIVERED.value,
-            OrderStatus.CANCELLED.value
-        ])
-    ).first() #is not None
+        Order.driver_status.in_(["accepted", "out_for_delivery"])
+    ).first()    
     
 def can_transition(current_status, new_status):
     allowed = {
@@ -120,28 +117,13 @@ def dashboard():
         #OrderStatus.PREPARING.value
     ]
 
-    # 3️⃣ Consulta de pedidos asignados
-    # query = (
-        # db.select(Order)
-        # .filter(
-            # Order.driver_id == driver_profile.id,
-            # Order.status.in_(active_statuses)
-        # )
-        # .options(
-            # joinedload(Order.user).joinedload(User.customer_profile),
-            # joinedload(Order.service),
-            # joinedload(Order.items).joinedload(OrderItem.product),
-            # joinedload(Order.items).joinedload(OrderItem.paquete_envio)
-        # )
-        # .order_by(Order.order_date.asc())
-    # )
     # 3️⃣ Pedidos activos del driver
     orders = (
         db.session.execute(
             db.select(Order)
             .filter(
                 Order.driver_id == driver_profile.id,
-                Order.status.in_(active_statuses)
+                Order.driver_status.in_(["accepted", "out_for_delivery"])
             )
             .options(
                 joinedload(Order.user),
