@@ -140,12 +140,14 @@
             <!-- Estados -->
 			<div class="mt-4">
 
-			  {% if order.driver_status == "accepted" and order.status == "Listo" %}
+			  {% if order.driver_status == "accepted"
+					and order.status == OrderStatus.PREPARING.value %}
 
 				<form method="POST"
 					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
 				  {{ form.hidden_tag() }}
-				  <input type="hidden" name="new_status" value="out_for_delivery">
+				  <input type="hidden" name="new_status"
+						 value="{{ OrderStatus.OUT_FOR_DELIVERY.value }}">
 				  <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
 					🚴 Salir a entregar
 				  </button>
@@ -162,13 +164,15 @@
 				<form method="POST"
 					  action="{{ url_for('driver.update_delivery_status', order_id=order.id) }}">
 				  {{ form.hidden_tag() }}
-				  <input type="hidden" name="new_status" value="delivered">
+				  <input type="hidden" name="new_status"
+						 value="{{ OrderStatus.DELIVERED.value }}">
 				  <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
 					✅ Pedido entregado
 				  </button>
 				</form>
 
 			  {% endif %}
+
 			</div>
 
           </div>
